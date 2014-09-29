@@ -3,13 +3,13 @@
 #
 
 # Name of your site (displayed in the header)
-name: Your Name
+name: Andrew MacDonald
 
 # Short bio or description (displayed in the header)
-description: Web Developer from Somewhere
+description: ecologist at University of British Columbia
 
 # URL of your avatar or profile pic (you could use your GitHub profile pic)
-avatar: https://raw.githubusercontent.com/barryclark/jekyll-now/master/images/jekyll-logo.png
+avatar: https://avatars3.githubusercontent.com/u/1198242?v=2&s=460
 
 #
 # Flags below are optional
@@ -21,7 +21,7 @@ footer-links:
   email: 
   facebook: 
   flickr: 
-  github: barryclark/jekyll-now
+  github: https://github.com/aammd
   instagram: 
   linkedin: 
   pinterest: 
@@ -37,7 +37,7 @@ google_analytics:
 
 # Your website URL (e.g. http://barryclark.github.io or http://www.barryclark.co)
 # Used for Sitemap.xml and your RSS feed
-url: 
+url: http://aammd.github.io/
 
 # If you're hosting your site at a Project repository on GitHub pages 
 # (http://yourusername.github.io/repository-name)
@@ -49,7 +49,16 @@ baseurl: ""
 # !! You don't need to change any of the configuration flags below !!
 #
 
-markdown: kramdown
+markdown: pandoc
+markdown_ext: markdown,mkdown,mkdn,mkd,md,Rmd,rmd
+pandoc:
+  extensions:
+    - smart
+    - mathjax
+# - template: 'assets/datauri_template.html' # Use with 'self-contained' to avoid header text in body
+# - self-contained # Archive images in posts as URIs. Very slow, for archiving only.
+# - mathml # Use mathml for equations (Archival, HTML5/XML valid syntax)
+
 highlighter: pygments
 permalink: /:title/
 
