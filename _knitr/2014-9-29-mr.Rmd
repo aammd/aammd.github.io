@@ -5,7 +5,7 @@ date: '2014-09-27'
 layout: post
 ---
 
-```{r}
+```{r echo = FALSE}
 knitr::opts_chunk$set(dev = 'svg')
 ```
 
