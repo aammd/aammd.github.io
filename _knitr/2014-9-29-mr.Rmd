@@ -8,14 +8,7 @@ date: '2014-09-27'
 #knitr::opts_chunk$set(fig.path = '~/Dropbox/Public/wp/')
 ```
 
-<head>
-<script type="text/x-mathjax-config">
-  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
-</script>
-<script type="text/javascript"
-  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
-</script>
-</head>
+
 
 Over the summer, some of us here at UBC started a [reading group](https://github.com/aammd/UBCadv-r) based around Hadley Wickham's book, [Advanced R Programming](http://adv-r.had.co.nz/).  The goal was to compare our answers to the exercises and our impressions of the content.  
 
