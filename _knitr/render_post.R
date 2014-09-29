@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-input <- commandArgs(trailingOnly = TRUE)
+#input <- commandArgs(trailingOnly = TRUE)
 KnitPost <- function(input, base.url = "/") {
   require(knitr)
   opts_knit$set(base.url = base.url)
@@ -12,4 +12,4 @@ KnitPost <- function(input, base.url = "/") {
   knit(input, output = paste0("../_posts/", sub(".Rmd$", "", basename(input)), ".md"), envir = parent.frame())
 }
 
-KnitPost(input)
+#KnitPost(input)
