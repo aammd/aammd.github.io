@@ -2,6 +2,7 @@
 title: "Continuous Fractions with Map and Reduce"
 author: "Andrew MacDonald"
 date: '2014-09-27'
+layout: post
 ---
 
 Over the summer, some of us here at UBC started a [reading group](https://github.com/aammd/UBCadv-r) based around Hadley Wickham's book, [Advanced R Programming](http://adv-r.had.co.nz/).  The goal was to compare our answers to the exercises and our impressions of the content.  
