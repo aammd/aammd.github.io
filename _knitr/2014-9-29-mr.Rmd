@@ -170,8 +170,3 @@ data.frame(ks = seq(5, 10, by = 1)) %>%
   ggplot(aes(x = ks, y = pi_value, colour = method)) + geom_point() + geom_path() + xlab("k") + ylab(expression(pi)) + theme_bw()
 ```
 
-<ul>
-  {% for tags in page.tags %}
-    <li>{{ tags }}</li>
-  {% endfor %}
-</ul>
