@@ -1,0 +1,38 @@
+---
+title: "Post With Code"
+author: "Harlow Malloc"
+date: "2022-10-05"
+categories: [news, code, analysis]
+image: "image.jpg"
+---
+
+This is a post with executable code.
+
+```{r}
+1 + 1
+```
+
+$$
+Y \sim \text{N}(\mu, \sigma)
+$$ {#eq-one}
+
+we love a simple equation like @eq-one
+
+let's have a plot
+
+```{r}
+x <- runif(42, -2, 2)
+y <- rnorm(42, 5 + 2.4 * x, 2.3)
+
+plot(x, y)
+
+```
+
+Here are two figures I made beforehand:
+
+```{r}
+library(targets)
+tar_load(plot_add)
+tar_load(plot_mult)
+```
+
