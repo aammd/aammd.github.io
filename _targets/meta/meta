@@ -1,6 +1,6 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|3ac93c7158ed6f97|||||||||||||||
-blog|stem|15707df49188fb72|37df897ef391d4b6|9bf854987589a4af|-298343691|_site*about.qmd*index.qmd*posts/post-with-code/index.qmd*posts/welcome/index.qmd*_quarto.yml*styles.css|t19271.4837525003s|7959248005262a51|1902|file|local|vector|||5.908||
+.Random.seed|object|1b0dcdde3d0bb688|||||||||||||||
+blog|stem|41a1faaee9936d86|c9a35e923891bd99|c92bd53ea222a0d9|-298343691|docs*blog.qmd*index.qmd*posts/demo-post/index.qmd*posts/growth_curve_measurement_error/index.qmd*posts/probability-integral-transform/index.qmd*_quarto.yml*styles.css|t19305.0959335783s|b40681d2093f5ade|2060813|file|local|vector|||30.607||
 decay_add|stem|1cba456c1f23bf5c|bc62aec99dbbdc67|f72763812452552c|-1843753654||t19271.4698456421s|268f97f804ee634f|1598|rds|local|vector|||1.826|package tibble was built under R version 4.1.2. package ggplot2 was built under R version 4.1.2. package dplyr was built under R version 4.1.2|
 decay_mult|stem|c6e3278cdc37a002|2a87c63feed0e380|4540680f06b29e83|-351045808||t19271.4698461473s|8db44bc8a23a91c1|1595|rds|local|vector|||0.006||
 make_decay_data_additive|function|c1ca39d2856019b3|||||||||||||||
@@ -8,3 +8,5 @@ make_decay_data_multiplicative|function|784e888751be123c|||||||||||||||
 plot_add|stem|e25e240c11beba94|49c111642d36e891|7205842ab29cd251|894921332||t19271.4704458247s|0ee04a76bdc40e76|69097|rds|local|vector|||0.014||
 plot_group_df|function|1ddff8be84a0b510|||||||||||||||
 plot_mult|stem|6bc8a46d6c9be60a|5eaccd5adb324694|2558a56c803a3a8c|953627644||t19271.4704467176s|8c771a0ecc97a8c8|69077|rds|local|vector|||0.011||
+sim_vb_one_tree|function|0e1eaf05809b5118|||||||||||||||
+vb_one_tree|stem|0123d9a9757e7b44|3e6d829a9dbc5aae|476866292fb2a947|-828049293||t19296.5745805695s|2098477052a4f98b|906|rds|local|vector|||1.299|package tibble was built under R version 4.1.2. package ggplot2 was built under R version 4.1.2. package dplyr was built under R version 4.1.2|

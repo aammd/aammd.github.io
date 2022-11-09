@@ -1,18 +1,20 @@
 project:
   type: website
+  output-dir: docs
 
 website:
-  title: "Demo_blog_quarto"
+  title: "Hello Quarto and Targets"
+  description: "Demonstrating ecological concepts and statistical models using simulation"
   navbar:
     right:
-      - about.qmd
+      - blog.qmd
       - icon: github
-        href: https://github.com/
+        href: https://github.com/aammd
       - icon: twitter
-        href: https://twitter.com
+        href: https://twitter.com/polesasunder
 format:
   html:
-    theme: cosmo
+    theme: sketchy
     css: styles.css
 
 editor: visual

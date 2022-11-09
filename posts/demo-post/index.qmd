@@ -1,6 +1,6 @@
 ---
-title: "Post With Code"
-author: "Harlow Malloc"
+title: "Exponential change"
+author: "Andrew"
 date: "2022-10-05"
 categories: [news, code, analysis]
 image: "image.jpg"
@@ -21,6 +21,7 @@ we love a simple equation like @eq-one
 let's have a plot
 
 ```{r}
+set.seed(5992)
 x <- runif(42, -2, 2)
 y <- rnorm(42, 5 + 2.4 * x, 2.3)
 
@@ -30,9 +31,11 @@ plot(x, y)
 
 Here are two figures I made beforehand:
 
-```{r}
+```{r tarplot}
 library(targets)
 tar_load(plot_add)
 tar_load(plot_mult)
+plot_add
 ```
 
+I want to know if you can see these figures!

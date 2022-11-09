@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Demo_blog_quarto</title>
+<title>Hello Quarto and Targets - Ecological Data Simulations</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -103,7 +103,7 @@ ul.task-list li input[type="checkbox"] {
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
     <a class="navbar-brand" href="./index.html">
-    <span class="navbar-title">Demo_blog_quarto</span>
+    <span class="navbar-title">Hello Quarto and Targets</span>
     </a>
   </div>
           <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
@@ -112,15 +112,15 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./about.html">About</a>
+    <a class="nav-link active" href="./blog.html" aria-current="page">Ecological Data Simulations</a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/"><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/aammd"><i class="bi bi-github" role="img">
 </i> 
  </a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com"><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com/polesasunder"><i class="bi bi-twitter" role="img">
 </i> 
  </a>
   </li>  
@@ -131,47 +131,144 @@ ul.task-list li input[type="checkbox"] {
     </nav>
 </header>
 <!-- content -->
-<header id="title-block-header" class="quarto-title-block default page-columns page-full">
-  <div class="quarto-title-banner page-columns page-full">
-    <div class="quarto-title column-page-left">
-      <h1 class="title">Demo_blog_quarto</h1>
-                      </div>
-  </div>
-    
-  
-  <div class="quarto-title-meta">
-
-      
-      
-    </div>
-    
-  
-  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-full page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(2)</span></div><div class="category" data-category="analysis">analysis <span class="quarto-category-count">(1)</span></div><div class="category" data-category="code">code <span class="quarto-category-count">(1)</span></div><div class="category" data-category="news">news <span class="quarto-category-count">(2)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(3)</span></div><div class="category" data-category="analysis">analysis <span class="quarto-category-count">(1)</span></div><div class="category" data-category="code">code <span class="quarto-category-count">(1)</span></div><div class="category" data-category="news">news <span class="quarto-category-count">(1)</span></div><div class="category" data-category="simulation">simulation <span class="quarto-category-count">(1)</span></div><div class="category" data-category="stan">stan <span class="quarto-category-count">(1)</span></div></div></div>
 <!-- main -->
-<main class="content quarto-banner-title-block column-page-left" id="quarto-document-content">
+<main class="content column-page-left" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Ecological Data Simulations</h1>
+</div>
 
 
 
+<div class="quarto-title-meta">
+
+    
+    
+  </div>
+  
+
+</header>
 
 
 
 
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
+<div class="listing-actions-group">
+   <div class="input-group input-group-sm quarto-listing-sort">
+     <span class="input-group-text"><i class="bi bi-sort-down"></i></span>
+     <select id="listing-listing-sort" class="form-select" aria-label="Order By" onchange="window['quarto-listings']['listing-listing'].sort(this.options[this.selectedIndex].value, { order: this.options[this.selectedIndex].getAttribute('data-direction')})">
+       <option value="" disabled="" selected="" hidden="">Order By</option>
+       <option value="index" data-direction="asc">Default</option>
+         <option value="listing-title" data-direction="asc">
+          Title
+        </option>
+         <option value="listing-date-sort" data-direction="asc">
+          Date - Oldest
+        </option>
+         <option value="listing-date-sort" data-direction="desc">
+          Date - Newest
+        </option>
+         <option value="listing-author" data-direction="asc">
+          Author
+        </option>
+     </select>
+  </div>
+    <div class="input-group input-group-sm quarto-listing-filter">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input type="text" class="search form-control" placeholder="Filter">
+    </div>
+</div>
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="news,code,analysis" data-listing-date-sort="1664942400000" data-listing-file-modified-sort="1665056147629" data-listing-reading-time-sort="0.205">
+<div class="quarto-post image-right" data-index="0" data-listing-date-sort="1666497600000" data-listing-file-modified-sort="1666728882242" data-listing-reading-time-sort="4.61">
 <div class="thumbnail">
-<p><a href="./posts/post-with-code/index.html"> <img src="./posts/post-with-code/image.jpg" class="thumnail-image"> </a></p>
+<a href="./posts/probability-integral-transform/index.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/probability-integral-transform/index.html"></a></p>
 </div>
 <div class="body">
-<a href="./posts/post-with-code/index.html">
+<a href="./posts/probability-integral-transform/index.html">
 <h3 class="no-anchor listing-title">
-Post With Code
+Probability integral transforms
+</h3>
+<div class="listing-subtitle">
+
+</div>
+<div class="listing-description">
+take random numbers from a distribution
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/probability-integral-transform/index.html">
+<div class="listing-date">
+Oct 23, 2022
+</div>
+<div class="listing-author">
+Andrew
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="stan,simulation" data-listing-date-sort="1665720000000" data-listing-file-modified-sort="1667262496778" data-listing-reading-time-sort="2.715">
+<div class="thumbnail">
+<a href="./posts/growth_curve_measurement_error/index.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./posts/growth_curve_measurement_error/index.html"></a></p>
+</div>
+<div class="body">
+<a href="./posts/growth_curve_measurement_error/index.html">
+<h3 class="no-anchor listing-title">
+Growth curves
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('stan'); return false;">
+stan
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('simulation'); return false;">
+simulation
+</div>
+</div>
+<a href="./posts/growth_curve_measurement_error/index.html">
+<div class="listing-description">
+Many animals and plants grow quickly when small and more slowly as they mature. There are many popular ways of describing this relationship; one very common and convenient relationship is the Von-Bertanalaffy (VB) growth curve:
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./posts/growth_curve_measurement_error/index.html">
+<div class="listing-date">
+Oct 14, 2022
+</div>
+<div class="listing-author">
+Andrew
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="2" data-categories="news,code,analysis" data-listing-date-sort="1664942400000" data-listing-file-modified-sort="1665057341426" data-listing-reading-time-sort="0.255">
+<div class="thumbnail">
+<p><a href="./posts/demo-post/index.html"> <img src="./posts/demo-post/image.jpg" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./posts/demo-post/index.html">
+<h3 class="no-anchor listing-title">
+Exponential change
 </h3>
 <div class="listing-subtitle">
 
@@ -188,54 +285,19 @@ code
 analysis
 </div>
 </div>
-<a href="./posts/post-with-code/index.html">
+<a href="./posts/demo-post/index.html">
 <div class="listing-description">
 This is a post with executable code.
 </div>
 </a>
 </div>
 <div class="metadata">
-<a href="./posts/post-with-code/index.html">
+<a href="./posts/demo-post/index.html">
 <div class="listing-date">
 Oct 5, 2022
 </div>
 <div class="listing-author">
-Harlow Malloc
-</div>
-</a>
-</div>
-</div>
-<div class="quarto-post image-right" data-index="1" data-categories="news" data-listing-date-sort="1664683200000" data-listing-file-modified-sort="1665002877828" data-listing-reading-time-sort="0.16">
-<div class="thumbnail">
-<p><a href="./posts/welcome/index.html"> <img src="./posts/welcome/thumbnail.jpg" class="thumnail-image"> </a></p>
-</div>
-<div class="body">
-<a href="./posts/welcome/index.html">
-<h3 class="no-anchor listing-title">
-Welcome To My Blog
-</h3>
-<div class="listing-subtitle">
-
-</div>
-</a>
-<div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('news'); return false;">
-news
-</div>
-</div>
-<a href="./posts/welcome/index.html">
-<div class="listing-description">
-This is the first post in a Quarto blog. Welcome!
-</div>
-</a>
-</div>
-<div class="metadata">
-<a href="./posts/welcome/index.html">
-<div class="listing-date">
-Oct 2, 2022
-</div>
-<div class="listing-author">
-Tristan O’Malley
+Andrew
 </div>
 </a>
 </div>

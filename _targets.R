@@ -42,5 +42,11 @@ list(
     name = plot_mult,
     command = plot_group_df(decay_mult)
   ),
+  # growth_curve_measurement_error ------------------------------------------
+  tar_target(
+    name = vb_one_tree,
+    command = sim_vb_one_tree()
+  ),
+
   tar_quarto(blog)
 )
