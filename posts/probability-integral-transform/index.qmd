@@ -3,6 +3,7 @@ title: "Probability integral transforms"
 author: "Andrew"
 date: 23 Oct 2022
 editor: visual
+freeze: true
 ---
 
 take random numbers from a distribution
@@ -92,7 +93,6 @@ expand_grid(meanval = seq(from = 1, to = 14, length.out = 6),
   geom_histogram() + 
   facet_grid(sdval~meanval)
 ```
-
 
 and with the lognormal
 
