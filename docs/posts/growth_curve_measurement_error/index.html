@@ -225,14 +225,14 @@ L_t = L_\infty - (L_\infty - L_0)e^{-rt}
 <section id="a-single-tree" class="level2">
 <h2 class="anchored" data-anchor-id="a-single-tree">a single tree</h2>
 <p>I’m going to do a simple simulation of one tree growing. here is code that does that</p>
-<div class="cell">
+<div class="cell" data-class-output=".r">
 <div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="cf">function</span> (<span class="at">time =</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">10</span>, <span class="at">to =</span> <span class="dv">200</span>, <span class="at">by =</span> <span class="dv">5</span>), <span class="at">Lo =</span> <span class="fl">0.01</span>, </span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">Lmax =</span> <span class="dv">150</span>, <span class="at">r =</span> <span class="fl">0.03</span>, <span class="at">sd =</span> <span class="dv">5</span>) </span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>{</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    tibble<span class="sc">::</span><span class="fu">tibble</span>(time, <span class="at">Lt =</span> Lmax <span class="sc">-</span> (Lmax <span class="sc">-</span> Lo) <span class="sc">*</span> <span class="fu">exp</span>(<span class="sc">-</span>r <span class="sc">*</span> time), </span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">Lt_obs =</span> <span class="fu">rnorm</span>(<span class="fu">length</span>(Lt), <span class="at">mean =</span> Lt, <span class="at">sd =</span> <span class="dv">5</span>))</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>function (time = seq(from = 10, to = 200, by = 5), Lo = 0.01, 
+    Lmax = 150, r = 0.03, sd = 5) 
+{
+    tibble::tibble(time, Lt = Lmax - (Lmax - Lo) * exp(-r * time), 
+        Lt_obs = rnorm(length(Lt), mean = Lt, sd = 5))
+}</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -254,24 +254,24 @@ L_t = L_\infty - (L_\infty - L_0)e^{-rt}
 </div>
 <p>simulate this same data in targets</p>
 <p>fit a stan model to it! here is the Stan model: formatted?</p>
-<div class="cell">
+<div class="cell" data-class-output=".stan">
 <div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb4"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span>{</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] time;</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] Lt;</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span>{</span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; r;</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; Lmax;</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_obs;</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span>{</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  Lt ~ normal(Lmax * (<span class="dv">1</span> - exp(-r*time)), sigma_obs);</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  r ~ lognormal(-<span class="dv">3</span>, <span class="dv">1</span>);</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  Lmax ~ normal(<span class="dv">200</span>, <span class="dv">20</span>);</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  sigma_obs ~ exponential(<span class="dv">1</span>);</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<pre><code>data{
+  int&lt;lower=0&gt; n;
+  vector[n] time;
+  vector[n] Lt;
+}
+parameters{
+  real&lt;lower=0&gt; r;
+  real&lt;lower=0&gt; Lmax;
+  real&lt;lower=0&gt; sigma_obs;
+}
+model{
+  Lt ~ normal(Lmax * (1 - exp(-r*time)), sigma_obs);
+  r ~ lognormal(-3, 1);
+  Lmax ~ normal(200, 20);
+  sigma_obs ~ exponential(1);
+}</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -289,7 +289,7 @@ L_t = L_\infty - (L_\infty - L_0)e^{-rt}
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 1 finished in 0.1 seconds.
+Chain 1 finished in 0.2 seconds.
 Chain 2 finished in 0.2 seconds.
 Chain 3 finished in 0.2 seconds.
 Chain 4 finished in 0.2 seconds.
@@ -301,10 +301,10 @@ Total execution time: 0.5 seconds.</code></pre>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>one_tree_post</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>  variable   mean median   sd  mad     q5    q95 rhat ess_bulk ess_tail
- lp__      -84.63 -84.29 1.29 1.02 -87.22 -83.25 1.00     1778     2461
- r           0.03   0.03 0.00 0.00   0.03   0.03 1.00     2378     2465
- Lmax      149.32 149.33 1.22 1.19 147.28 151.35 1.00     2534     2339
- sigma_obs   4.79   4.74 0.52 0.49   4.02   5.71 1.00     2578     2505</code></pre>
+ lp__      -93.00 -92.67 1.27 1.00 -95.51 -91.65 1.00     1602     2168
+ r           0.03   0.03 0.00 0.00   0.03   0.03 1.00     2234     2364
+ Lmax      152.38 152.38 1.49 1.46 149.94 154.77 1.00     2315     2459
+ sigma_obs   5.78   5.74 0.62 0.60   4.85   6.84 1.00     2177     1908</code></pre>
 </div>
 </div>
 <p>plot it</p>
@@ -323,7 +323,7 @@ Total execution time: 0.5 seconds.</code></pre>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
 <p></p><figcaption class="figure-caption">Growth curve for one tree. the line shows the expected value, with posterior uncertainty around exactly what that average should be.</figcaption><p></p>
 </figure>
 </div>
@@ -337,7 +337,7 @@ Total execution time: 0.5 seconds.</code></pre>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_dist_lineribbon</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">dist =</span> Lt),</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> expected_df, <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>At the time of this writing the error messages here are particularly unhelpful. If you try to use <code>stat_lineribbon</code> rather than <code>stat_dist_lineribbon</code> you get the foloing misleading message:</p>

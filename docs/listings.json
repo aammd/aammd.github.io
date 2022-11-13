@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/multispecies-functional-response/index.html",
       "/posts/probability-integral-transform/index.html",
       "/posts/growth_curve_measurement_error/index.html",
       "/posts/demo-post/index.html"

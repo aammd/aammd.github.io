@@ -6,10 +6,10 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Andrew">
-<meta name="dcterms.date" content="2022-10-05">
+<meta name="author" content="Andrew MacDonald &amp; Ben Mercier">
+<meta name="dcterms.date" content="2022-11-11">
 
-<title>Hello Quarto and Targets - Exponential change</title>
+<title>Hello Quarto and Targets - Fitting a multispecies functional response in Stan</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -85,6 +85,25 @@ code span.st { color: #4070a0; } /* String */
 code span.va { color: #19177c; } /* Variable */
 code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}
 </style>
 
 
@@ -168,13 +187,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Exponential change</h1>
-                                <div class="quarto-categories">
-                <div class="quarto-category">news</div>
-                <div class="quarto-category">code</div>
-                <div class="quarto-category">analysis</div>
-              </div>
-                  </div>
+      <h1 class="title">Fitting a multispecies functional response in Stan</h1>
+                      </div>
   </div>
     
   
@@ -183,14 +197,14 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div>
       <div class="quarto-title-meta-heading">Author</div>
       <div class="quarto-title-meta-contents">
-               <p>Andrew </p>
+               <p>Andrew MacDonald &amp; Ben Mercier </p>
             </div>
     </div>
       
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">October 5, 2022</p>
+        <p class="date">November 11, 2022</p>
       </div>
     </div>
       
@@ -207,46 +221,58 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 
-<p>This is a post with executable code.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="dv">1</span> <span class="sc">+</span> <span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 2</code></pre>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(targets)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</div>
-<p><span id="eq-one"><span class="math display">\[
-Y \sim \text{N}(\mu, \sigma)
+<section id="the-equation" class="level2">
+<h2 class="anchored" data-anchor-id="the-equation">The equation</h2>
+<p>Predators eat prey. They eat prey faster when there is more prey – though they do have to slow down to catch, kill, and chew.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
+<p>If a predator can eat multiple things, then they might end up eating less of any one prey because they spread their kills around among all their prey. In the very simplest case, they do this in proportion to how frequent the different prey are – the predator has no preference, it just goes around randomly and eats what it finds</p>
+<p>The classic OG version of this model comes from <span class="citation" data-cites="holling1966">Holling (<a href="#ref-holling1966" role="doc-biblioref">1966</a>)</span></p>
+<p><span id="eq-type2"><span class="math display">\[
+A = \frac{\alpha N}{1 + h\alpha N}
 \tag{1}\]</span></span></p>
-<p>we love a simple equation like <a href="#eq-one">Equation&nbsp;1</a></p>
-<p>let’s have a plot</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5992</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">42</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">42</span>, <span class="dv">5</span> <span class="sc">+</span> <span class="fl">2.4</span> <span class="sc">*</span> x, <span class="fl">2.3</span>)</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>Here are two figures I made beforehand:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(targets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'targets' was built under R version 4.1.3</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar_load</span>(plot_add)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tar_load</span>(plot_mult)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>plot_add</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/tarplot-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-<p>I want to know if you can see these figures!</p>
+<p>where</p>
+<ul>
+<li>N is the number of prey</li>
+<li><span class="math inline">\(\alpha\)</span> is the attack rate</li>
+<li><span class="math inline">\(h\)</span> is the handling time</li>
+</ul>
+<p>And altogether you get the number of attacks <span class="math inline">\(A\)</span> on prey in some unit of time.</p>
+</section>
+<section id="multiple-species" class="level2">
+<h2 class="anchored" data-anchor-id="multiple-species">multiple species</h2>
+<p>Suppose you have more than one species in this system. You could then rewrite <a href="#eq-type2">Equation&nbsp;1</a> to allow multiple animals to be included in the predation:</p>
+<p><span id="eq-mstype2"><span class="math display">\[
+A_i = \frac{\alpha N_i}{1 + h\alpha \sum_{j = 1}^s N_j}
+\tag{2}\]</span></span></p>
+<p>here <span class="math inline">\(\sum_{j = 1}^s N_j\)</span> means the sum over the abundances of all the prey. The subscript <span class="math inline">\(i\)</span> just means that we are talking about one particular prey, which we label <span class="math inline">\(i\)</span>. This prey is included in the summation in the denominator.</p>
+<p>It’s common to consider that different prey species might be attacked or handled at different rates <span class="citation" data-cites="smith2020">Smout et al. (<a href="#ref-smout2010" role="doc-biblioref">2010</a>)</span>.</p>
 
 
 
-</main> <!-- /main -->
+</section>
+
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
+<div id="ref-holling1966" class="csl-entry" role="doc-biblioentry">
+Holling, C. S. 1966. <span>“The Functional Response of Invertebrate Predators to Prey Density.”</span> <em>Memoirs of the Entomological Society of Canada</em> 98 (S48): 5–86. <a href="https://doi.org/10.4039/entm9848fv">https://doi.org/10.4039/entm9848fv</a>.
+</div>
+<div id="ref-smith2020" class="csl-entry" role="doc-biblioentry">
+Smith, Brian E., and Laurel A. Smith. 2020. <span>“Multispecies Functional Responses Reveal Reduced Predation at High Prey Densities and Varied Responses Among and Within Trophic Groups.”</span> <em>Fish and Fisheries</em> 21 (5): 891–905. <a href="https://doi.org/10.1111/faf.12468">https://doi.org/10.1111/faf.12468</a>.
+</div>
+<div id="ref-smout2010" class="csl-entry" role="doc-biblioentry">
+Smout, Sophie, Christian Asseburg, Jason Matthiopoulos, Carmen Fernández, Stephen Redpath, Simon Thirgood, and John Harwood. 2010. <span>“The Functional Response of a Generalist Predator.”</span> <em>PLOS ONE</em> 5 (5): e10761. <a href="https://doi.org/10.1371/journal.pone.0010761">https://doi.org/10.1371/journal.pone.0010761</a>.
+</div>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Things that eat plants have to do the same; replace “kill” with “peel” etc.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

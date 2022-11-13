@@ -1,0 +1,49 @@
+---
+title: "Fitting a multispecies functional response in Stan"
+author: "Andrew MacDonald & Ben Mercier"
+date: 11 Nov 2022
+editor: visual
+categorues: [UdeS, stan]
+bibliography: references.bib
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+## The equation
+
+Predators eat prey. They eat prey faster when there is more prey -- though they do have to slow down to catch, kill, and chew.[^1]
+
+[^1]: Things that eat plants have to do the same; replace "kill" with "peel" etc.
+
+If a predator can eat multiple things, then they might end up eating less of any one prey because they spread their kills around among all their prey. In the very simplest case, they do this in proportion to how frequent the different prey are -- the predator has no preference, it just goes around randomly and eats what it finds
+
+The classic OG version of this model comes from @holling1966
+
+$$
+A = \frac{\alpha N}{1 + h\alpha N}
+$$ {#eq-type2}
+
+where
+
+-   N is the number of prey
+-   $\alpha$ is the attack rate
+-   $h$ is the handling time
+
+And altogether you get the number of attacks $A$ on prey in some unit of time.
+
+## multiple species
+
+Suppose you have more than one species in this system. You could then rewrite @eq-type2 to allow multiple animals to be included in the predation:
+
+$$
+A_i = \frac{\alpha N_i}{1 + h\alpha \sum_{j = 1}^s N_j}
+$$ {#eq-mstype2}
+
+here $\sum_{j = 1}^s N_j$ means the sum over the abundances of all the prey. The subscript $i$ just means that we are talking about one particular prey, which we label $i$. This prey is included in the summation in the denominator.
+
+It's common to consider that different prey species might be attacked or handled at different rates [@smith2020, @smout2010].

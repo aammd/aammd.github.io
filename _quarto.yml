@@ -14,7 +14,7 @@ website:
         href: https://twitter.com/polesasunder
 format:
   html:
-    theme: minty
+    theme: sketchy
     css: styles.css
 
 editor: visual
