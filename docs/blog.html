@@ -70,9 +70,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-date','listing-title','listing-author','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
+      searchColumns: ["listing-date","listing-title","listing-author","listing-description","listing-categories"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -136,7 +136,7 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(4)</span></div><div class="category" data-category="analysis">analysis <span class="quarto-category-count">(1)</span></div><div class="category" data-category="code">code <span class="quarto-category-count">(1)</span></div><div class="category" data-category="news">news <span class="quarto-category-count">(1)</span></div><div class="category" data-category="simulation">simulation <span class="quarto-category-count">(1)</span></div><div class="category" data-category="stan">stan <span class="quarto-category-count">(1)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(4)</span></div><div class="category" data-category="R">R <span class="quarto-category-count">(1)</span></div><div class="category" data-category="UdeS">UdeS <span class="quarto-category-count">(1)</span></div><div class="category" data-category="simulation">simulation <span class="quarto-category-count">(1)</span></div><div class="category" data-category="stan">stan <span class="quarto-category-count">(2)</span></div></div></div>
 <!-- main -->
 <main class="content column-page-left" id="quarto-document-content">
 
@@ -187,14 +187,7 @@ ul.task-list li input[type="checkbox"] {
     </div>
 </div>
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-listing-date-sort="1668142800000" data-listing-file-modified-sort="1668202476589" data-listing-reading-time-sort="1.25">
-<div class="thumbnail">
-<a href="./posts/multispecies-functional-response/index.html">
-<div class="thumbnail-image">
-
-</div>
-</a><p><a href="./posts/multispecies-functional-response/index.html"></a></p>
-</div>
+<div class="quarto-post image-right" data-index="0" data-categories="UdeS,stan" data-listing-date-sort="1668142800000" data-listing-file-modified-sort="1668354518784" data-listing-reading-time-sort="1.25">
 <div class="body">
 <a href="./posts/multispecies-functional-response/index.html">
 <h3 class="no-anchor listing-title">
@@ -203,6 +196,16 @@ Fitting a multispecies functional response in Stan
 <div class="listing-subtitle">
 
 </div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('UdeS'); return false;">
+UdeS
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('stan'); return false;">
+stan
+</div>
+</div>
+<a href="./posts/multispecies-functional-response/index.html">
 <div class="listing-description">
 Predators eat prey. They eat prey faster when there is more prey – though they do have to slow down to catch, kill, and chew.<sup>1</sup>
 </div>
@@ -220,13 +223,6 @@ Andrew MacDonald &amp; Ben Mercier
 </div>
 </div>
 <div class="quarto-post image-right" data-index="1" data-listing-date-sort="1666497600000" data-listing-file-modified-sort="1668188334329" data-listing-reading-time-sort="4.61">
-<div class="thumbnail">
-<a href="./posts/probability-integral-transform/index.html">
-<div class="thumbnail-image">
-
-</div>
-</a><p><a href="./posts/probability-integral-transform/index.html"></a></p>
-</div>
 <div class="body">
 <a href="./posts/probability-integral-transform/index.html">
 <h3 class="no-anchor listing-title">
@@ -252,13 +248,6 @@ Andrew
 </div>
 </div>
 <div class="quarto-post image-right" data-index="2" data-categories="stan,simulation" data-listing-date-sort="1665720000000" data-listing-file-modified-sort="1668188334316" data-listing-reading-time-sort="2.715">
-<div class="thumbnail">
-<a href="./posts/growth_curve_measurement_error/index.html">
-<div class="thumbnail-image">
-
-</div>
-</a><p><a href="./posts/growth_curve_measurement_error/index.html"></a></p>
-</div>
 <div class="body">
 <a href="./posts/growth_curve_measurement_error/index.html">
 <h3 class="no-anchor listing-title">
@@ -293,43 +282,34 @@ Andrew
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="news,code,analysis" data-listing-date-sort="1664942400000" data-listing-file-modified-sort="1668188334315" data-listing-reading-time-sort="0.255">
-<div class="thumbnail">
-<p><a href="./posts/demo-post/index.html"> <img src="./posts/demo-post/image.jpg" class="thumnail-image"> </a></p>
-</div>
+<div class="quarto-post image-right" data-index="3" data-categories="R" data-listing-date-sort="1411790400000" data-listing-file-modified-sort="1668355330010" data-listing-reading-time-sort="5.555">
 <div class="body">
-<a href="./posts/demo-post/index.html">
+<a href="./posts/continuous-fractions-functional-programming/index.html">
 <h3 class="no-anchor listing-title">
-Exponential change
+Continuous fractions with Map and Reduce
 </h3>
 <div class="listing-subtitle">
 
 </div>
 </a>
 <div class="listing-categories">
-<div class="listing-category" onclick="window.quartoListingCategory('news'); return false;">
-news
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('code'); return false;">
-code
-</div>
-<div class="listing-category" onclick="window.quartoListingCategory('analysis'); return false;">
-analysis
+<div class="listing-category" onclick="window.quartoListingCategory('R'); return false;">
+R
 </div>
 </div>
-<a href="./posts/demo-post/index.html">
+<a href="./posts/continuous-fractions-functional-programming/index.html">
 <div class="listing-description">
-This is a post with executable code.
+Over the summer, some of us here at UBC started a reading group based around Hadley Wickham’s book, Advanced R Programming. The goal was to compare our answers to the exercises and our impressions of the content.
 </div>
 </a>
 </div>
 <div class="metadata">
-<a href="./posts/demo-post/index.html">
+<a href="./posts/continuous-fractions-functional-programming/index.html">
 <div class="listing-date">
-Oct 5, 2022
+Sep 27, 2014
 </div>
 <div class="listing-author">
-Andrew
+Andrew MacDonald
 </div>
 </a>
 </div>

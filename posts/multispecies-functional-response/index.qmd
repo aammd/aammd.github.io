@@ -3,7 +3,7 @@ title: "Fitting a multispecies functional response in Stan"
 author: "Andrew MacDonald & Ben Mercier"
 date: 11 Nov 2022
 editor: visual
-categorues: [UdeS, stan]
+categories: [UdeS, stan]
 bibliography: references.bib
 ---
 
@@ -46,4 +46,4 @@ $$ {#eq-mstype2}
 
 here $\sum_{j = 1}^s N_j$ means the sum over the abundances of all the prey. The subscript $i$ just means that we are talking about one particular prey, which we label $i$. This prey is included in the summation in the denominator.
 
-It's common to consider that different prey species might be attacked or handled at different rates [@smith2020, @smout2010].
+It's common to consider that different prey species might be attacked or handled at different rates [@smith2020] [@smout2010a]
