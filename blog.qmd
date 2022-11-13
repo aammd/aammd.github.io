@@ -1,5 +1,5 @@
 ---
-title: "Ecological Data Simulations"
+title: "The Study of the Household"
 listing:
   contents: posts
   sort: "date desc"

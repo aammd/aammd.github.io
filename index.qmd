@@ -1,18 +1,39 @@
 ---
-title: "About"
-image: profile.jpg
+title: "Andrew MacDonald, PhD"
+image: for_website.png
 about:
-  template: jolla
+  template: broadside
   links:
     - icon: twitter
       text: Twitter
-      href: https://twitter.com
+      href: https://twitter.com/polesasunder
     - icon: linkedin
       text: LinkedIn
-      href: https://linkedin.com
+      href: https://www.linkedin.com/in/andrew-macdonald-76649474/
     - icon: github
       text: Github
-      href: https://github.com
+      href: https://github.com/aammd
+    - icon: envelope
+      text: email
+      href: mailto:andrew.macdonald@usherbrooke.ca
+bibliography: references.bib
 ---
 
-This is just a test blog
+## About me
+
+I love insects, statistics, but most of all I like solving interesting problems in a collaborative environment
+
+I am currently a Research Associate at the Université de Sherbrooke. My goal is to improve our ability to make predictions for ecological systems, and to build a community of practice around statistical methods in ecology.
+
+## Education
+
+-   PhD, University of British Columbia, 2017
+-   MSc, University of Toronto, 2009
+-   BSc, Cape Breton University, 2006
+
+## Selected publications
+
+---
+nocite: |
+  @macdonald2020a, @srivastava2012, @céréghino2018
+---

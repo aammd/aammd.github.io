@@ -3,7 +3,7 @@ project:
   output-dir: docs
 
 website:
-  title: "Hello Quarto and Targets"
+  title: "Andrew MacDonald"
   description: "Demonstrating ecological concepts and statistical models using simulation"
   navbar:
     right:
