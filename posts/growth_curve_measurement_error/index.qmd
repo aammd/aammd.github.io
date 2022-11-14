@@ -54,8 +54,7 @@ vb_one_tree |>
 
 simulate this same data in targets
 
-fit a stan model to it! here is the Stan model:
-formatted?
+fit a stan model to it! here is the Stan model: formatted?
 
 ```{r}
 #| echo: FALSE
@@ -101,9 +100,7 @@ expected_plot <- expected_df |>
 expected_plot
 ```
 
-This relationship shows the *average* line, the expected size of the tree. 
-We can add the original data like this:
-
+This relationship shows the *average* line, the expected size of the tree. We can add the original data like this:
 
 ```{r}
 one_tree_sim |> 
@@ -122,4 +119,3 @@ one_tree_sim |>
   stat_lineribbon(aes(x = time, y = Lt),
                   data = expected_df, inherit.aes = FALSE)
 ```
-
