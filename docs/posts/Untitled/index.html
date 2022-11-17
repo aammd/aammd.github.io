@@ -6,10 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="author" content="Andrew MacDonald &amp; Ben Mercier">
-<meta name="dcterms.date" content="2022-11-11">
+<meta name="author" content="Andrew MacDonald">
+<meta name="dcterms.date" content="2016-12-02">
+<meta name="description" content="What are my brilliant friends reading?">
 
-<title>Andrew MacDonald - Fitting a multispecies functional response in Stan</title>
+<title>Andrew MacDonald - Twitter recommends stats books</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -85,25 +86,6 @@ code span.st { color: #4070a0; } /* String */
 code span.va { color: #19177c; } /* Variable */
 code span.vs { color: #4070a0; } /* VerbatimString */
 code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-}
-.hanging div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}
 </style>
 
 
@@ -142,8 +124,13 @@ div.csl-indent {
     "search-submit-button-title": "Submit"
   }
 }</script>
+<script type="application/json" class="js-hypothesis-config">
+{
+  "theme": "clean"
+}
+</script>
+<script async="" src="https://hypothes.is/embed.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -187,10 +174,16 @@ div.csl-indent {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Fitting a multispecies functional response in Stan</h1>
-                                <div class="quarto-categories">
-                <div class="quarto-category">UdeS</div>
-                <div class="quarto-category">stan</div>
+      <h1 class="title">Twitter recommends stats books</h1>
+                  <div>
+        <div class="description">
+          What are my brilliant friends reading?
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">books</div>
+                <div class="quarto-category">statistics</div>
+                <div class="quarto-category">twitter</div>
               </div>
                   </div>
   </div>
@@ -201,14 +194,14 @@ div.csl-indent {
       <div>
       <div class="quarto-title-meta-heading">Author</div>
       <div class="quarto-title-meta-contents">
-               <p>Andrew MacDonald &amp; Ben Mercier </p>
+               <p>Andrew MacDonald </p>
             </div>
     </div>
       
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">November 11, 2022</p>
+        <p class="date">December 2, 2016</p>
       </div>
     </div>
       
@@ -223,8 +216,13 @@ div.csl-indent {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-equation" id="toc-the-equation" class="nav-link active" data-scroll-target="#the-equation">The equation</a></li>
-  <li><a href="#multiple-species" id="toc-multiple-species" class="nav-link" data-scroll-target="#multiple-species">multiple species</a></li>
+  <li><a href="#stats-texts" id="toc-stats-texts" class="nav-link active" data-scroll-target="#stats-texts">Stats texts</a></li>
+  <li><a href="#classic-works" id="toc-classic-works" class="nav-link" data-scroll-target="#classic-works">Classic works:</a></li>
+  <li><a href="#what-is-this-post" id="toc-what-is-this-post" class="nav-link" data-scroll-target="#what-is-this-post">What is this post</a></li>
+  <li><a href="#why-i-switched-to-quarto" id="toc-why-i-switched-to-quarto" class="nav-link" data-scroll-target="#why-i-switched-to-quarto">Why I switched to Quarto</a></li>
+  <li><a href="#quarto-resources" id="toc-quarto-resources" class="nav-link" data-scroll-target="#quarto-resources">quarto resources</a></li>
+  <li><a href="#surprise-its-targets" id="toc-surprise-its-targets" class="nav-link" data-scroll-target="#surprise-its-targets">surprise it’s targets</a></li>
+  <li><a href="#my-own-observations-and-questions" id="toc-my-own-observations-and-questions" class="nav-link" data-scroll-target="#my-own-observations-and-questions">My own observations and questions</a></li>
   </ul>
 </nav>
     </div>
@@ -234,58 +232,89 @@ div.csl-indent {
 
 
 
+<p>Yesterday I asked my beloved Twitter nerds to recommend to me their favourite quantitative texts in Ecology:</p>
+<blockquote class="twitter-tweet blockquote" data-partner="tweetdeck">
+<p lang="en" dir="ltr">
+my postdoc super tells me I can BUY BOOKS! 💓📚📚💓 quick sweet friends, what are your fun statistical ecology book recommendations?
+</p>
+— Andrew MacDonald (<span class="citation" data-cites="polesasunder">@polesasunder</span>) <a href="https://twitter.com/polesasunder/status/804480623410872320">December 2, 2016</a>
+</blockquote>
+<script async="" src="//platform.twitter.com/widgets.js" charset="utf-8"></script>
+<p>As a way of saying <strong>“Thank you!”</strong> I thought that I would put all the books in a list for anyone who is curious.</p>
+<section id="stats-texts" class="level3">
+<h3 class="anchored" data-anchor-id="stats-texts">Stats texts</h3>
+<ul>
+<li><a href="http://eu.wiley.com/WileyCDA/WileyTitle/productCd-EHEP002348.html">Statistics for Spatio-Temporal Data, by Noel Cressie, Christopher K. Wikle, Wiley-Blackwell (19 avril 2011)</a></li>
+<li><a href="https://www.amazon.fr/Statistical-Rethinking-Bayesian-Course-Examples/dp/1482253445">Statistical Rethinking: A Bayesian Course with Examples in R and Stan by Richard McElreath</a> – This one was a HUGE favourite recommended by multiple people. Going straight to the top of my list!</li>
+<li><a href="http://store.elsevier.com/Applied-Hierarchical-Modeling-in-Ecology-Analysis-of-distribution-abundance-and-species-richness-in-R-and-BUGS/Marc-Kery/isbn-9780128014868/">Applied Hierarchical Modeling in Ecology: Analysis of distribution, abundance and species richness in R and BUGS, 1st Edition- by Kery &amp; Royle, Academic Press</a> on the strength of recs from two fine quantitative folks, Auriel Fournier and Petr Keil</li>
+<li><a href="https://www.amazon.com/Quantitative-Ecology-Evolutionary-Biology-Integrating/dp/0198714874">Quantitative Ecology and Evolutionary Biology: Integrating models with data (Oxford Series in Ecology and Evolution) 1st Edition by Otso Ovaskainen, Henrik Johan de Knegt, Maria del Mar Delgado</a></li>
+<li><a href="https://www.amazon.fr/Bayesian-Models-Statistical-Primer-Ecologists/dp/0691159289%3FSubscriptionId%3DAKIAILSHYYTFIVPWUY6Q%26tag%3Dduckduckgo-ffsb-fr-21%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3D0691159289">Bayesian Models - A Statistical Primer for Ecologists (Anglais) Relié – 25 août 2015 - de N Thompson Hobbs , Mevin Hooten</a></li>
+<li><a href="https://www.amazon.com/Generalized-Additive-Models-Introduction-Statistical/dp/1498728332">Generalized Additive Models: An Introduction with R, Second Edition (Chapman &amp; Hall/CRC Texts in Statistical Science) 2nd Edition by Simon N. Wood</a></li>
+<li><a href="http://www.springer.com/us/book/9781441929181">Regression Modeling Strategies With Applications to Linear Models, Logistic Regression, and Survival Analysis by Harrell, Frank</a></li>
+<li><a href="https://www.amazon.com/Graph-Theory-Complex-Networks-Introduction/dp/9081540610/ref=sr_1_7?s=books&amp;ie=UTF8&amp;qid=1480639288&amp;sr=1-7&amp;keywords=%22graph+theory%22">Graph Theory and Complex Networks: An Introduction by Maarten van Steen</a></li>
+<li><a href="https://www.amazon.com/Analysis-Regression-Multilevel-Hierarchical-Models/dp/052168689X">Data Analysis Using Regression and Multilevel/Hierarchical Models 1st Edition by Andrew Gelman, Jennifer Hill</a> – this one (which I had already) was another very frequent recommendation!</li>
+</ul>
+</section>
+<section id="classic-works" class="level3">
+<h3 class="anchored" data-anchor-id="classic-works">Classic works:</h3>
+<ul>
+<li><a href="https://www.amazon.fr/Crude-Look-Whole-Science-Business-ebook/dp/B016TX4DU4%3FSubscriptionId%3DAKIAILSHYYTFIVPWUY6Q%26tag%3Dduckduckgo-ffab-fr-21%26linkCode%3Dxm2%26camp%3D2025%26creative%3D165953%26creativeASIN%3DB016TX4DU4">A Crude Look at the Whole: The Science of Complex Systems in Business, Life, and Society by John H. Miller</a></li>
+<li><a href="https://www.amazon.com/Daedalus-Science-Future-J-Haldane/dp/B000RB32TI">Daedalus, or Science and the Future</a> by JBS Haldane</li>
+<li><a href="http://www.cambridge.org/catalogue/catalogue.asp?isbn=9780521692748">Evidence and Evolution: the Logic behind the Science</a> by Elliott Sober</li>
+<li>Biology as Ideology, Lewontin</li>
+</ul>
+<p>So, as Margaret Kosmala of <a href="http://ecologybits.com/index.php/2016/11/30/how-to-run-an-online-academic-book-club/">Ec0l0gy b1ts</a> says: what are we reading next?</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(targets)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<section id="the-equation" class="level2">
-<h2 class="anchored" data-anchor-id="the-equation">The equation</h2>
-<p>Predators eat prey. They eat prey faster when there is more prey – though they do have to slow down to catch, kill, and chew.<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></p>
-<p>If a predator can eat multiple things, then they might end up eating less of any one prey because they spread their kills around among all their prey. In the very simplest case, they do this in proportion to how frequent the different prey are – the predator has no preference, it just goes around randomly and eats what it finds</p>
-<p>The classic OG version of this model comes from <span class="citation" data-cites="holling1966">Holling (<a href="#ref-holling1966" role="doc-biblioref">1966</a>)</span></p>
-<p><span id="eq-type2"><span class="math display">\[
-A = \frac{\alpha N}{1 + h\alpha N}
-\tag{1}\]</span></span></p>
-<p>where</p>
+</section>
+<section id="what-is-this-post" class="level2">
+<h2 class="anchored" data-anchor-id="what-is-this-post">What is this post</h2>
+<p>This post is meant to be a simple template for new posts – when I make a new post I’ll start by copying and pasting this current one over. Probably in the future there will be a plugin that does this for us, but until then this will be fine.</p>
+</section>
+<section id="why-i-switched-to-quarto" class="level2">
+<h2 class="anchored" data-anchor-id="why-i-switched-to-quarto">Why I switched to Quarto</h2>
+<p>A simple and frequent answer: overenthusiasm! I like seeing all the new things that the Rstudio team develop, and I know that this vibrant community will keep adding features and tutorials</p>
+</section>
+<section id="quarto-resources" class="level2">
+<h2 class="anchored" data-anchor-id="quarto-resources">quarto resources</h2>
 <ul>
-<li>N is the number of prey</li>
-<li><span class="math inline">\(\alpha\)</span> is the attack rate</li>
-<li><span class="math inline">\(h\)</span> is the handling time</li>
+<li><p><a href="https://albert-rapp.de/posts/13_quarto_blog_writing_guide/13_quarto_blog_writing_guide.htm">the Ultimate Guide to starting a Quarto blog</a></p></li>
+<li><p><a href="https://github.com/quarto-dev/quarto-cli/discussions">quarto discussions</a></p></li>
+<li><p><a href="https://blog.djnavarro.net/posts/2022-04-20_porting-to-quarto/">Danielle Navarro’s comments on the topic</a></p></li>
+<li><p><a href="https://www.njtierney.com/post/2022/04/11/rmd-to-qmd/">Nick Tierney’s notes</a></p></li>
+<li><p>and of course <a href="https://rmd4sci.njtierney.com/">Nicks exciting book project!</a></p></li>
 </ul>
-<p>And altogether you get the number of attacks <span class="math inline">\(A\)</span> on prey in some unit of time.</p>
 </section>
-<section id="multiple-species" class="level2">
-<h2 class="anchored" data-anchor-id="multiple-species">multiple species</h2>
-<p>Suppose you have more than one species in this system. You could then rewrite <a href="#eq-type2">Equation&nbsp;1</a> to allow multiple animals to be included in the predation:</p>
-<p><span id="eq-mstype2"><span class="math display">\[
-A_i = \frac{\alpha N_i}{1 + h\alpha \sum_{j = 1}^s N_j}
-\tag{2}\]</span></span></p>
-<p>here <span class="math inline">\(\sum_{j = 1}^s N_j\)</span> means the sum over the abundances of all the prey. The subscript <span class="math inline">\(i\)</span> just means that we are talking about one particular prey, which we label <span class="math inline">\(i\)</span>. This prey is included in the summation in the denominator.</p>
-<p>It’s common to consider that different prey species might be attacked or handled at different rates <span class="citation" data-cites="smith2020">(<a href="#ref-smith2020" role="doc-biblioref">Smith and Smith 2020</a>)</span> <span class="citation" data-cites="smout2010a">(<a href="#ref-smout2010a" role="doc-biblioref">Smout et al. 2010</a>)</span></p>
-
+<section id="surprise-its-targets" class="level2">
+<h2 class="anchored" data-anchor-id="surprise-its-targets">surprise it’s targets</h2>
+<iframe src="https://giphy.com/embed/12yB3XoYboAkjm" width="480" height="273" frameborder="0" class="giphy-embed" allowfullscreen="">
+</iframe>
+<p>
+<a href="https://giphy.com/gifs/disney-2016-new-year-the-emperors-groove-12yB3XoYboAkjm">via GIPHY</a>
+</p>
+<p>I’m also using <a href="https://github.com/ropensci/targets">targets</a>. Here are some observations on that so far:</p>
+<ul>
+<li><p><code>Last error: ! System command 'quarto' failed</code> I get this error message more that 10x more often than any other. As I’m learning Quarto I keep making errors which break the Quarto process but <code>targets</code> doesn’t (yet?) communicate the specific error message. To find out what has gone wrong, I go over to the terminal and run <code>quarto render .</code></p></li>
+<li><p>you have to go into <code>_metadata.yml</code> and stop the posts from freezing, by setting <code>freeze: false</code> . Targets will handle all the rest of it.</p></li>
+</ul>
+<p>I’m using <code>targets</code> with quarto because I want to work with large bayesian models fit with <code>stan</code> and <code>brms</code>., and fitting them in a regular blog post – including compiling, sampling etc.</p>
+</section>
+<section id="my-own-observations-and-questions" class="level2">
+<h2 class="anchored" data-anchor-id="my-own-observations-and-questions">My own observations and questions</h2>
+<p>so far it is very straightforward!</p>
+<ul>
+<li><p>it seems like post folder can’t begin with dates?</p></li>
+<li><p>love LOVE the bibliography automatically appearing</p></li>
+</ul>
 
 
 </section>
 
-
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
-<div id="ref-holling1966" class="csl-entry" role="doc-biblioentry">
-Holling, C. S. 1966. <span>“The Functional Response of Invertebrate Predators to Prey Density.”</span> <em>Memoirs of the Entomological Society of Canada</em> 98 (S48): 5–86. <a href="https://doi.org/10.4039/entm9848fv">https://doi.org/10.4039/entm9848fv</a>.
-</div>
-<div id="ref-smith2020" class="csl-entry" role="doc-biblioentry">
-Smith, Brian E., and Laurel A. Smith. 2020. <span>“Multispecies Functional Responses Reveal Reduced Predation at High Prey Densities and Varied Responses Among and Within Trophic Groups.”</span> <em>Fish and Fisheries</em> 21 (5): 891–905. <a href="https://doi.org/10.1111/faf.12468">https://doi.org/10.1111/faf.12468</a>.
-</div>
-<div id="ref-smout2010a" class="csl-entry" role="doc-biblioentry">
-Smout, Sophie, Christian Asseburg, Jason Matthiopoulos, Carmen Fernández, Stephen Redpath, Simon Thirgood, and John Harwood. 2010. <span>“The Functional Response of a Generalist Predator.”</span> <em>PLOS ONE</em> 5 (5): e10761. <a href="https://doi.org/10.1371/journal.pone.0010761">https://doi.org/10.1371/journal.pone.0010761</a>.
-</div>
-</div></section><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
-
-<ol>
-<li id="fn1"><p>Things that eat plants have to do the same; replace “kill” with “peel” etc.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-</ol>
-</section></div></main> <!-- /main -->
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {

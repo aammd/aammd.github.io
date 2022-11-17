@@ -19,3 +19,7 @@ format:
 
 editor: visual
 
+comments:
+  hypothesis:
+    theme: clean
+
