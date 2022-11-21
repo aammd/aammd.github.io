@@ -1,8 +1,8 @@
 ---
-title: "Andrew tries Quarto"
+title: "Simple nonlinear growth"
 author: "Andrew MacDonald"
 description: |
-  Quick notes on how to make a blog with Quarto and also targets.
+  How to model the growth of an individual of known age.
 date: 11 Nov 2022
 editor: visual
 categories: [UdeS, stan]
