@@ -1,0 +1,87 @@
+---
+title: "Andrew tries Quarto"
+author: "Andrew MacDonald"
+description: |
+  Quick notes on how to make a blog with Quarto and also targets.
+date: 11 Nov 2022
+editor: visual
+categories: [UdeS, stan]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+## Growth when you know the age
+
+We're doing a lot of work with growth equations these days! 
+This is how to use `brms` to fit the growth of an animal when we know:
+
+* the birth year
+
+* size at each year (measured as the length of a leg)
+
+* time
+
+We'll start with the classic VB growth equation that has been in several other posts:
+
+$$
+L_t = L_0e^{-rt} + L_\infty(1 - e^{-rt})
+$$ {#eq-vb}
+
+```{r}
+simulate_one_growth_known_age <- function(age, r, Lmax, size_at_first, sd_obs){
+  tibble(age = 0:age,
+         size = size_at_first * exp(-r * age) + Lmax * (1 - exp(-r * age)),
+         obs_size = rnorm(n = length(age), mean = size, sd = sd_obs))
+}
+```
+
+```{r}
+one_animal <- simulate_one_growth_known_age(9, Lmax = 550, size_at_first = 277, r = .7, sd_obs = 40)
+
+one_animal |> 
+  ggplot(aes(x = age, y = size)) + geom_point()
+```
+
+```{r}
+suppressPackageStartupMessages(library(brms))
+
+vb_form <- bf(obs_size ~ startsize * exp(-growthrate * age) + maxsize * (1 - exp(-growthrate * age)),
+              startsize ~ 1, 
+              growthrate ~ 1,
+              maxsize ~ 1 + sex,
+              nl = TRUE,
+              family = gaussian())
+
+get_prior(vb_form, data = one_animal)
+
+vb_prior <- c(
+  prior(exponential(1), class = "sigma"),
+  prior(normal(0,1), nlpar = "growthrate", lb = 0),
+  prior(normal(550, 20), nlpar = "maxsize", lb = 0),
+  prior(normal(200, 50), nlpar = "startsize", lb = 0)
+)
+
+vb_model <- brm(formula = vb_form,
+                prior = vb_prior, 
+                data = one_animal, 
+                chains = 2)
+```
+
+```{r}
+
+one_animal |> 
+  tidybayes::add_predicted_rvars(vb_model) |> 
+  ggplot(aes(x = age, dist = .prediction)) + 
+  stat_dist_lineribbon() + 
+  geom_point(aes(x = age, y = obs_size), inherit.aes = FALSE) 
+```
+
+```{r}
+summary(vb_model)
+```
+
