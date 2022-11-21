@@ -1,0 +1,226 @@
+[
+  {
+    "objectID": "blog.html",
+    "href": "blog.html",
+    "title": "The Study of the Household",
+    "section": "",
+    "text": "Order By\n       Default\n         \n          Title\n        \n         \n          Date - Oldest\n        \n         \n          Date - Newest\n        \n         \n          Author\n        \n     \n  \n    \n      \n      \n    \n\n\n\n\n\n\n\n\n\n\n\n\n\nFitting a multispecies functional response in Stan\n\n\n\n\n\n\n\nUdeS\n\n\nstan\n\n\n\n\n\n\n\n\n\n\n\nNov 11, 2022\n\n\nAndrew MacDonald & Ben Mercier\n\n\n1 min\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSimple nonlinear growth\n\n\n\n\n\n\n\nUdeS\n\n\nstan\n\n\n\n\nHow to model the growth of an individual of known age.\n\n\n\n\n\n\nNov 11, 2022\n\n\nAndrew MacDonald\n\n\n1 min\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nAndrew tries Quarto\n\n\n\n\n\n\n\nUdeS\n\n\nstan\n\n\n\n\nQuick notes on how to make a blog with Quarto and also targets.\n\n\n\n\n\n\nNov 11, 2022\n\n\nAndrew MacDonald\n\n\n1 min\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nProbability integral transforms\n\n\n\n\n\n\n\n\n\n\n\n\nOct 23, 2022\n\n\nAndrew\n\n\n4 min\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nGrowth curves\n\n\n\n\n\n\n\nstan\n\n\nsimulation\n\n\n\n\n\n\n\n\n\n\n\nOct 14, 2022\n\n\nAndrew\n\n\n2 min\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nPopulation growth with functional programming\n\n\n\n\n\n\n\nR\n\n\n\n\n\n\n\n\n\n\n\nDec 7, 2016\n\n\nAndrew MacDonald\n\n\n5 min\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nTwitter recommends stats books\n\n\n\n\n\n\n\nbooks\n\n\nstatistics\n\n\ntwitter\n\n\n\n\nWhat are my brilliant friends reading?\n\n\n\n\n\n\nDec 2, 2016\n\n\nAndrew MacDonald\n\n\n3 min\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nContinuous fractions with Map and Reduce\n\n\n\n\n\n\n\nR\n\n\n\n\n\n\n\n\n\n\n\nSep 27, 2014\n\n\nAndrew MacDonald\n\n\n5 min\n\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Andrew MacDonald, PhD",
+    "section": "",
+    "text": "I love insects, statistics, but most of all I like solving interesting problems in a collaborative environment\nI am currently a Research Associate at the Université de Sherbrooke. My goal is to improve our ability to make predictions for ecological systems, and to build a community of practice around statistical methods in ecology."
+  },
+  {
+    "objectID": "index.html#education",
+    "href": "index.html#education",
+    "title": "Andrew MacDonald, PhD",
+    "section": "Education",
+    "text": "Education\n\nPhD, University of British Columbia, 2017\nMSc, University of Toronto, 2009\nBSc, Cape Breton University, 2006"
+  },
+  {
+    "objectID": "posts/2014-11-27-continuous-fraction-functional-programming/index.html",
+    "href": "posts/2014-11-27-continuous-fraction-functional-programming/index.html",
+    "title": "Continuous fractions with Map and Reduce",
+    "section": "",
+    "text": "Over the summer, some of us here at UBC started a reading group based around Hadley Wickham’s book, Advanced R Programming. The goal was to compare our answers to the exercises and our impressions of the content.\nWe recently read my favourite chapter, Functionals, where readers are challenged to read about some algorithms in Structure and Interpretation of Computer Programs, and implement it in R.\nI wanted to share some functions I wrote to calculate these exotic things called k-term finite continued fractions, based on that challenge:"
+  },
+  {
+    "objectID": "posts/2014-11-27-continuous-fraction-functional-programming/index.html#continued-fractions",
+    "href": "posts/2014-11-27-continuous-fraction-functional-programming/index.html#continued-fractions",
+    "title": "Continuous fractions with Map and Reduce",
+    "section": "continued fractions",
+    "text": "continued fractions\nContinued Fractions look like this:\n\\[\n\\frac{n_1}{d_1 + \\frac{n_2}{d_2 + \\frac{n_3}{d_3 + \\cdots } } }\n\\]\nand have an infinite number of \\(n\\) and \\(d\\) values. However, if after \\(k\\) values you just replace the remaining ones (the \\(...\\) above) with 0, then you get a k-term finite continued fraction, which is maybe close enough:\n\\[\n\\frac{n_1}{d_1  + \\frac{n_2}{\\ddots + \\frac{n_k}{d_k}}}\n\\]\nContinued fractions have the values of \\(n\\) and \\(d\\) defined by a series. We need a function that will take the series for the numerator and denominator, calculate \\(k\\) terms, and put them together into a continued fraction.\nSo, how do we calculate this in R? Well, it turns out we can apply two concepts we learned from Wickham’s book to do so: closures and functionals.\n\nCreating a series of closures\nWe could say that each “part” of the continued fraction was a unit that looks like\n\\[\n\\frac{n}{d + x}\n\\]\nwhere \\(n\\) and \\(d\\) are a “pair” of numerator and denominator, and \\(x\\) is the next “part”, and so on. (there are probably mathematical terms for these, but I’m an ecologist, not a mathematician!). If you “build” the continued fraction from the inside out, you’d start with \\(x = 0\\), and calculate \\(\\frac{n_k}{d_k}\\). Then you move on to \\(n_{k-1}\\); for this fraction you have the numerator-denominator pair, plus the term (\\(x\\)) which you just calculated.\nWe can use closures to calculate each of these “parts” in turn, in order to keep the numerator-denominator pairs together. Closures are functions which are created by other functions; they “enclose” the environment in which they were created (hence the name), which means they can use variables from that environment (in our case, the values of a numerator & denominator)\nFirst, we make a “function factory”, a function which creates other functions (closures which retain different values of \\(n\\) and \\(d\\)):\n\nfrac_maker <- function(n, d){\n  force(n)\n  force(d)\n  function(x) n / (d + x)\n  }\n\nThis function takes a pair of numbers and defines a new function which uses them. But how can we create lots of closures, one for every numerator-denominator “pair” between 1 and \\(k\\)? We can use the function Map to run this function on each variable pair. Map works like a zipper, combining the first elements of two (or more) vectors with a function, then the second, etc. For example, the reciprocal of the Golden Ratio is the result of a continued fraction where \\(n\\) and \\(d\\) are both 1:\n\n  Ns <- rep(1, 20)\n  Ds <- rep(1, 20)\n  funs <- Map(frac_maker, Ns, Ds)\n\nfuns is now a list of functions, each one remembering its own particular value of \\(n\\) or \\(d\\). Now all we need to do is put them together and run them all. For that, we need another functional: Reduce."
+  },
+  {
+    "objectID": "posts/2014-11-27-continuous-fraction-functional-programming/index.html#using-reduce",
+    "href": "posts/2014-11-27-continuous-fraction-functional-programming/index.html#using-reduce",
+    "title": "Continuous fractions with Map and Reduce",
+    "section": "using Reduce",
+    "text": "using Reduce\nReduce is just lovely. It takes a vector and “reduces” it to a single number by applying a function: the first two arguments are the first and second vector elements, then the result of that calculation and the third element, then that result and the fourth element:\nReduce(sum, c(1, 2, 3, 4)) = sum(sum(sum(1, 2), 3), 4)\nHere we have a list of functions, not values, so we use Reduce to run a function that simply executes its second argument on its first:\n\nanswer <- Reduce(function(f1,f2) f2(f1), x = funs, init = 0)\n## take reciprocal to get the Golden Ratio:\n1/answer\n\n[1] 1.618034\n\n\nWe start with the value of 0, because as we said the approximation of the continuous fraction simply replaces all the the “parts” after \\(k\\) with 0. So our function runs the first function on 0, the second function on that result, the third function on that result, etc. The result is the whole approximation of a continuous fraction, “built” from the inside out."
+  },
+  {
+    "objectID": "posts/2014-11-27-continuous-fraction-functional-programming/index.html#combine-into-a-function",
+    "href": "posts/2014-11-27-continuous-fraction-functional-programming/index.html#combine-into-a-function",
+    "title": "Continuous fractions with Map and Reduce",
+    "section": "combine into a function",
+    "text": "combine into a function\nSo now we combine this to form a single function that calculates the value of a continuous series for \\(k\\) terms:\n\ncontinuous_frac <- function(Ns, Ds, frac_fun = frac_maker){\n  Ns <- rev(Ns)\n  Ds <- rev(Ds)\n  funs <- Map(frac_fun, Ns, Ds)\n  Reduce(function(f1,f2) f2(f1), x = funs, init = 0)\n  }\n\nNote that we have to reverse the series Ns and Ds, simply because the series are usually defined from \\(n_1\\) to \\(n_k\\), but we are building our function from \\(n_k\\) backwards."
+  },
+  {
+    "objectID": "posts/2014-11-27-continuous-fraction-functional-programming/index.html#calculating-numbers",
+    "href": "posts/2014-11-27-continuous-fraction-functional-programming/index.html#calculating-numbers",
+    "title": "Continuous fractions with Map and Reduce",
+    "section": "calculating numbers",
+    "text": "calculating numbers\nWith this function in hand, we can approximate any continued fraction. Here are a few examples:\n\nThe value of \\(e\\) (for biological content)\nAre you wondering what all this has to do with biology? Well, Euler’s number certainly appears in plenty of biological models, so let’s calculate it:\n\ndenominator <- function(k){\n  nums <- lapply(seq_len(k)*2, function(x) c(1, 1, x))\n  out <- do.call(c, nums)\n  out[-1]\n}\n\n2 + continuous_frac(Ds = denominator(20), Ns = rep(1, 3 * 20 -1))\n\n[1] 2.718282"
+  },
+  {
+    "objectID": "posts/2014-11-27-continuous-fraction-functional-programming/index.html#calculating-pi",
+    "href": "posts/2014-11-27-continuous-fraction-functional-programming/index.html#calculating-pi",
+    "title": "Continuous fractions with Map and Reduce",
+    "section": "calculating pi",
+    "text": "calculating pi\nThere are several ways to calculate \\(\\pi\\), based on different forms of this equation. Apparently they converge at different rates. here are some examples:\n\nleibniz <- function(k){\n  seqs <- seq(from = 1, by = 2, length.out = k -1)\n  N <- c(4, seqs ^ 2)\n  D <- c(1, rep(2, k-1))\n  continuous_frac(N, D)\n}\n\nsomayaji <- function(k){\n  N <- seq(from = 1, by = 2, length.out = k) ^ 2\n  D <- rep(6, k)\n  3 + continuous_frac(N, D)\n}\n\nlinear <- function(k){\n  N <- seq(from = 1, by = 1, length.out = k -1) ^ 2\n  N <- c(4, N)\n  D <- seq(from = 1, by = 2, length.out = k)\n  continuous_frac(N, D)\n}\n\nlibrary(dplyr)\n\nWarning: package 'dplyr' was built under R version 4.1.3\n\nlibrary(tidyr)\n\nWarning: package 'tidyr' was built under R version 4.1.3\n\nlibrary(ggplot2)\n\nWarning: package 'ggplot2' was built under R version 4.1.3\n\ndata.frame(ks = seq(2, 100, by = 5)) %>%\n  rowwise %>%\n  mutate(leibniz = leibniz(ks),\n         somayaji = somayaji(ks),\n         linear = linear(ks)) %>%\n  gather(method, pi_value, -ks) %>%\n  ggplot(aes(x = ks, y = pi_value, colour = method)) + geom_point() + geom_path() + theme_bw()\n\n\n\n\nIf we zoom in we can see that the third form outperforms Somayaji’s:\n\ndata.frame(ks = seq(5, 10, by = 1)) %>%\n  rowwise %>%\n  mutate(somayaji = somayaji(ks),\n         linear = linear(ks)) %>%\n  gather(method, pi_value, -ks) %>%\n  ggplot(aes(x = ks, y = pi_value, colour = method)) + geom_point() + geom_path() + xlab(\"k\") + ylab(expression(pi)) + theme_bw()"
+  },
+  {
+    "objectID": "posts/2016-12-07-population-growth-functional-programming/index.html",
+    "href": "posts/2016-12-07-population-growth-functional-programming/index.html",
+    "title": "Population growth with functional programming",
+    "section": "",
+    "text": "Today I want to tell you about an approach for functional programming in R – and then apply it to studying population growth!\nI have been studying some of the purrr functions lately. They are a useful family of functions for performing two common tasks in R: manipulating lists and altering the behaviour of functions. If you’d like a high-quality guide to this group of functions, set aside some time to work through Jenny Bryan’s excellent tutorial and Hadley Wickham’s chapter on Lists.\nI was inspired to write this post after reading This StackOverflow question by jebyrnes. He asks:\nand there is! An answerer mentioned purr::accumulate(). In this post I’m going to expand on the approach they suggest. accumulate, and its twin reduce, are examples of functionals – functions that take functions as their arguments, and manipulate their behaviour in some way. purrr::accumulate is a wrapper around to Reduce from the base package, with the argument accumulate = TRUE.\naccumulate is normally used when you want to do some cumulative function all along a vector. For example, we can reproduce the cumulative some of a vector like this (same output as cumsum(1:10))\n.x and .y here are just a handy way of writing “the first thing” and “the second thing”. Then accumulate goes down the vector 1:10, and takes the first thing (1) adds it to the second thing (2) and so on….\nHowever, this is not the only way it works! accumulate can take an initial value (.init) and can work on a dummy variable. If its starting function does nothing but modify an element, it will just keep modifying it: so instead of f(1, 2), f(f(1, 2), 3) we get f(.init), f(f(.init)) etc:\nClearly, the 0s are not involved in any calculation (the answer would be 0!). instead, you just get the starting value multiplied by 1.5 each time!\nThis already suggests an awesome biological interpretation: logistic population growth.\nOn thing I like about this is that is is to much easier to look at – it look like the common biological equation for population growth:\n\\[\nN_{t+1} = r*N_t\n\\]"
+  },
+  {
+    "objectID": "posts/2016-12-07-population-growth-functional-programming/index.html#so-is-this-useful",
+    "href": "posts/2016-12-07-population-growth-functional-programming/index.html#so-is-this-useful",
+    "title": "Population growth with functional programming",
+    "section": "So, is this useful?",
+    "text": "So, is this useful?\nI wonder if this might be an interesting pedagogical tool. I feel like it might place the emphasis a bit differently to for-loops. Perhaps a for loop emphasizes the passage of time – how, at each time step (each i for example) certain things happen in a certain order (the Resource grows, the Predator kills some, then some predators die, etc). On the other hand, I feel like the functional programming approach emphasizes how a population (or pair of populations) is transformed. Each little function has some parameters – which are either, constant, varying, and/or influenced by something besides population size – and each little function does only one thing – transform the population between one time step and the next."
+  },
+  {
+    "objectID": "posts/2022-10-14-growth_curve_measurement_error/index.html",
+    "href": "posts/2022-10-14-growth_curve_measurement_error/index.html",
+    "title": "Growth curves",
+    "section": "",
+    "text": "library(targets)\nlibrary(ggplot2)\nlibrary(tidyverse)\nlibrary(tidybayes)\nMany animals and plants grow quickly when small and more slowly as they mature. There are many popular ways of describing this relationship; one very common and convenient relationship is the Von-Bertanalaffy (VB) growth curve:\n\\[\nL_t = L_0e^{-rt} + L_\\infty(1 - e^{-rt})\n\\tag{1}\\]\nThis can also be written as\n\\[\nL_t = L_\\infty - (L_\\infty - L_0)e^{-rt}\n\\]\nThis curve has a long tradition in ecology. It can be derived from simple assumptions about how different aspects of metabolism scale with the body size of an organism. I’m not going to derive it here because I don’t want this to be a huge post!\nI like this second way of writing the equation because it highlights that the VB equation is a linear transformation of an exponential function."
+  },
+  {
+    "objectID": "posts/2022-10-14-growth_curve_measurement_error/index.html#a-single-tree",
+    "href": "posts/2022-10-14-growth_curve_measurement_error/index.html#a-single-tree",
+    "title": "Growth curves",
+    "section": "a single tree",
+    "text": "a single tree\nI’m going to do a simple simulation of one tree growing. here is code that does that\n\n\nfunction (time = seq(from = 10, to = 200, by = 5), Lo = 0.01, \n    Lmax = 150, r = 0.03, sd = 5) \n{\n    tibble::tibble(time, Lt = Lmax - (Lmax - Lo) * exp(-r * time), \n        Lt_obs = rnorm(length(Lt), mean = Lt, sd = 5))\n}\n\n\n\ntar_load(vb_one_tree)\n\nvb_one_tree |> \n  ggplot(aes(x = time, y = Lt_obs)) + \n  geom_point() + \n  geom_line(aes(y = Lt)) + \n  theme_bw()\n\n\n\n\nFigure 1: One tree’s growth\n\n\n\n\nsimulate this same data in targets\nfit a stan model to it! here is the Stan model: formatted?\n\n\ndata{\n  int<lower=0> n;\n  vector[n] time;\n  vector[n] Lt;\n}\nparameters{\n  real<lower=0> r;\n  real<lower=0> Lmax;\n  real<lower=0> sigma_obs;\n}\nmodel{\n  Lt ~ normal(Lmax * (1 - exp(-r*time)), sigma_obs);\n  r ~ lognormal(-3, 1);\n  Lmax ~ normal(200, 20);\n  sigma_obs ~ exponential(1);\n}\n\n\n\nvb_one_tree <- cmdstan_model(here::here(\"posts\", \"2022-10-14-growth_curve_measurement_error\",\"vb_one_tree.stan\"))\n\none_tree_sim <- sim_vb_one_tree()\n\none_tree_list <- list(n = nrow(one_tree_sim),\n                      time  = one_tree_sim$time, \n                      Lt = one_tree_sim$Lt_obs)\n\none_tree_post <- vb_one_tree$sample(data = one_tree_list,\n                                    refresh = 0L,\n                                    parallel_chains = 4)\n\nRunning MCMC with 4 parallel chains...\n\nChain 1 finished in 0.2 seconds.\nChain 2 finished in 0.2 seconds.\nChain 3 finished in 0.2 seconds.\nChain 4 finished in 0.2 seconds.\n\nAll 4 chains finished successfully.\nMean chain execution time: 0.2 seconds.\nTotal execution time: 0.5 seconds.\n\none_tree_post\n\n  variable   mean median   sd  mad     q5    q95 rhat ess_bulk ess_tail\n lp__      -80.22 -79.88 1.29 1.01 -82.76 -78.86 1.00     1675     2121\n r           0.03   0.03 0.00 0.00   0.03   0.03 1.00     2087     2131\n Lmax      149.26 149.24 1.08 1.06 147.52 151.08 1.00     2095     2141\n sigma_obs   4.34   4.31 0.48 0.48   3.63   5.19 1.00     2527     2578\n\n\nplot it\n\nlibrary(tidybayes)\n\nexpected_df <- one_tree_post |> \n  spread_rvars(Lmax, r) |> \n  expand_grid(time = seq(0, 200, length.out = 14)) |> \n  mutate(Lt = Lmax * (1 - exp(-r * time)))\n\nexpected_plot <- expected_df |> \n  ggplot(aes(x = time, y = Lt)) + \n  stat_lineribbon()\nexpected_plot\n\n\n\n\nGrowth curve for one tree. the line shows the expected value, with posterior uncertainty around exactly what that average should be.\n\n\n\n\nThis relationship shows the average line, the expected size of the tree. We can add the original data like this:\n\none_tree_sim |> \n  ggplot(aes(x = time, y = Lt_obs)) + \n  geom_point() +\n  stat_dist_lineribbon(aes(x = time, dist = Lt),\n                  data = expected_df, inherit.aes = FALSE)\n\n\n\n\nAt the time of this writing the error messages here are particularly unhelpful. If you try to use stat_lineribbon rather than stat_dist_lineribbon you get the foloing misleading message:\n\none_tree_sim |> \n  ggplot(aes(x = time, y = Lt_obs)) + \n  geom_point() +\n  stat_lineribbon(aes(x = time, y = Lt),\n                  data = expected_df, inherit.aes = FALSE)"
+  },
+  {
+    "objectID": "posts/2022-10-23-probability-integral-transform/index.html",
+    "href": "posts/2022-10-23-probability-integral-transform/index.html",
+    "title": "Probability integral transforms",
+    "section": "",
+    "text": "take random numbers from a distribution\nThen run them through that distribution’s CDF\nsure enough it is uniform!"
+  },
+  {
+    "objectID": "posts/2022-10-23-probability-integral-transform/index.html#what-happens-when-you-are-wrong",
+    "href": "posts/2022-10-23-probability-integral-transform/index.html#what-happens-when-you-are-wrong",
+    "title": "Probability integral transforms",
+    "section": "what happens when you are wrong",
+    "text": "what happens when you are wrong\nlet’s make some curves that don’t really match\n\nlibrary(tidyverse)\n\n── Attaching packages ─────────────────────────────────────── tidyverse 1.3.1 ──\n\n\n✔ ggplot2 3.3.6          ✔ purrr   0.3.4.9000\n✔ tibble  3.1.7          ✔ dplyr   1.0.8     \n✔ tidyr   1.1.3          ✔ stringr 1.4.0     \n✔ readr   2.1.1          ✔ forcats 0.5.1     \n\n\nWarning: package 'ggplot2' was built under R version 4.1.2\n\n\nWarning: package 'tibble' was built under R version 4.1.2\n\n\nWarning: package 'dplyr' was built under R version 4.1.2\n\n\n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\n\nn <- 4000\ntibble(meanval = seq(from = 1, to = 14, length.out = 6),\n       sd = 2.5) |> \n  expand_grid(x = seq(from = 0, to = 18, length.out = 30)) |>\n  mutate(normal_dist = dnorm(x, mean = meanval, sd = sd),\n         gamma_dist = dgamma(x, \n                        shape = meanval^2/sd^2,\n                        rate = meanval/sd^2)) |> \n  pivot_longer(ends_with(\"dist\"), \n               names_to = \"distribution\",\n               values_to = \"value\") |> \n  ggplot(aes(x = x, y = value, colour = distribution)) + \n  geom_line()  +\n  facet_wrap(~meanval)\n\n\n\n\nWe can see that the fit gets worse as the mean drops\nlet’s simulate data from the gamma and use the PIT assuming instead it is normal:\n\nn <- 4000\ntibble(meanval = seq(from = 1, to = 14, length.out = 6),\n       sd = 2.5) |> \n  rowwise() |>\n  mutate(normal_dist = list(rnorm(n, mean = meanval, sd = sd)),\n         gamma_dist = list(rgamma(n, \n                        shape = meanval^2/sd^2,\n                        rate = meanval/sd^2))) |> \n  pivot_longer(ends_with(\"dist\"), \n               names_to = \"distribution\",\n               values_to = \"samples\") |> \n  rowwise() |> \n  mutate(pit_samples = list(pnorm(samples, mean = meanval, sd = sd))) |> \n  select(-samples) |> \n  # filter(distribution == \"gamma_dist\") |> \n  unnest(pit_samples) |> \n  ggplot(aes(x = pit_samples)) + \n  geom_histogram() + \n  facet_grid(distribution~meanval)\n\n`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.\n\n\n\n\n\nlet’s try it with just the gamma, but changing both moments and always using the normal:\n\nn <- 4000\nexpand_grid(meanval = seq(from = 1, to = 14, length.out = 6),\n       sdval = seq(from = .2, to = 7, length.out = 4)) |> \n  rowwise() |>\n  mutate(gamma_dist = list(rgamma(n, \n                        shape = meanval^2/sdval^2,\n                        rate = meanval/sdval^2))) |> \n  rowwise() |> \n  mutate(pit_samples = list(\n    pnorm(gamma_dist,\n          mean = meanval,\n          sd = sdval))) |> \n  select(-gamma_dist) |> \n  # filter(distribution == \"gamma_dist\") |> \n  unnest(pit_samples) |> \n  ggplot(aes(x = pit_samples)) + \n  geom_histogram() + \n  facet_grid(sdval~meanval)\n\n`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.\n\n\n\n\n\nand with the lognormal\n\nn <- 4000\nexpand_grid(meanval = seq(from = 1, \n                          to = 14, \n                          length.out = 6),\n       sdval = seq(from = .2, \n                   to = 7, \n                   length.out = 4)) |> \n  rowwise() |>\n  mutate(\n    cf = log(sdval/meanval)^2 + 1,\n    lnorm_dist = list(rlnorm(n, \n                        meanlog = log(meanval) - .5*cf, \n                        sdlog = sqrt(cf))\n                      )\n    )|> \n  rowwise() |> \n  mutate(pit_samples = list(\n    pnorm(lnorm_dist,\n          mean = meanval,\n          sd = sdval)\n    # plnorm(lnorm_dist, \n    #        meanlog = log(meanval) - .5*cf, \n    #        sdlog = sqrt(cf))\n    )) |> \n  select(-lnorm_dist) |> \n  # filter(distribution == \"gamma_dist\") |> \n  unnest(pit_samples) |> \n  ggplot(aes(x = pit_samples)) + \n  geom_histogram() + \n  facet_grid(sdval~meanval)\n\n`stat_bin()` using `bins = 30`. Pick better value with `binwidth`."
+  },
+  {
+    "objectID": "posts/2022-11-11-multispecies-functional-response/index.html",
+    "href": "posts/2022-11-11-multispecies-functional-response/index.html",
+    "title": "Fitting a multispecies functional response in Stan",
+    "section": "",
+    "text": "library(targets)\nlibrary(ggplot2)\nlibrary(tidyverse)\nlibrary(tidybayes)"
+  },
+  {
+    "objectID": "posts/2022-11-11-multispecies-functional-response/index.html#the-equation",
+    "href": "posts/2022-11-11-multispecies-functional-response/index.html#the-equation",
+    "title": "Fitting a multispecies functional response in Stan",
+    "section": "The equation",
+    "text": "The equation\nPredators eat prey. They eat prey faster when there is more prey – though they do have to slow down to catch, kill, and chew.1\nIf a predator can eat multiple things, then they might end up eating less of any one prey because they spread their kills around among all their prey. In the very simplest case, they do this in proportion to how frequent the different prey are – the predator has no preference, it just goes around randomly and eats what it finds\nThe classic OG version of this model comes from Holling (1966)\n\\[\nA = \\frac{\\alpha N}{1 + h\\alpha N}\n\\tag{1}\\]\nwhere\n\nN is the number of prey\n\\(\\alpha\\) is the attack rate\n\\(h\\) is the handling time\n\nAnd altogether you get the number of attacks \\(A\\) on prey in some unit of time."
+  },
+  {
+    "objectID": "posts/2022-11-11-multispecies-functional-response/index.html#multiple-species",
+    "href": "posts/2022-11-11-multispecies-functional-response/index.html#multiple-species",
+    "title": "Fitting a multispecies functional response in Stan",
+    "section": "multiple species",
+    "text": "multiple species\nSuppose you have more than one species in this system. You could then rewrite Equation 1 to allow multiple animals to be included in the predation:\n\\[\nA_i = \\frac{\\alpha N_i}{1 + h\\alpha \\sum_{j = 1}^s N_j}\n\\tag{2}\\]\nhere \\(\\sum_{j = 1}^s N_j\\) means the sum over the abundances of all the prey. The subscript \\(i\\) just means that we are talking about one particular prey, which we label \\(i\\). This prey is included in the summation in the denominator.\nIt’s common to consider that different prey species might be attacked or handled at different rates (Smith and Smith 2020) (Smout et al. 2010)"
+  },
+  {
+    "objectID": "posts/2022-11-21-growth-curve-known-age/index.html",
+    "href": "posts/2022-11-21-growth-curve-known-age/index.html",
+    "title": "Simple nonlinear growth",
+    "section": "",
+    "text": "library(targets)\nlibrary(ggplot2)\nlibrary(tidyverse)\nlibrary(tidybayes)"
+  },
+  {
+    "objectID": "posts/2022-11-21-growth-curve-known-age/index.html#growth-when-you-know-the-age",
+    "href": "posts/2022-11-21-growth-curve-known-age/index.html#growth-when-you-know-the-age",
+    "title": "Simple nonlinear growth",
+    "section": "Growth when you know the age",
+    "text": "Growth when you know the age\nWe’re doing a lot of work with growth equations these days! This is how to use brms to fit the growth of an animal when we know:\n\nthe birth year\nsize at each year (measured as the length of a leg)\ntime\n\nWe’ll start with the classic VB growth equation that has been in several other posts:\n\\[\nL_t = L_0e^{-rt} + L_\\infty(1 - e^{-rt})\n\\tag{1}\\]\n\nsimulate_one_growth_known_age <- function(age, r, Lmax, size_at_first, sd_obs){\n  tibble(age = 0:age,\n         size = size_at_first * exp(-r * age) + Lmax * (1 - exp(-r * age)),\n         obs_size = rnorm(n = length(age), mean = size, sd = sd_obs))\n}\n\n\none_animal <- simulate_one_growth_known_age(9, Lmax = 550, size_at_first = 277, r = .7, sd_obs = 40)\n\none_animal |> \n  ggplot(aes(x = age, y = size)) + geom_point()\n\n\n\n\n\nsuppressPackageStartupMessages(library(brms))\n\nWarning: package 'Rcpp' was built under R version 4.1.3\n\nvb_form <- bf(obs_size ~ startsize * exp(-growthrate * age) + maxsize * (1 - exp(-growthrate * age)),\n              startsize ~ 1, \n              growthrate ~ 1,\n              maxsize ~ 1,\n              nl = TRUE,\n              family = gaussian())\n\nget_prior(vb_form, data = one_animal)\n\n                 prior class      coef group resp dpar      nlpar bound\n student_t(3, 0, 49.4) sigma                                           \n                (flat)     b                           growthrate      \n                (flat)     b Intercept                 growthrate      \n                (flat)     b                              maxsize      \n                (flat)     b Intercept                    maxsize      \n                (flat)     b                            startsize      \n                (flat)     b Intercept                  startsize      \n       source\n      default\n      default\n (vectorized)\n      default\n (vectorized)\n      default\n (vectorized)\n\nvb_prior <- c(\n  prior(exponential(1), class = \"sigma\"),\n  prior(normal(0,1), nlpar = \"growthrate\", lb = 0),\n  prior(normal(550, 20), nlpar = \"maxsize\", lb = 0),\n  prior(normal(200, 50), nlpar = \"startsize\", lb = 0)\n)\n\nvb_model <- brm(formula = vb_form,\n                prior = vb_prior, \n                data = one_animal, \n                chains = 2)\n\nCompiling Stan program...\n\n\nStart sampling\n\n\n\nSAMPLING FOR MODEL 'bee674c7cf29f0c7ea8ea16013fea1d0' NOW (CHAIN 1).\nChain 1: \nChain 1: Gradient evaluation took 0 seconds\nChain 1: 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.\nChain 1: Adjust your expectations accordingly!\nChain 1: \nChain 1: \nChain 1: Iteration:    1 / 2000 [  0%]  (Warmup)\nChain 1: Iteration:  200 / 2000 [ 10%]  (Warmup)\nChain 1: Iteration:  400 / 2000 [ 20%]  (Warmup)\nChain 1: Iteration:  600 / 2000 [ 30%]  (Warmup)\nChain 1: Iteration:  800 / 2000 [ 40%]  (Warmup)\nChain 1: Iteration: 1000 / 2000 [ 50%]  (Warmup)\nChain 1: Iteration: 1001 / 2000 [ 50%]  (Sampling)\nChain 1: Iteration: 1200 / 2000 [ 60%]  (Sampling)\nChain 1: Iteration: 1400 / 2000 [ 70%]  (Sampling)\nChain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)\nChain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)\nChain 1: Iteration: 2000 / 2000 [100%]  (Sampling)\nChain 1: \nChain 1:  Elapsed Time: 0.155 seconds (Warm-up)\nChain 1:                0.09 seconds (Sampling)\nChain 1:                0.245 seconds (Total)\nChain 1: \n\nSAMPLING FOR MODEL 'bee674c7cf29f0c7ea8ea16013fea1d0' NOW (CHAIN 2).\nChain 2: \nChain 2: Gradient evaluation took 0 seconds\nChain 2: 1000 transitions using 10 leapfrog steps per transition would take 0 seconds.\nChain 2: Adjust your expectations accordingly!\nChain 2: \nChain 2: \nChain 2: Iteration:    1 / 2000 [  0%]  (Warmup)\nChain 2: Iteration:  200 / 2000 [ 10%]  (Warmup)\nChain 2: Iteration:  400 / 2000 [ 20%]  (Warmup)\nChain 2: Iteration:  600 / 2000 [ 30%]  (Warmup)\nChain 2: Iteration:  800 / 2000 [ 40%]  (Warmup)\nChain 2: Iteration: 1000 / 2000 [ 50%]  (Warmup)\nChain 2: Iteration: 1001 / 2000 [ 50%]  (Sampling)\nChain 2: Iteration: 1200 / 2000 [ 60%]  (Sampling)\nChain 2: Iteration: 1400 / 2000 [ 70%]  (Sampling)\nChain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)\nChain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)\nChain 2: Iteration: 2000 / 2000 [100%]  (Sampling)\nChain 2: \nChain 2:  Elapsed Time: 0.125 seconds (Warm-up)\nChain 2:                0.111 seconds (Sampling)\nChain 2:                0.236 seconds (Total)\nChain 2: \n\n\n\none_animal |> \n  tidybayes::add_predicted_rvars(vb_model) |> \n  ggplot(aes(x = age, dist = .prediction)) + \n  stat_dist_lineribbon() + \n  geom_point(aes(x = age, y = obs_size), inherit.aes = FALSE) \n\n\n\n\n\nsummary(vb_model)\n\n Family: gaussian \n  Links: mu = identity; sigma = identity \nFormula: obs_size ~ startsize * exp(-growthrate * age) + maxsize * (1 - exp(-growthrate * age)) \n         startsize ~ 1\n         growthrate ~ 1\n         maxsize ~ 1\n   Data: one_animal (Number of observations: 10) \n  Draws: 2 chains, each with iter = 2000; warmup = 1000; thin = 1;\n         total post-warmup draws = 2000\n\nPopulation-Level Effects: \n                     Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS\nstartsize_Intercept    275.32     13.44   249.21   301.24 1.00     1415\ngrowthrate_Intercept     0.59      0.06     0.48     0.72 1.00     1080\nmaxsize_Intercept      570.02      7.11   555.58   584.38 1.00     1093\n                     Tail_ESS\nstartsize_Intercept      1233\ngrowthrate_Intercept     1109\nmaxsize_Intercept        1189\n\nFamily Specific Parameters: \n      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS\nsigma    14.31      1.96    10.91    18.63 1.00     1350     1302\n\nDraws were sampled using sampling(NUTS). For each parameter, Bulk_ESS\nand Tail_ESS are effective sample size measures, and Rhat is the potential\nscale reduction factor on split chains (at convergence, Rhat = 1)."
+  },
+  {
+    "objectID": "posts/9999-template/index.html",
+    "href": "posts/9999-template/index.html",
+    "title": "Andrew tries Quarto",
+    "section": "",
+    "text": "library(targets)\nlibrary(ggplot2)\nlibrary(tidyverse)\nlibrary(tidybayes)"
+  },
+  {
+    "objectID": "posts/9999-template/index.html#what-is-this-post",
+    "href": "posts/9999-template/index.html#what-is-this-post",
+    "title": "Andrew tries Quarto",
+    "section": "What is this post",
+    "text": "What is this post\nThis post is meant to be a simple template for new posts – when I make a new post I’ll start by copying and pasting this current one over. Probably in the future there will be a plugin that does this for us, but until then this will be fine."
+  },
+  {
+    "objectID": "posts/9999-template/index.html#why-i-switched-to-quarto",
+    "href": "posts/9999-template/index.html#why-i-switched-to-quarto",
+    "title": "Andrew tries Quarto",
+    "section": "Why I switched to Quarto",
+    "text": "Why I switched to Quarto\nA simple and frequent answer: overenthusiasm! I like seeing all the new things that the Rstudio team develop, and I know that this vibrant community will keep adding features and tutorials"
+  },
+  {
+    "objectID": "posts/9999-template/index.html#quarto-resources",
+    "href": "posts/9999-template/index.html#quarto-resources",
+    "title": "Andrew tries Quarto",
+    "section": "quarto resources",
+    "text": "quarto resources\n\nthe Ultimate Guide to starting a Quarto blog\nquarto discussions\nDanielle Navarro’s comments on the topic\nNick Tierney’s notes\nand of course Nicks exciting book project!"
+  },
+  {
+    "objectID": "posts/9999-template/index.html#surprise-its-targets",
+    "href": "posts/9999-template/index.html#surprise-its-targets",
+    "title": "Andrew tries Quarto",
+    "section": "surprise it’s targets",
+    "text": "surprise it’s targets\n\n\n\nvia GIPHY\n\nI’m also using targets. Here are some observations on that so far:\n\nLast error: ! System command 'quarto' failed I get this error message more that 10x more often than any other. As I’m learning Quarto I keep making errors which break the Quarto process but targets doesn’t (yet?) communicate the specific error message. To find out what has gone wrong, I go over to the terminal and run quarto render .\nyou have to go into _metadata.yml and stop the posts from freezing, by setting freeze: false . Targets will handle all the rest of it.\n\nI’m using targets with quarto because I want to work with large bayesian models fit with stan and brms., and fitting them in a regular blog post – including compiling, sampling etc."
+  },
+  {
+    "objectID": "posts/9999-template/index.html#my-own-observations-and-questions",
+    "href": "posts/9999-template/index.html#my-own-observations-and-questions",
+    "title": "Andrew tries Quarto",
+    "section": "My own observations and questions",
+    "text": "My own observations and questions\nso far it is very straightforward!\n\n~it seems like post folder cant begin with dates?~ you can start a folder with a date, and I do, so that the posts sort in at least approximately the right temporal sequence. However the date for a post comes from the YAML, not the folder name.\nlove LOVE the bibliography automatically appearing"
+  },
+  {
+    "objectID": "posts/Untitled/index.html",
+    "href": "posts/Untitled/index.html",
+    "title": "Twitter recommends stats books",
+    "section": "",
+    "text": "Yesterday I asked my beloved Twitter nerds to recommend to me their favourite quantitative texts in Ecology:\nAs a way of saying “Thank you!” I thought that I would put all the books in a list for anyone who is curious."
+  },
+  {
+    "objectID": "posts/Untitled/index.html#what-is-this-post",
+    "href": "posts/Untitled/index.html#what-is-this-post",
+    "title": "Twitter recommends stats books",
+    "section": "What is this post",
+    "text": "What is this post\nThis post is meant to be a simple template for new posts – when I make a new post I’ll start by copying and pasting this current one over. Probably in the future there will be a plugin that does this for us, but until then this will be fine."
+  },
+  {
+    "objectID": "posts/Untitled/index.html#why-i-switched-to-quarto",
+    "href": "posts/Untitled/index.html#why-i-switched-to-quarto",
+    "title": "Twitter recommends stats books",
+    "section": "Why I switched to Quarto",
+    "text": "Why I switched to Quarto\nA simple and frequent answer: overenthusiasm! I like seeing all the new things that the Rstudio team develop, and I know that this vibrant community will keep adding features and tutorials"
+  },
+  {
+    "objectID": "posts/Untitled/index.html#quarto-resources",
+    "href": "posts/Untitled/index.html#quarto-resources",
+    "title": "Twitter recommends stats books",
+    "section": "quarto resources",
+    "text": "quarto resources\n\nthe Ultimate Guide to starting a Quarto blog\nquarto discussions\nDanielle Navarro’s comments on the topic\nNick Tierney’s notes\nand of course Nicks exciting book project!"
+  },
+  {
+    "objectID": "posts/Untitled/index.html#surprise-its-targets",
+    "href": "posts/Untitled/index.html#surprise-its-targets",
+    "title": "Twitter recommends stats books",
+    "section": "surprise it’s targets",
+    "text": "surprise it’s targets\n\n\n\nvia GIPHY\n\nI’m also using targets. Here are some observations on that so far:\n\nLast error: ! System command 'quarto' failed I get this error message more that 10x more often than any other. As I’m learning Quarto I keep making errors which break the Quarto process but targets doesn’t (yet?) communicate the specific error message. To find out what has gone wrong, I go over to the terminal and run quarto render .\nyou have to go into _metadata.yml and stop the posts from freezing, by setting freeze: false . Targets will handle all the rest of it.\n\nI’m using targets with quarto because I want to work with large bayesian models fit with stan and brms., and fitting them in a regular blog post – including compiling, sampling etc."
+  },
+  {
+    "objectID": "posts/Untitled/index.html#my-own-observations-and-questions",
+    "href": "posts/Untitled/index.html#my-own-observations-and-questions",
+    "title": "Twitter recommends stats books",
+    "section": "My own observations and questions",
+    "text": "My own observations and questions\nso far it is very straightforward!\n\nit seems like post folder can’t begin with dates?\nlove LOVE the bibliography automatically appearing"
+  }
+]
