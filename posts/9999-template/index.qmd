@@ -55,6 +55,6 @@ I'm using `targets` with quarto because I want to work with large bayesian model
 
 so far it is very straightforward!
 
--   ~it seems like post folder cant begin with dates?~ you *can* start a folder with a date, and I do, so that the posts sort in at least approximately the right temporal sequence. However the date for a post comes from the YAML, not the folder name. 
+-   \~it seems like post folder cant begin with dates?\~ you *can* start a folder with a date, and I do, so that the posts sort in at least approximately the right temporal sequence. However the date for a post comes from the YAML, not the folder name.
 
 -   love LOVE the bibliography automatically appearing

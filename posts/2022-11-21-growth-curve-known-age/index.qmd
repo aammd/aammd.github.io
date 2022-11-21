@@ -3,7 +3,7 @@ title: "Simple nonlinear growth"
 author: "Andrew MacDonald"
 description: |
   How to model the growth of an individual of known age.
-date: 11 Nov 2022
+date: 21 Nov 2022
 editor: visual
 categories: [UdeS, stan]
 ---
@@ -17,14 +17,13 @@ library(tidybayes)
 
 ## Growth when you know the age
 
-We're doing a lot of work with growth equations these days! 
-This is how to use `brms` to fit the growth of an animal when we know:
+We're doing a lot of work with growth equations these days! This is how to use `brms` to fit the growth of an animal when we know:
 
-* the birth year
+-   the birth year
 
-* size at each year (measured as the length of a leg)
+-   size at each year (measured as the length of a leg)
 
-* time
+-   time
 
 We'll start with the classic VB growth equation that has been in several other posts:
 
@@ -84,4 +83,3 @@ one_animal |>
 ```{r}
 summary(vb_model)
 ```
-
