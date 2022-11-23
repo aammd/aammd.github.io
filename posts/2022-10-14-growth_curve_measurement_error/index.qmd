@@ -27,7 +27,7 @@ $$
 
 This curve has a long tradition in ecology. It can be derived from simple assumptions about how different aspects of metabolism scale with the body size of an organism. I'm not going to derive it here because I don't want this to be a huge post!
 
-I like this second way of writing the equation because it highlights that the VB equation is a linear transformation of an exponential function.
+I like this second way of writing the equation because it highlights that the VB equation is a linear transformation of an exponential function. We start out at $L_0$ and exponentially decay towards $L_\infty$.
 
 ## a single tree
 
@@ -36,14 +36,9 @@ I'm going to do a simple simulation of one tree growing. here is code that does 
 ```{r}
 #| echo: FALSE
 #| class-output: .r
-source(here::here("R", "vb-growth.R"))
-sim_vb_one_tree
 ```
 
-```{r error=TRUE}
-#| label: fig-vb
-#| fig-cap: "One tree's growth"
-#| 
+```{r }
 tar_load(vb_one_tree)
 
 vb_one_tree |> 
@@ -120,3 +115,7 @@ one_tree_sim |>
   stat_lineribbon(aes(x = time, y = Lt),
                   data = expected_df, inherit.aes = FALSE)
 ```
+
+## adding measurement error
+
+In order to shift the curve left and right to account for aget

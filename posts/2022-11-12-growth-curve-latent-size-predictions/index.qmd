@@ -1,0 +1,18 @@
+---
+title: "Making predictions with measurement error"
+author: "Andrew MacDonald"
+description: |
+  Quick notes on how to make a blog with Quarto add also targets.
+date: 11 Nov 2022
+editor: visual
+categories: [UdeS, stan]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+## 

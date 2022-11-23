@@ -277,7 +277,7 @@ L_t = L_0e^{-rt} + L_\infty(1 - e^{-rt})
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a><span class="fu">get_prior</span>(vb_form, <span class="at">data =</span> one_animal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                 prior class      coef group resp dpar      nlpar bound
- student_t(3, 0, 49.4) sigma                                           
+ student_t(3, 0, 67.4) sigma                                           
                 (flat)     b                           growthrate      
                 (flat)     b Intercept                 growthrate      
                 (flat)     b                              maxsize      
@@ -332,9 +332,9 @@ Chain 1: Iteration: 1600 / 2000 [ 80%]  (Sampling)
 Chain 1: Iteration: 1800 / 2000 [ 90%]  (Sampling)
 Chain 1: Iteration: 2000 / 2000 [100%]  (Sampling)
 Chain 1: 
-Chain 1:  Elapsed Time: 0.155 seconds (Warm-up)
-Chain 1:                0.09 seconds (Sampling)
-Chain 1:                0.245 seconds (Total)
+Chain 1:  Elapsed Time: 0.103 seconds (Warm-up)
+Chain 1:                0.089 seconds (Sampling)
+Chain 1:                0.192 seconds (Total)
 Chain 1: 
 
 SAMPLING FOR MODEL 'bee674c7cf29f0c7ea8ea16013fea1d0' NOW (CHAIN 2).
@@ -357,9 +357,9 @@ Chain 2: Iteration: 1600 / 2000 [ 80%]  (Sampling)
 Chain 2: Iteration: 1800 / 2000 [ 90%]  (Sampling)
 Chain 2: Iteration: 2000 / 2000 [100%]  (Sampling)
 Chain 2: 
-Chain 2:  Elapsed Time: 0.125 seconds (Warm-up)
-Chain 2:                0.111 seconds (Sampling)
-Chain 2:                0.236 seconds (Total)
+Chain 2:  Elapsed Time: 0.161 seconds (Warm-up)
+Chain 2:                0.105 seconds (Sampling)
+Chain 2:                0.266 seconds (Total)
 Chain 2: </code></pre>
 </div>
 </div>
@@ -388,17 +388,17 @@ Formula: obs_size ~ startsize * exp(-growthrate * age) + maxsize * (1 - exp(-gro
 
 Population-Level Effects: 
                      Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS
-startsize_Intercept    275.32     13.44   249.21   301.24 1.00     1415
-growthrate_Intercept     0.59      0.06     0.48     0.72 1.00     1080
-maxsize_Intercept      570.02      7.11   555.58   584.38 1.00     1093
+startsize_Intercept    300.54     23.53   254.58   346.63 1.00     1527
+growthrate_Intercept     0.64      0.15     0.40     0.97 1.00     1308
+maxsize_Intercept      563.03     11.77   541.22   586.60 1.00     1528
                      Tail_ESS
-startsize_Intercept      1233
-growthrate_Intercept     1109
-maxsize_Intercept        1189
+startsize_Intercept      1301
+growthrate_Intercept     1233
+maxsize_Intercept        1142
 
 Family Specific Parameters: 
       Estimate Est.Error l-95% CI u-95% CI Rhat Bulk_ESS Tail_ESS
-sigma    14.31      1.96    10.91    18.63 1.00     1350     1302
+sigma    27.62      2.93    22.53    34.33 1.00     1647     1401
 
 Draws were sampled using sampling(NUTS). For each parameter, Bulk_ESS
 and Tail_ESS are effective sample size measures, and Rhat is the potential
