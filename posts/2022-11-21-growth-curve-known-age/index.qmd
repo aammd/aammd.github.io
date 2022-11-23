@@ -3,7 +3,7 @@ title: "Simple nonlinear growth"
 author: "Andrew MacDonald"
 description: |
   How to model the growth of an individual of known age.
-date: 11 Nov 2022
+date: 21 Nov 2022
 editor: visual
 categories: [UdeS, stan]
 ---
@@ -13,18 +13,18 @@ library(targets)
 library(ggplot2)
 library(tidyverse)
 library(tidybayes)
+suppressPackageStartupMessages(library(brms))
 ```
 
 ## Growth when you know the age
 
-We're doing a lot of work with growth equations these days! 
-This is how to use `brms` to fit the growth of an animal when we know:
+We're doing a lot of work with growth equations these days! This is how to use `brms` to fit the growth of an animal when we know:
 
-* the birth year
+-   the birth year
 
-* size at each year (measured as the length of a leg)
+-   size at each year (measured as the length of a leg)
 
-* time
+-   time
 
 We'll start with the classic VB growth equation that has been in several other posts:
 
@@ -32,23 +32,60 @@ $$
 L_t = L_0e^{-rt} + L_\infty(1 - e^{-rt})
 $$ {#eq-vb}
 
+The model we use will resemble the others as well:
+
+$$
+\begin{align}
+\text{Measurements} &\sim \text{Normal}(L_t, \sigma_{meas})\\
+L_t &= L_0e^{-rt} + L_\infty(1 - e^{-rt}) \\
+L_0 &\sim ...\\
+L_\infty &\sim ...\\
+r &\sim ...
+\end{align}
+$$
+
+### Simulating data
+
+I'm starting off with a function to simulate data; this will make it easy to repeat experiments with this model.
+
 ```{r}
-simulate_one_growth_known_age <- function(age, r, Lmax, size_at_first, sd_obs){
+simulate_one_growth_known_age <- function(age, r,
+                                          Lmax,
+                                          size_at_first,
+                                          sd_obs){
   tibble(age = 0:age,
          size = size_at_first * exp(-r * age) + Lmax * (1 - exp(-r * age)),
          obs_size = rnorm(n = length(age), mean = size, sd = sd_obs))
 }
 ```
 
-```{r}
-one_animal <- simulate_one_growth_known_age(9, Lmax = 550, size_at_first = 277, r = .7, sd_obs = 40)
+```{r one_animal_plot}
+#| fig-cap: Growth curve for a single individual. The curved line is the true size, and the dots are observations around it. The observations are taken in the field while the semi-tranquilized animal is struggling, so they show some slight variation.
+one_animal <- simulate_one_growth_known_age(9, Lmax = 550, size_at_first = 277, r = .7, sd_obs = 6)
 
 one_animal |> 
-  ggplot(aes(x = age, y = size)) + geom_point()
+  ggplot(aes(x = age, y = obs_size)) + 
+  geom_point() + 
+  theme_bw() + 
+  geom_line(aes(y = size)) + 
+  labs(x = "Age", y = "Size") 
 ```
 
+
+## Nonlinear modelling with BRMS
+
+There are three steps to defining and elementary model with `brms`:
+
+1. write the model
+1. write down some priors
+1. condition the model on data
+
+In practice there are many more steps, including prior predictive checks to make sure our priors make sense. In this post I'm going to focus on the mechanistic how-to of fitting a nonlinear model in `brms` and I'll come back to Prior Predictive checks, which I love, in another post.
+
+First we define the model, here we need to indicate what are parameters by doing a `~1` after each. 
+Yes it is a formula with multiple little formulae inside it! Feel the power flow through you.
+
 ```{r}
-suppressPackageStartupMessages(library(brms))
 
 vb_form <- bf(obs_size ~ startsize * exp(-growthrate * age) + maxsize * (1 - exp(-growthrate * age)),
               startsize ~ 1, 
@@ -69,11 +106,11 @@ vb_prior <- c(
 vb_model <- brm(formula = vb_form,
                 prior = vb_prior, 
                 data = one_animal, 
-                chains = 2)
+                chains = 2, 
+                file = here::here("posts/2022-11-21-growth-curve-known-age/vb_model.rds"))
 ```
 
 ```{r}
-
 one_animal |> 
   tidybayes::add_predicted_rvars(vb_model) |> 
   ggplot(aes(x = age, dist = .prediction)) + 
@@ -84,4 +121,3 @@ one_animal |>
 ```{r}
 summary(vb_model)
 ```
-
