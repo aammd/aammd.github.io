@@ -58,3 +58,8 @@ so far it is very straightforward!
 -   \~it seems like post folder cant begin with dates?\~ you *can* start a folder with a date, and I do, so that the posts sort in at least approximately the right temporal sequence. However the date for a post comes from the YAML, not the folder name.
 
 -   love LOVE the bibliography automatically appearing
+
+-   DO think about changing the working directory for chunk evaluations to the project root, [as described here](https://bookdown.org/yihui/rmarkdown-cookbook/working-directory.html). 
+This is really important because that is the directory that `targets` uses when sourcing files.
+For example `tar_load(my_target_name)` will load in an object from your pipeline. 
+But run this same line from an `.qmd` file in a subfolder (say `posts/yourpostname/index.qmd`), then THAT will be the location the computer looks in.. 

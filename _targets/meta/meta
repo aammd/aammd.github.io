@@ -1,20 +1,33 @@
 name|type|data|command|depend|seed|path|time|size|bytes|format|repository|iteration|parent|children|seconds|warnings|error
-.Random.seed|object|3cc7eb5e96063711|||||||||||||||
+.Random.seed|object|73cab48327dd2e54|||||||||||||||
 <<<<<<< HEAD|||||||||||||||||
 =======|||||||||||||||||
 >>>>>>> main|||||||||||||||||
-blog|stem|678a13be75690c43|45cb382622547ae1|3d5ad42ea4b7c1b1|-298343691|docs*blog.qmd*index.qmd*posts/2014-11-27-continuous-fraction-functional-programming/index.qmd*posts/2016-12-07-population-growth-functional-programming/index.qmd*posts/2022-10-14-growth_curve_measurement_error/index.qmd*posts/2022-10-23-probability-integral-transform/index.qmd*posts/2022-11-11-multispecies-functional-response/index.qmd*posts/2022-11-12-growth-curve-latent-size-predictions/index.qmd*posts/2022-11-21-growth-curve-known-age/index.qmd*posts/Untitled/index.qmd*.nojekyll*_quarto.yml*styles.css|t19319.077854276s|2bf03e24088bb019|2639442|file|local|vector|||121.98||
+blog|stem|3f50749776c7e0dd|084b0cee0ffca8f0|8d3753369bf9a99a|-298343691|docs*blog.qmd*index.qmd*posts/2014-11-27-continuous-fraction-functional-programming/index.qmd*posts/2016-12-02/index.qmd*posts/2016-12-07-population-growth-functional-programming/index.qmd*posts/2022-10-14-growth_curve_measurement_error/index.qmd*posts/2022-10-23-probability-integral-transform/index.qmd*posts/2022-11-11-multispecies-functional-response/index.qmd*posts/2022-11-21-growth-curve-known-age/index.qmd*posts/2022-11-23-evolution-of-plasticity/index.qmd*posts/9999-template/index.qmd*.nojekyll*_quarto.yml*styles.css|t19319.9005376221s|ded2e9592fd1d36f|2972300|file|local|vector|||180.31||
 decay_add|stem|fe6ad8bedad8ebdf|bc62aec99dbbdc67|f72763812452552c|-1843753654||t19317.7047574246s|16a8552283a30e01|1600|rds|local|vector|||0.02||
 decay_mult|stem|a5b229daa446e69b|2a87c63feed0e380|4540680f06b29e83|-351045808||t19317.7047577138s|ff2c25b85c9321a6|1599|rds|local|vector|||0.01||
+growth_curve_meas_data|stem|b9eacd07fe16750c|d173244076317d63|43486a38af24829a|1312939306||t19319.1270118455s|a36937a0e2e07239|670|qs|local|vector|||0||
+growth_curve_meas_diagnostics_vb_one_tree_Lo|stem|b3627652b0d4540a|25e092c0e5e06e62|70520a02dd16c0e9|-1362035362||t19319.1655586004s|85fbc930a2f57fa0|87781|fst_tbl|local|vector|||0||
+growth_curve_meas_diagnostics_vb_one_tree_Lo_oneline|stem|ccb36a1b3a6c922d|eeef7c2ea5104c8e|96a514766d9883ae|-202446608||t19319.165561527s|5aadb5e0e00e0845|85407|fst_tbl|local|vector|||0||
+growth_curve_meas_file_vb_one_tree_Lo|stem|c5e036017974440a|a48d2b642a93e823|ef46db3751d8e999|-1310196287|posts/2022-10-14-growth_curve_measurement_error/vb_one_tree_Lo.stan|t19319.1426788791s|38e45df62ca4537f|455|file|local|vector|||0||
+growth_curve_meas_file_vb_one_tree_Lo_oneline|stem|e30a5629fe928d97|67cf5cfb99a9297e|ef46db3751d8e999|1659407233|posts/2022-10-14-growth_curve_measurement_error/vb_one_tree_Lo_oneline.stan|t19319.5830118997s|8d8a2e1bf0a26c90|382|file|local|vector|||0||
+growth_curve_meas_mcmc_vb_one_tree_Lo|stem|ee537113f581ec2b|affcfeee9c2589ba|9a42390ae68524cb|-1728410266||t19319.164637157s|32ff731cf9192649|254037|qs|local|vector|||61.57||
+growth_curve_meas_mcmc_vb_one_tree_Lo_oneline|stem|f583ad34a4e9dd5f|65df02d92fabb8ed|d38e9e8a359d9fa7|1146491538||t19319.1655579064s|56e7abde3682248d|196927|qs|local|vector|||79.5||
+growth_curve_meas_summary_vb_one_tree_Lo|stem|a37a4c2eccb5999a|8af0916103aac33b|5464eb285d499269|-391732987||t19319.1655603008s|124861856939d110|1342|fst_tbl|local|vector|||0.12||
+growth_curve_meas_summary_vb_one_tree_Lo_oneline|stem|91abbc21eef44124|9accbcb8b757472a|0b7a8ac750a71610|645770283||t19319.1655613072s|124861856939d110|1342|fst_tbl|local|vector|||0.06||
+growth_curve_predict_data|stem|819ee529b76da885|c020d1cd23d78cb4|b10c44a71e00dead|587215931||t19319.7596411851s|e6763ecd64db90ef|472|qs|local|vector|||0.98|package tibble was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tidyverse was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package dplyr was built under R version 4.1.3|
+growth_curve_predict_diagnostics_vb_one_tree_Lo_oneline_predictions|stem|76afae9792249f3a|c288173a01eb14a7|e81afc2c781be6eb|1282029535||t19319.7597253445s|48b110038ed67047|84966|fst_tbl|local|vector|||0||
+growth_curve_predict_file_vb_one_tree_Lo_oneline_predictions|stem|ea29dacb250a4e6c|3a4c3428a897f6a7|ef46db3751d8e999|1739551412|posts/2022-10-14-growth_curve_measurement_error/vb_one_tree_Lo_oneline_predictions.stan|t19319.6139292717s|7128c2d1638cb86c|712|file|local|vector|||0||
+growth_curve_predict_mcmc_vb_one_tree_Lo_oneline_predictions|stem|43580313064b2b2d|5ebbf6aef8574bd2|1b35141289f20fed|1072251981||t19319.7597242687s|37b8921904d977c9|400099|qs|local|vector|||7.08||
+growth_curve_predict_summary_vb_one_tree_Lo_oneline_predictions|stem|781b49be9955ff6a|951de6f586f73402|cb089d998226400e|1146941080||t19319.7597297633s|96f7bc868892b51d|2410|fst_tbl|local|vector|||0.36||
 make_decay_data_additive|function|c1ca39d2856019b3|||||||||||||||
 make_decay_data_multiplicative|function|784e888751be123c|||||||||||||||
 plot_add|stem|97f93f36c4a31dda|49c111642d36e891|a1dc81e477388a2b|894921332||t19317.7108100945s|a38b3ab25a61f581|69098|rds|local|vector|||0.02||
 plot_group_df|function|1ddff8be84a0b510|||||||||||||||
 plot_mult|stem|57e256ee3b342986|5eaccd5adb324694|cbd835192ba49eb5|953627644||t19317.7108107885s|8df937e44c0bbb34|69077|rds|local|vector|||0.01||
 sim_vb_one_tree|function|0e1eaf05809b5118|||||||||||||||
+sim_vb_one_tree_and_new|function|bd6b92fc061cd1a3|||||||||||||||
 vb_one_tree|stem|9e4daabb2e1fdc2e|3e6d829a9dbc5aae|476866292fb2a947|-828049293||t19317.7047568694s|0d02b3b4a062679e|906|rds|local|vector|||1.08|package tibble was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tidyverse was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package dplyr was built under R version 4.1.3|
-make_decay_data_multiplicative|function|784e888751be123c
-make_decay_data_additive|function|c1ca39d2856019b3
-.Random.seed|object|5f2d5773f41f6962
-plot_group_df|function|1ddff8be84a0b510
-sim_vb_one_tree|function|0e1eaf05809b5118
+vb_one_tree_latent_data|stem|e7bf37a2178565bb|3e6d829a9dbc5aae|476866292fb2a947|816433437||t19319.1241954596s|1e19357f05a79414|710|qs|local|vector|||1.2|package tibble was built under R version 4.1.3. package ggplot2 was built under R version 4.1.3. package tidyverse was built under R version 4.1.3. package tidyr was built under R version 4.1.3. package dplyr was built under R version 4.1.3|
+vb_one_tree_latent_file_vb_one_tree_Lo|stem|f307bea7472baf25|a48d2b642a93e823|ef46db3751d8e999|-14657474|posts/2022-10-14-growth_curve_measurement_error/vb_one_tree_Lo.stan|t19319.0712765312s|879e13a3ade5143b|459|file|local|vector|||0||
+vb_one_tree_latent_mcmc_vb_one_tree_Lo|stem||abc7363a448583b2|9f3a0699e08dbccd|427460514||t19319.121393647s||0|qs|local|vector|||0.19||data should be a path or a named list.

@@ -22,7 +22,8 @@ options(clustermq.scheduler = "multicore")
 # Install packages {{future}}, {{future.callr}}, and {{future.batchtools}} to allow use_targets() to configure tar_make_future() options.
 
 # Run the R scripts in the R/ folder with your custom functions:
-tar_source()
+tar_source(files = dir("posts", pattern=".*\\.R", full.names = TRUE, recursive=TRUE))
+tar_source(files = "R")
 # source("other_functions.R") # Source other scripts as needed. # nolint
 
 # Replace the target list below with your own:
@@ -48,6 +49,29 @@ list(
     name = vb_one_tree,
     command = sim_vb_one_tree()
   ),
-
+  tar_stan_mcmc(
+    growth_curve_meas,
+    stan_files = c(
+      "posts/2022-10-14-growth_curve_measurement_error/vb_one_tree_Lo.stan",
+      "posts/2022-10-14-growth_curve_measurement_error/vb_one_tree_Lo_oneline.stan"
+    ),
+    data = purrr::splice(
+      as.list(vb_one_tree),
+      n = nrow(vb_one_tree)
+      ),
+    return_draws = FALSE,
+    stdout = R.utils::nullfile(),
+    stderr = R.utils::nullfile()
+  ),
+  tar_stan_mcmc(
+    growth_curve_predict,
+    stan_files = c(
+      "posts/2022-10-14-growth_curve_measurement_error/vb_one_tree_Lo_oneline_predictions.stan"),
+    data = sim_vb_one_tree_and_new(),
+    return_draws = FALSE,
+    stdout = R.utils::nullfile(),
+    stderr = R.utils::nullfile()
+  )
+  ,
   tar_quarto(blog)
 )

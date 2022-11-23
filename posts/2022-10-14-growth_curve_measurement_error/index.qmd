@@ -3,7 +3,8 @@ title: "Growth curves"
 author: "Andrew"
 date: "2022-10-14"
 categories: [stan, simulation]
-freeze: true
+freeze: false
+
 ---
 
 ```{r eval=TRUE, message=FALSE, warning=FALSE}
@@ -33,11 +34,6 @@ I like this second way of writing the equation because it highlights that the VB
 
 I'm going to do a simple simulation of one tree growing. here is code that does that
 
-```{r}
-#| echo: FALSE
-#| class-output: .r
-```
-
 ```{r }
 tar_load(vb_one_tree)
 
@@ -48,7 +44,7 @@ vb_one_tree |>
   theme_bw()
 ```
 
-simulate this same data in targets
+simulate this same data\`\`\` in targets
 
 fit a stan model to it! here is the Stan model: formatted?
 
@@ -57,7 +53,9 @@ fit a stan model to it! here is the Stan model: formatted?
 #| class-output: .stan
 
 suppressPackageStartupMessages(library(cmdstanr))
-vb_one_tree <- cmdstan_model(here::here("posts", "2022-10-14-growth_curve_measurement_error","vb_one_tree.stan"))
+vb_one_tree <- cmdstan_model(here::here("posts", 
+                                        "2022-10-14-growth_curve_measurement_error",
+                                        "vb_one_tree.stan"))
 
 vb_one_tree
 ```
@@ -65,6 +63,8 @@ vb_one_tree
 ```{r, warning=FALSE, message=FALSE}
 
 vb_one_tree <- cmdstan_model(here::here("posts", "2022-10-14-growth_curve_measurement_error","vb_one_tree.stan"))
+
+source(here::here("posts", "2022-10-14-growth_curve_measurement_error","vb-growth.R"))
 
 one_tree_sim <- sim_vb_one_tree()
 
@@ -118,4 +118,60 @@ one_tree_sim |>
 
 ## adding measurement error
 
-In order to shift the curve left and right to account for aget
+Not all trees are the same age. there are two ways for a tree to be different in size to its neighbhours: it could be a different age, or it could grow at a different rate. when we fit a growth curve to many individuals, we usually need to shift the curve to the left or right. We do this by modelling the starting size as a parameter in the model
+
+Here we kind of have two choices. We could subtract every trees first date of measurment from all measurements. This would start all trees off at 0. And then the likelihood for $L_1$ would be:
+
+$$ 
+L_1 \sim \text{N}(L_0e^{-r0} + L_\infty(1 - e^{-r0}), \sigma_{obs})
+$$
+
+Or, we could split the likelihood into two parts: one for the first observations, and one for all subsequent ones:
+
+$$
+\begin{align}
+L_t &\sim \text{N}(L_oe^{-rt} + L_\infty(1 - e^{-rt}), \sigma_{obs}) \\
+L_1 &\sim \text{N}(L_o, \sigma_{obs})\\
+\end{align}
+$$
+
+If we don't know the size that the tree was at the beginning
+
+-   create a new target to run tidybayes on both of these and extract them. look at the distributions of Lo.
+
+-   think about how to work with differing growth rates across years -- taylor approx?
+
+-   make a multi-individual version where everyone has a different Lo parameter -- just using indexing
+
+-   make a multi-site version where everyone has a site offset too
+
+-   can you do it like
+
+vector_of_plot_id -- as long as numbers of trees, having values up to the max plot id vector_of_plot_ids\[tree_id\] -- get the plot that a specific tree is in
+
+vector_of_plot_means\[vector_of_plot_ids\[tree_id\]\] vector_of_plot_sigmas\[vector_of_plot_ids\[tree_id\]\]
+
+as the two parameters for the distribution of all tree IDs
+
+then to calculate the Lo for a new tree you'd use these latter mean and sigma for that plot or whatever model you ahve
+
+how to add yearly variation?
+
+r is a year interval
+
+would it be possible to find the expectation of a range of values from a gaussian process?
+
+what would be the expectation of a t draws from a normal distribution? like every year, some are up and some are down -- have any of those years been observed already.
+
+```{r}
+tar_load(growth_curve_predict_mcmc_vb_one_tree_Lo_oneline_predictions)
+tar_load(growth_curve_predict_data)
+
+growth_curve_predict_mcmc_vb_one_tree_Lo_oneline_predictions |> 
+  gather_rvars(Lnew[t_id]) |> 
+  mutate(time = growth_curve_predict_data$timenew[t_id]) |> 
+  ggplot(aes(x = time, dist = .value)) + 
+  stat_dist_lineribbon()
+```
+
+Is it as simple as: a generated quantites model which takes the new observations, models them as N(lo, sigma_obs), then computes the expectation as a generated quantity?

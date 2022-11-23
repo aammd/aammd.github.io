@@ -1,0 +1,247 @@
+---
+title: "The evolution of plasticity"
+author: "Andrew MacDonald and Audrey Tremblay"
+description: |
+  How to measure plasticity with a bayesian hierarchical model
+date: 23 Nov 2022
+editor: visual
+categories: [UdeS, stan, brms]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+## Data simulation
+
+RARE to have more than two years per female
+
+let's start with one female
+
+
+```{r}
+n <- 1
+avg_csize <- 5
+
+lifespan <- 5
+
+general_temp <- runif(lifespan, 2, 12)
+
+general_temp_c <- general_temp - mean(general_temp)
+
+```
+
+## fecundity
+
+$$
+\begin{align}
+\text{eggs} &\sim \text{Poisson}(e^{\beta_0 + \beta_1*(x - \bar{x})})
+\end{align}
+$$
+
+```{r}
+library(tidyverse)
+
+effet_temp <- .1
+
+one_bird <- tibble(year = 1:lifespan,
+       general_temp,
+       general_temp_c,
+       expected_clutch = log(avg_csize) + effet_temp * general_temp_c,
+       observed_clutch = rpois(n = length(year), 
+                               lambda = exp(expected_clutch)))
+
+one_bird
+```
+
+Make a simple model to measure
+
+```{r}
+summary(glm(observed_clutch ~ general_temp_c, data = one_bird))
+```
+
+```{r}
+one_bird |> 
+  ggplot(aes(x = general_temp, y = observed_clutch)) + 
+  geom_point()
+```
+
+
+## Date of laying
+
+When do birds lay eggs?
+
+
+```{r}
+
+avg_dponte <- 138
+
+effet_temp_dponte <- -3
+
+one_bird_dponte <- tibble(year = 1:lifespan,
+       general_temp,
+       general_temp_c,
+       expected_dponte = avg_dponte + effet_temp_dponte * general_temp_c,
+       observed_dponte = round(rnorm(n = length(year), 
+                               mean = expected_dponte,
+                               sd = 5)))
+```
+
+```{r}
+one_bird_dponte |> 
+  ggplot(aes(x = general_temp, y= observed_dponte)) + 
+  geom_point()
+
+summary(lm(observed_dponte ~ general_temp_c, data = one_bird_dponte))
+```
+
+
+
+## combine the two
+
+Birds which lay earlier also lay larger eggs, possibly because they are High Quality Moms.
+
+```{r}
+## population averages
+pop_average_dponte <- 138
+pop_average_csize <- 4
+
+## Effect of quality
+mom_quality <- 4
+quality_on_dponte <- 2
+quality_on_csize <- .2
+
+
+```
+
+let's observe five years for the high-quality Mom:
+
+```{r}
+quality_effects <- tibble(
+  year = 1:lifespan,
+  mom_quality = mom_quality,
+  general_temp,
+  general_temp_c,
+  ## Effect of temperature -- does it depend on quality? let's say that it DOES (for now) 
+  effet_temp_dponte_qual = -.7*mom_quality,
+  effet_temp_csize_qual = .1*log(mom_quality),
+  # csize
+  mom_avg_csize = log(pop_average_csize) +  quality_on_csize*log(mom_quality),
+  temp_avg_csize = exp(mom_avg_csize + effet_temp_csize_qual*general_temp_c),
+  # dponte
+  mom_avg_dponte = pop_average_dponte + quality_on_dponte*mom_quality,
+  temp_avg_dponte = mom_avg_dponte + effet_temp_dponte_qual*general_temp_c,
+  ## observations
+  obs_csize = rpois(n = length(year), lambda = temp_avg_csize),
+  obs_dponte = rnorm(n = length(year), mean = temp_avg_dponte, sd = 3) |> round()
+)
+```
+
+Some of these values are unreasonable! we can adjust later
+
+```{r}
+quality_effects |> 
+  ggplot(aes(x = general_temp, y = obs_csize)) + 
+  geom_point()
+
+quality_effects |> 
+  ggplot(aes(x = general_temp, y = obs_dponte)) + geom_point()
+```
+
+## Multiple females
+
+We can repeat this process for multiple females at once! 
+
+```{r}
+n_females <- 42
+
+lifespan <- 5
+
+general_temp <- runif(lifespan, 2, 12)
+
+general_temp_c <- general_temp - mean(general_temp)
+
+mom_qualities <- runif(n_females, min = 0, max = 4)
+
+many_moms_temperature <- expand_grid(year = 1:lifespan,
+            idF1 = 1:n_females) |> 
+  mutate(mom_quality = mom_qualities[idF1],
+         general_temp = general_temp[year],
+         general_temp_c = general_temp_c[year],
+         ## adding the biology
+         ## Effect of temperature -- does it depend on quality? let's say that it DOES (for now) 
+         effet_temp_dponte_qual = -.7*mom_quality,
+         effet_temp_csize_qual = .1*log(mom_quality),
+         # csize
+         mom_avg_csize = log(pop_average_csize) +  quality_on_csize*log(mom_quality),
+         temp_avg_csize = exp(mom_avg_csize + effet_temp_csize_qual*general_temp_c),
+         # dponte
+         mom_avg_dponte = pop_average_dponte + quality_on_dponte*mom_quality,
+         temp_avg_dponte = mom_avg_dponte + effet_temp_dponte_qual*general_temp_c,
+         ## observations
+         obs_csize = rpois(n = length(year), lambda = temp_avg_csize),
+         obs_dponte = rnorm(n = length(year), mean = temp_avg_dponte, sd = 3) |> round()
+  )
+
+
+
+
+```
+
+let's plot it! 
+
+```{r}
+many_moms_temperature |> 
+  ggplot(aes(x = general_temp, y = obs_dponte)) + 
+  geom_point()
+
+many_moms_temperature |> 
+  ggplot(aes(x = general_temp, y = obs_dponte, group = idF1)) + 
+  stat_smooth(method = "lm", se = FALSE)
+```
+
+```{r}
+many_moms_temperature |> 
+  ggplot(aes(x = general_temp, y = obs_csize)) + 
+  geom_point()
+
+many_moms_temperature |> 
+  ggplot(aes(x = general_temp, y = obs_csize, group = idF1)) + 
+  stat_smooth(method = "lm", se = FALSE)
+```
+
+## model in brms
+
+```{r}
+library(brms)
+glimpse(many_moms_temperature)
+
+## define formulae
+csize_model_bf <- bf(obs_csize ~ 1 + general_temp_c + (1 + general_temp_c|f|idF1),
+                     family = poisson())
+
+dponte_model_bf <- bf(obs_dponte ~ 1 + general_temp_c + (1 + general_temp_c|f|idF1),
+                      family = gaussian())
+
+## set priors
+
+## run full model
+full_model <- brm(csize_model_bf + dponte_model_bf, 
+                  data = many_moms_temperature,
+                  cores = 2, chains = 2)
+
+```
+
+
+
+
+## fitness
+
+## notes
+
+very small sample sizes per female -- experiment with this (2 years or more)
+
+The data are 0-truncated: only nesting females are measured! 
