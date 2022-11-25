@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.1.251">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -152,18 +152,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../blog.html">
- <span class="menu-text">The Study of the Household</span></a>
+    <a class="nav-link" href="../../blog.html">The Study of the Household</a>
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/aammd"><i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+ </a>
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://twitter.com/polesasunder"><i class="bi bi-twitter" role="img">
 </i> 
- <span class="menu-text"></span></a>
+ </a>
   </li>  
 </ul>
               <div id="quarto-search" class="" title="Search"></div>
@@ -198,7 +197,6 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
         <p class="date">December 7, 2016</p>
       </div>
     </div>
-    
       
     </div>
     
@@ -259,22 +257,15 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <p>This already suggests an awesome biological interpretation: logistic population growth.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>pop_size <span class="ot">&lt;-</span> <span class="fu">accumulate</span>(dummy, <span class="sc">~</span> .<span class="sc">*</span> <span class="fl">1.5</span>, <span class="at">.init =</span> <span class="dv">50</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'ggplot2' was built under R version 4.1.3</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'dplyr' was built under R version 4.1.3</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">data_frame</span>(<span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">11</span>, pop_size) <span class="sc">%&gt;%</span> </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> pop_size)) <span class="sc">+</span> </span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">data_frame</span>(<span class="at">time =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">11</span>, pop_size) <span class="sc">%&gt;%</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> pop_size)) <span class="sc">+</span> </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: `data_frame()` was deprecated in tibble 1.1.0.
-Please use `tibble()` instead.
-This warning is displayed once every 8 hours.
-Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.</code></pre>
+ℹ Please use `tibble()` instead.</code></pre>
 </div>
 <div class="cell-output-display">
 <div id="fig-curve" class="quarto-figure quarto-figure-center anchored">
@@ -293,15 +284,15 @@ N_{t+1} = r*N_t
 <h3 class="anchored" data-anchor-id="stochastic-population-growth">Stochastic population growth</h3>
 <p>In the original question, <a href="http://stackoverflow.com/questions/40095463/simulating-a-timeseries-in-dplyr-instead-of-using-a-for-loop">jebyrnes asked</a> if parameters could be allowed to vary over time. Here is a way of allowing that to happen. We have to get a bit more abstract, and write a function which takes both population growth rate <code>lambda</code> and the population at time N<sub>t</sub> as inputs</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>exp_growth <span class="ot">&lt;-</span> <span class="cf">function</span>(lambda, Nt) lambda <span class="sc">*</span> Nt </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2016-12-01</span>)</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>pop_functions <span class="ot">&lt;-</span> <span class="fu">data_frame</span>(<span class="at">time    =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, </span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">lambda_con =</span> <span class="fl">1.12</span>,</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">lambda_var  =</span> <span class="fl">1.12</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="fl">0.2</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># make a list of functions</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fns_con =</span> <span class="fu">map</span>(lambda_con, <span class="sc">~</span> <span class="fu">partial</span>(exp_growth, <span class="at">lambda =</span> .x, <span class="at">.lazy =</span> <span class="cn">FALSE</span>)),</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">fns_var =</span> <span class="fu">map</span>(lambda_var, <span class="sc">~</span> <span class="fu">partial</span>(exp_growth, <span class="at">lambda =</span> .x, <span class="at">.lazy =</span> <span class="cn">FALSE</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>exp_growth <span class="ot">&lt;-</span> <span class="cf">function</span>(lambda, Nt) lambda <span class="sc">*</span> Nt </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2016-12-01</span>)</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>pop_functions <span class="ot">&lt;-</span> <span class="fu">data_frame</span>(<span class="at">time    =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, </span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>                            <span class="at">lambda_con =</span> <span class="fl">1.12</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>                            <span class="at">lambda_var  =</span> <span class="fl">1.12</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="fl">0.2</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># make a list of functions</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">fns_con =</span> <span class="fu">map</span>(lambda_con, <span class="sc">~</span> <span class="fu">partial</span>(exp_growth, <span class="at">lambda =</span> .x, <span class="at">.lazy =</span> <span class="cn">FALSE</span>)),</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">fns_var =</span> <span class="fu">map</span>(lambda_var, <span class="sc">~</span> <span class="fu">partial</span>(exp_growth, <span class="at">lambda =</span> .x, <span class="at">.lazy =</span> <span class="cn">FALSE</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: The `.lazy` argument is soft-deprecated as of purrr 0.3.0.
 Please unquote the arguments that should be evaluated once and for all.
@@ -314,9 +305,9 @@ Please unquote the arguments that should be evaluated once and for all.
   partial(fn, u = !!runif(1), n = rnorm(1))    # First constant
 This warning is displayed once per session.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pop_functions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(pop_functions)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 6 x 5
+<pre><code># A tibble: 6 × 5
    time lambda_con lambda_var fns_con    fns_var   
   &lt;int&gt;      &lt;dbl&gt;      &lt;dbl&gt; &lt;list&gt;     &lt;list&gt;    
 1     1       1.12      1.40  &lt;prrr_fn_&gt; &lt;prrr_fn_&gt;
@@ -330,29 +321,29 @@ This warning is displayed once per session.</code></pre>
 <p>Now we have, instead of one function, many tiny little functions which each convert between time steps. The function <code>purrr::partial()</code> is handy for _partial_ly filling in the arguments of a function. Here it sets the value of the population growth rate between generations (<code>lambda</code>), and leaves us with a function that only needs one value, the population size.</p>
 <p>How do we run these little functions? We need yet another function – this time, a function that takes two functions and <em>runs the second on the first</em>:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>run_both <span class="ot">&lt;-</span> <span class="cf">function</span>(.x, .y) <span class="fu">.y</span>(.x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>run_both <span class="ot">&lt;-</span> <span class="cf">function</span>(.x, .y) <span class="fu">.y</span>(.x)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Applying this function will let us run all the functions held in <code>pop_functions</code>. All we need to supply is the starting number of individuals for each population:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>simulated_growth <span class="ot">&lt;-</span> pop_functions <span class="sc">%&gt;%</span> </span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pops_con =</span> <span class="fu">accumulate</span>(fns_con, run_both, <span class="at">.init =</span> <span class="dv">10</span>)[<span class="sc">-</span><span class="dv">1</span>],</span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">pops_var =</span> <span class="fu">accumulate</span>(fns_var, run_both, <span class="at">.init =</span> <span class="dv">10</span>)[<span class="sc">-</span><span class="dv">1</span>])</span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>simulated_growth <span class="sc">%&gt;%</span> </span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(time, <span class="fu">starts_with</span>(<span class="st">"pops"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">gather</span>(<span class="st">"growthtype"</span>, <span class="st">"size"</span>, <span class="sc">-</span>time) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> size, <span class="at">colour =</span> growthtype)) <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>simulated_growth <span class="ot">&lt;-</span> pop_functions <span class="sc">%&gt;%</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pops_con =</span> <span class="fu">accumulate</span>(fns_con, run_both, <span class="at">.init =</span> <span class="dv">10</span>)[<span class="sc">-</span><span class="dv">1</span>],</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">pops_var =</span> <span class="fu">accumulate</span>(fns_var, run_both, <span class="at">.init =</span> <span class="dv">10</span>)[<span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>simulated_growth <span class="sc">%&gt;%</span> </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(time, <span class="fu">starts_with</span>(<span class="st">"pops"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  tidyr<span class="sc">::</span><span class="fu">gather</span>(<span class="st">"growthtype"</span>, <span class="st">"size"</span>, <span class="sc">-</span>time) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> size, <span class="at">colour =</span> growthtype)) <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/thumbnail-lines-1.png" class="img-fluid" width="672"></p>
 </div>
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rerun</span>(<span class="dv">40</span>, {<span class="fu">data_frame</span>(<span class="at">time    =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, </span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">lambda_var  =</span> <span class="fl">1.12</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="fl">0.1</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># make a list of functions</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">fns_var =</span> <span class="fu">map</span>(lambda_var, <span class="sc">~</span> <span class="fu">partial</span>(exp_growth, <span class="at">lambda =</span> .x, <span class="at">.lazy =</span> <span class="cn">FALSE</span>)),</span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">pops_var =</span> <span class="fu">accumulate</span>(fns_var, run_both, <span class="at">.init =</span> <span class="dv">10</span>)[<span class="sc">-</span><span class="dv">1</span>]) <span class="sc">%&gt;%</span> </span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(time,lambda_var, pops_var)}) <span class="sc">%&gt;%</span> </span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(<span class="at">.id =</span> <span class="st">"sim"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> pops_var, <span class="at">group =</span> sim)) <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">rerun</span>(<span class="dv">40</span>, {<span class="fu">data_frame</span>(<span class="at">time    =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">20</span>, </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">lambda_var  =</span> <span class="fl">1.12</span> <span class="sc">+</span> <span class="fu">rnorm</span>(<span class="dv">20</span>, <span class="dv">0</span>, <span class="fl">0.1</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># make a list of functions</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">fns_var =</span> <span class="fu">map</span>(lambda_var, <span class="sc">~</span> <span class="fu">partial</span>(exp_growth, <span class="at">lambda =</span> .x, <span class="at">.lazy =</span> <span class="cn">FALSE</span>)),</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">pops_var =</span> <span class="fu">accumulate</span>(fns_var, run_both, <span class="at">.init =</span> <span class="dv">10</span>)[<span class="sc">-</span><span class="dv">1</span>]) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(time,lambda_var, pops_var)}) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(<span class="at">.id =</span> <span class="st">"sim"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> pops_var, <span class="at">group =</span> sim)) <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/thumbnail-lines-2.png" class="img-fluid" width="672"></p>
 </div>
@@ -369,30 +360,28 @@ R_{t+1} = R_t \times (1 + r \times (1 - R_t/K)) - P \times a
 P_{t+1} = P_t \times (1 - m + c \times R_t \times a)
 \]</span></p>
 <div class="cell preview-image">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>res_cons <span class="ot">&lt;-</span> <span class="cf">function</span>(vec, m, r, K, a, c){</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  out1 <span class="ot">&lt;-</span> vec[[<span class="st">"res"</span>]] <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> r <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> vec[[<span class="st">"res"</span>]] <span class="sc">/</span> K ) <span class="sc">-</span> vec[[<span class="st">"con"</span>]] <span class="sc">*</span> a)</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  out2 <span class="ot">&lt;-</span> vec[[<span class="st">"con"</span>]] <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> m <span class="sc">+</span> c <span class="sc">*</span> vec[[<span class="st">"res"</span>]] <span class="sc">*</span> a)</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"res"</span> <span class="ot">=</span> out1, <span class="st">"con"</span> <span class="ot">=</span> out2)</span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>paper_mod <span class="ot">&lt;-</span> <span class="fu">partial</span>(res_cons, <span class="at">r =</span> <span class="dv">1</span>, <span class="at">K =</span> <span class="dv">100</span>, <span class="at">m =</span> <span class="fl">0.21</span>, <span class="at">c =</span> <span class="fl">0.15</span>, <span class="at">a =</span> <span class="fl">0.032</span>)</span>
-<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'tidyr' was built under R version 4.1.3</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accumulate</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>, <span class="sc">~</span> <span class="fu">paper_mod</span>(.x), <span class="at">.init =</span> <span class="fu">c</span>(<span class="st">"res"</span> <span class="ot">=</span> <span class="dv">50</span>, <span class="st">"con"</span> <span class="ot">=</span> <span class="dv">1</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">enframe</span>(.) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">res =</span> <span class="fu">map_dbl</span>(value, <span class="st">"res"</span>),</span>
-<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">con =</span> <span class="fu">map_dbl</span>(value, <span class="st">"con"</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>value) <span class="sc">%&gt;%</span></span>
-<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather</span>(trophic, abd, <span class="sc">-</span>name) <span class="sc">%&gt;%</span> </span>
-<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> name, <span class="at">y =</span> abd, <span class="at">colour =</span> trophic)) <span class="sc">+</span> <span class="fu">geom_line</span>()</span>
-<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot2::ggsave(here::here("posts/population-growth-functional-programming/fig.png"))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>res_cons <span class="ot">&lt;-</span> <span class="cf">function</span>(vec, m, r, K, a, c){</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  out1 <span class="ot">&lt;-</span> vec[[<span class="st">"res"</span>]] <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> r <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> vec[[<span class="st">"res"</span>]] <span class="sc">/</span> K ) <span class="sc">-</span> vec[[<span class="st">"con"</span>]] <span class="sc">*</span> a)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  out2 <span class="ot">&lt;-</span> vec[[<span class="st">"con"</span>]] <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> m <span class="sc">+</span> c <span class="sc">*</span> vec[[<span class="st">"res"</span>]] <span class="sc">*</span> a)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">c</span>(<span class="st">"res"</span> <span class="ot">=</span> out1, <span class="st">"con"</span> <span class="ot">=</span> out2)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>paper_mod <span class="ot">&lt;-</span> <span class="fu">partial</span>(res_cons, <span class="at">r =</span> <span class="dv">1</span>, <span class="at">K =</span> <span class="dv">100</span>, <span class="at">m =</span> <span class="fl">0.21</span>, <span class="at">c =</span> <span class="fl">0.15</span>, <span class="at">a =</span> <span class="fl">0.032</span>)</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a><span class="fu">accumulate</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>, <span class="sc">~</span> <span class="fu">paper_mod</span>(.x), <span class="at">.init =</span> <span class="fu">c</span>(<span class="st">"res"</span> <span class="ot">=</span> <span class="dv">50</span>, <span class="st">"con"</span> <span class="ot">=</span> <span class="dv">1</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  tibble<span class="sc">::</span><span class="fu">enframe</span>(.) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">res =</span> <span class="fu">map_dbl</span>(value, <span class="st">"res"</span>),</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">con =</span> <span class="fu">map_dbl</span>(value, <span class="st">"con"</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>value) <span class="sc">%&gt;%</span></span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather</span>(trophic, abd, <span class="sc">-</span>name) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> name, <span class="at">y =</span> abd, <span class="at">colour =</span> trophic)) <span class="sc">+</span> <span class="fu">geom_line</span>()</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a><span class="co"># ggplot2::ggsave(here::here("posts/population-growth-functional-programming/fig.png"))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div id="fig-demo" class="quarto-figure quarto-figure-center anchored">
 <figure class="figure">
@@ -452,24 +441,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     button.classList.add('code-copy-button-checked');
     var currentTitle = button.getAttribute("title");
     button.setAttribute("title", "Copied!");
-    let tooltip;
-    if (window.bootstrap) {
-      button.setAttribute("data-bs-toggle", "tooltip");
-      button.setAttribute("data-bs-placement", "left");
-      button.setAttribute("data-bs-title", "Copied!");
-      tooltip = new bootstrap.Tooltip(button, 
-        { trigger: "manual", 
-          customClass: "code-copy-button-tooltip",
-          offset: [0, -8]});
-      tooltip.show();    
-    }
     setTimeout(function() {
-      if (tooltip) {
-        tooltip.hide();
-        button.removeAttribute("data-bs-title");
-        button.removeAttribute("data-bs-toggle");
-        button.removeAttribute("data-bs-placement");
-      }
       button.setAttribute("title", currentTitle);
       button.classList.remove('code-copy-button-checked');
     }, 1000);
@@ -505,42 +477,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       return note.innerHTML;
     });
   }
-  const findCites = (el) => {
-    const parentEl = el.parentElement;
-    if (parentEl) {
-      const cites = parentEl.dataset.cites;
-      if (cites) {
-        return {
-          el,
-          cites: cites.split(' ')
-        };
-      } else {
-        return findCites(el.parentElement)
-      }
-    } else {
-      return undefined;
-    }
-  };
   var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
   for (var i=0; i<bibliorefs.length; i++) {
     const ref = bibliorefs[i];
-    const citeInfo = findCites(ref);
-    if (citeInfo) {
-      tippyHover(citeInfo.el, function() {
-        var popup = window.document.createElement('div');
-        citeInfo.cites.forEach(function(cite) {
-          var citeDiv = window.document.createElement('div');
-          citeDiv.classList.add('hanging-indent');
-          citeDiv.classList.add('csl-entry');
-          var biblioDiv = window.document.getElementById('ref-' + cite);
-          if (biblioDiv) {
-            citeDiv.innerHTML = biblioDiv.innerHTML;
-          }
-          popup.appendChild(citeDiv);
-        });
-        return popup.innerHTML;
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
       });
-    }
+      return popup.innerHTML;
+    });
   }
 });
 </script>

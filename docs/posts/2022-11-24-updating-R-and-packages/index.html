@@ -6,8 +6,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="Andrew MacDonald">
+<meta name="dcterms.date" content="2022-11-11">
+<meta name="description" content="Because sometimes: you have to">
 
-<title>Andrew MacDonald - Andrew MacDonald, PhD</title>
+<title>Andrew MacDonald - Updating R and your R packages</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,43 +23,25 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1.6em;
   vertical-align: middle;
 }
-div.csl-bib-body { }
-div.csl-entry {
-  clear: both;
-}
-.hanging div.csl-entry {
-  margin-left:2em;
-  text-indent:-2em;
-}
-div.csl-left-margin {
-  min-width:2em;
-  float:left;
-}
-div.csl-right-inline {
-  margin-left:2em;
-  padding-left:1em;
-}
-div.csl-indent {
-  margin-left: 2em;
-}
 </style>
 
 
-<script src="site_libs/quarto-nav/quarto-nav.js"></script>
-<script src="site_libs/quarto-nav/headroom.min.js"></script>
-<script src="site_libs/clipboard/clipboard.min.js"></script>
-<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
-<script src="site_libs/quarto-search/fuse.min.js"></script>
-<script src="site_libs/quarto-search/quarto-search.js"></script>
-<meta name="quarto:offset" content="./">
-<script src="site_libs/quarto-html/quarto.js"></script>
-<script src="site_libs/quarto-html/popper.min.js"></script>
-<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
-<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
-<script src="site_libs/bootstrap/bootstrap.min.js"></script>
-<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -84,17 +69,17 @@ div.csl-indent {
 <script async="" src="https://hypothes.is/embed.js"></script>
 
 
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="../../styles.css">
 </head>
 
-<body class="nav-fixed fullcontent">
+<body class="nav-fixed">
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container">
-    <a class="navbar-brand" href="./index.html">
+    <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrew MacDonald</span>
     </a>
   </div>
@@ -104,7 +89,7 @@ div.csl-indent {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="./blog.html">The Study of the Household</a>
+    <a class="nav-link" href="../../blog.html">The Study of the Household</a>
   </li>  
   <li class="nav-item compact">
     <a class="nav-link" href="https://github.com/aammd"><i class="bi bi-github" role="img">
@@ -123,72 +108,69 @@ div.csl-indent {
     </nav>
 </header>
 <!-- content -->
-<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Updating R and your R packages</h1>
+                  <div>
+        <div class="description">
+          <p>Because sometimes: you have to</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
+                <div class="quarto-category">UdeS</div>
+                <div class="quarto-category">stan</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Andrew MacDonald </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">November 11, 2022</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#doctor-update-thyself" id="toc-doctor-update-thyself" class="nav-link active" data-scroll-target="#doctor-update-thyself">Doctor, update thyself</a></li>
+  </ul>
+</nav>
+    </div>
 <!-- main -->
-<div class="quarto-about-broadside column-page">
-  <div class="about-main">
-    <div class="about-entity" style="background-image: url('for_website.png')"></div>
-    <div class="about-contents"><header id="title-block-header" class="quarto-title-block default">
-<div class="quarto-title">
-<h1 class="title">Andrew MacDonald, PhD</h1>
-</div>
-<div class="quarto-title-meta">
-  </div>
-</header><main class="content" id="quarto-document-content">
-<section id="about-me" class="level2">
-<h2 data-anchor-id="about-me">About me</h2>
-<p>I love insects, statistics, but most of all I like solving interesting problems in a collaborative environment</p>
-<p>I am currently a Research Associate at the Université de Sherbrooke. My goal is to improve our ability to make predictions for ecological systems, and to build a community of practice around statistical methods in ecology.</p>
-</section>
-<section id="education" class="level2">
-<h2 data-anchor-id="education">Education</h2>
-<ul>
-<li>PhD, University of British Columbia, 2017</li>
-<li>MSc, University of Toronto, 2009</li>
-<li>BSc, Cape Breton University, 2006</li>
-</ul>
-</section>
-<section id="selected-publications" class="level2">
+<main class="content quarto-banner-title-block" id="quarto-document-content">
 
 
+
+
+<section id="doctor-update-thyself" class="level2">
+<h2 class="anchored" data-anchor-id="doctor-update-thyself">Doctor, update thyself</h2>
+<p>I teach a few R workshops a year, and I often send out the typical “make sure R and Rstudio is up-to-date, using <a href="https://cran.r-project.org/">these</a> helpful <a href="https://posit.co">links</a>. And then of course the workshop starts, and all the class notices that I myself have not updated R in .. 7 months.</p>
+<p>When I do decide to do it, I find I often need to google the correct procedure. In the spirit of this blog, here is a short note detailing the process, inspired by this <a href="https://stackoverflow.com/questions/13656699/update-r-using-rstudio">stackoverflow note</a></p>
 
 
 </section>
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">Selected publications</h2><div id="refs" class="references csl-bib-body hanging-indent" role="doc-bibliography">
-<div id="ref-céréghino2018" class="csl-entry" role="doc-biblioentry">
-Céréghino, Régis, Valério D. Pillar, Diane S. Srivastava, Paula M. de Omena, A. Andrew M. MacDonald, Ignacio M. Barberis, Bruno Corbara, et al. 2018. <span>“Constraints on the Functional Trait Space of Aquatic Invertebrates in Bromeliads.”</span> <em>Functional Ecology</em> 32 (10): 2435–47. <a href="https://doi.org/10.1111/1365-2435.13141">https://doi.org/10.1111/1365-2435.13141</a>.
-</div>
-<div id="ref-macdonald2020a" class="csl-entry" role="doc-biblioentry">
-MacDonald, Arthur Andrew Meahan, Francis Banville, and Timothée Poisot. 2020. <span>“Revisiting the Links-Species Scaling Relationship in Food Webs.”</span> <em>Patterns</em> 1 (7): 100079. <a href="https://doi.org/10.1016/j.patter.2020.100079">https://doi.org/10.1016/j.patter.2020.100079</a>.
-</div>
-<div id="ref-srivastava2012" class="csl-entry" role="doc-biblioentry">
-Srivastava, Diane S., Marc W. Cadotte, A. Andrew M. MacDonald, Robin G. Marushia, and Nicholas Mirotchnick. 2012. <span>“Phylogenetic Diversity and the Functioning of Ecosystems.”</span> Edited by Arne Mooers. <em>Ecology Letters</em> 15 (7): 637–48. <a href="https://doi.org/10.1111/j.1461-0248.2012.01795.x">https://doi.org/10.1111/j.1461-0248.2012.01795.x</a>.
-</div>
-</div></section></div></main></div>
-  </div>
-  <div class="about-links">
-  <a href="https://twitter.com/polesasunder" class="about-link">
-    <i class="bi bi-twitter"></i>
-     <span class="about-link-text">Twitter</span>
-  </a>
-  <a href="https://www.linkedin.com/in/andrew-macdonald-76649474/" class="about-link">
-    <i class="bi bi-linkedin"></i>
-     <span class="about-link-text">LinkedIn</span>
-  </a>
-  <a href="https://github.com/aammd" class="about-link">
-    <i class="bi bi-github"></i>
-     <span class="about-link-text">Github</span>
-  </a>
-  <a href="mailto:andrew.macdonald@usherbrooke.ca" class="about-link">
-    <i class="bi bi-envelope"></i>
-     <span class="about-link-text">email</span>
-  </a>
-</div>
-</div>
- <!-- /main -->
+
+</main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -209,6 +191,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
   toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
   const clipboard = new window.ClipboardJS('.code-copy-button', {
     target: function(trigger) {
       return trigger.previousElementSibling;

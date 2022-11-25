@@ -9,10 +9,13 @@ categories: [UdeS, stan, brms]
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+options(tidyverse.quiet = TRUE)
 library(targets)
 library(ggplot2)
 library(tidyverse)
 library(tidybayes)
+library(brms)
+source("posts/2022-11-23-evolution-of-plasticity/evolution_of_plasticity.R")
 ```
 
 ## Data simulation
@@ -20,7 +23,6 @@ library(tidybayes)
 RARE to have more than two years per female
 
 let's start with one female
-
 
 ```{r}
 n <- 1
@@ -69,11 +71,9 @@ one_bird |>
   geom_point()
 ```
 
-
 ## Date of laying
 
 When do birds lay eggs?
-
 
 ```{r}
 
@@ -98,8 +98,6 @@ one_bird_dponte |>
 summary(lm(observed_dponte ~ general_temp_c, data = one_bird_dponte))
 ```
 
-
-
 ## combine the two
 
 Birds which lay earlier also lay larger eggs, possibly because they are High Quality Moms.
@@ -113,7 +111,6 @@ pop_average_csize <- 4
 mom_quality <- 4
 quality_on_dponte <- 2
 quality_on_csize <- .2
-
 
 ```
 
@@ -143,6 +140,10 @@ quality_effects <- tibble(
 Some of these values are unreasonable! we can adjust later
 
 ```{r}
+#| layout-ncol: 2
+#| fig-cap: 
+#|   - "One female adjusting clutch size in response to temperature"
+#|   - "One female adjusting laying date in repsonse to temperature"
 quality_effects |> 
   ggplot(aes(x = general_temp, y = obs_csize)) + 
   geom_point()
@@ -153,47 +154,21 @@ quality_effects |>
 
 ## Multiple females
 
-We can repeat this process for multiple females at once! 
+We can repeat this process for multiple females at once! let's wrap it in a function to make it easier to work with.
 
 ```{r}
-n_females <- 42
-
-lifespan <- 5
-
-general_temp <- runif(lifespan, 2, 12)
-
-general_temp_c <- general_temp - mean(general_temp)
-
-mom_qualities <- runif(n_females, min = 0, max = 4)
-
-many_moms_temperature <- expand_grid(year = 1:lifespan,
-            idF1 = 1:n_females) |> 
-  mutate(mom_quality = mom_qualities[idF1],
-         general_temp = general_temp[year],
-         general_temp_c = general_temp_c[year],
-         ## adding the biology
-         ## Effect of temperature -- does it depend on quality? let's say that it DOES (for now) 
-         effet_temp_dponte_qual = -.7*mom_quality,
-         effet_temp_csize_qual = .1*log(mom_quality),
-         # csize
-         mom_avg_csize = log(pop_average_csize) +  quality_on_csize*log(mom_quality),
-         temp_avg_csize = exp(mom_avg_csize + effet_temp_csize_qual*general_temp_c),
-         # dponte
-         mom_avg_dponte = pop_average_dponte + quality_on_dponte*mom_quality,
-         temp_avg_dponte = mom_avg_dponte + effet_temp_dponte_qual*general_temp_c,
-         ## observations
-         obs_csize = rpois(n = length(year), lambda = temp_avg_csize),
-         obs_dponte = rnorm(n = length(year), mean = temp_avg_dponte, sd = 3) |> round()
-  )
-
-
-
-
+simulate_many_moms
+many_moms_temperature <- simulate_many_moms()
 ```
 
-let's plot it! 
+
+let's plot it!
 
 ```{r}
+#| layout-ncol: 2
+#| fig-cap: 
+#|   - "simulations for all females in all years"
+#|   - "simple linear models fit to each female, showing the variation in slopes (i.e. in plasticity"
 many_moms_temperature |> 
   ggplot(aes(x = general_temp, y = obs_dponte)) + 
   geom_point()
@@ -215,28 +190,11 @@ many_moms_temperature |>
 
 ## model in brms
 
-```{r}
-library(brms)
-glimpse(many_moms_temperature)
+```{targets brms-target}
 
-## define formulae
-csize_model_bf <- bf(obs_csize ~ 1 + general_temp_c + (1 + general_temp_c|f|idF1),
-                     family = poisson())
 
-dponte_model_bf <- bf(obs_dponte ~ 1 + general_temp_c + (1 + general_temp_c|f|idF1),
-                      family = gaussian())
-
-## set priors
-
-## run full model
-full_model <- brm(csize_model_bf + dponte_model_bf, 
-                  data = many_moms_temperature,
-                  cores = 2, chains = 2)
 
 ```
-
-
-
 
 ## fitness
 
@@ -244,4 +202,4 @@ full_model <- brm(csize_model_bf + dponte_model_bf,
 
 very small sample sizes per female -- experiment with this (2 years or more)
 
-The data are 0-truncated: only nesting females are measured! 
+The data are 0-truncated: only nesting females are measured!
