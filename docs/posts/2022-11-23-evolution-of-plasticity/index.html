@@ -239,10 +239,13 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(targets)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">tidyverse.quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(targets)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(brms)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"posts/2022-11-23-evolution-of-plasticity/evolution_of_plasticity.R"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="study-question" class="level2">
 <h2 class="anchored" data-anchor-id="study-question">Study question</h2>
@@ -287,11 +290,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <pre><code># A tibble: 5 x 5
    year general_temp general_temp_c expected_clutch observed_clutch
   &lt;int&gt;        &lt;dbl&gt;          &lt;dbl&gt;           &lt;dbl&gt;           &lt;int&gt;
-1     1        11.6            4.72            2.08               5
-2     2         3.00          -3.92            1.22               4
-3     3         8.10           1.19            1.73               9
-4     4         3.05          -3.86            1.22               5
-5     5         8.78           1.87            1.80              10</code></pre>
+1     1         8.44          0.536            1.66               3
+2     2         5.71         -2.20             1.39               4
+3     3         7.42         -0.491            1.56               3
+4     4         8.26          0.351            1.64               4
+5     5         9.71          1.81             1.79               6</code></pre>
 </div>
 </div>
 <p>Make a simple model to measure</p>
@@ -304,20 +307,20 @@ glm(formula = observed_clutch ~ general_temp_c, data = one_bird)
 
 Deviance Residuals: 
       1        2        3        4        5  
--3.0812  -1.3699   2.0256  -0.3882   2.8136  
+-1.2182   0.8967  -0.7998  -0.1430   1.2643  
 
 Coefficients:
-               Estimate Std. Error t value Pr(&gt;|t|)  
-(Intercept)      6.6000     1.2527   5.268   0.0133 *
-general_temp_c   0.3141     0.3698   0.849   0.4581  
+               Estimate Std. Error t value Pr(&gt;|t|)   
+(Intercept)      4.0000     0.5506   7.265  0.00538 **
+general_temp_c   0.4073     0.4159   0.979  0.39967   
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-(Dispersion parameter for gaussian family taken to be 7.846815)
+(Dispersion parameter for gaussian family taken to be 1.515561)
 
-    Null deviance: 29.20  on 4  degrees of freedom
-Residual deviance: 23.54  on 3  degrees of freedom
-AIC: 27.936
+    Null deviance: 6.0000  on 4  degrees of freedom
+Residual deviance: 4.5467  on 3  degrees of freedom
+AIC: 19.714
 
 Number of Fisher Scoring iterations: 2</code></pre>
 </div>
@@ -362,18 +365,18 @@ lm(formula = observed_dponte ~ general_temp_c, data = one_bird_dponte)
 
 Residuals:
      1      2      3      4      5 
- 3.527 -1.502 -3.282  3.660 -2.403 
+-2.614  4.305 -7.271  1.908  3.673 
 
 Coefficients:
                Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)    136.6000     1.7251  79.185 4.44e-06 ***
-general_temp_c  -2.7834     0.5092  -5.466    0.012 *  
+(Intercept)     138.000      2.521  54.729 1.34e-05 ***
+general_temp_c   -2.587      1.905  -1.358    0.268    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 3.857 on 3 degrees of freedom
-Multiple R-squared:  0.9088,    Adjusted R-squared:  0.8783 
-F-statistic: 29.88 on 1 and 3 DF,  p-value: 0.01204</code></pre>
+Residual standard error: 5.638 on 3 degrees of freedom
+Multiple R-squared:  0.3807,    Adjusted R-squared:  0.1743 
+F-statistic: 1.844 on 1 and 3 DF,  p-value: 0.2676</code></pre>
 </div>
 </div>
 </section>
@@ -412,70 +415,93 @@ F-statistic: 29.88 on 1 and 3 DF,  p-value: 0.01204</code></pre>
 <span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Some of these values are unreasonable! we can adjust later</p>
-<div class="cell">
+<div>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>quality_effects <span class="sc">|&gt;</span> </span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> general_temp, <span class="at">y =</span> obs_csize)) <span class="sc">+</span> </span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>quality_effects <span class="sc">|&gt;</span> </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> general_temp, <span class="at">y =</span> obs_dponte)) <span class="sc">+</span> <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">One female adjusting clutch size in response to temperature</figcaption><p></p>
+</figure>
 </div>
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>quality_effects <span class="sc">|&gt;</span> </span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> general_temp, <span class="at">y =</span> obs_dponte)) <span class="sc">+</span> <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-18-2.png" class="img-fluid" width="672"></p>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-18-2.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">One female adjusting laying date in repsonse to temperature</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
 </div>
 </div>
 </section>
 <section id="multiple-females" class="level2">
 <h2 class="anchored" data-anchor-id="multiple-females">Multiple females</h2>
-<p>We can repeat this process for multiple females at once!</p>
+<p>We can repeat this process for multiple females at once! let’s wrap it in a function to make it easier to work with.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>n_females <span class="ot">&lt;-</span> <span class="dv">42</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>lifespan <span class="ot">&lt;-</span> <span class="dv">5</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>general_temp <span class="ot">&lt;-</span> <span class="fu">runif</span>(lifespan, <span class="dv">2</span>, <span class="dv">12</span>)</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>general_temp_c <span class="ot">&lt;-</span> general_temp <span class="sc">-</span> <span class="fu">mean</span>(general_temp)</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>mom_qualities <span class="ot">&lt;-</span> <span class="fu">runif</span>(n_females, <span class="at">min =</span> <span class="dv">0</span>, <span class="at">max =</span> <span class="dv">4</span>)</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>many_moms_temperature <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">year =</span> <span class="dv">1</span><span class="sc">:</span>lifespan,</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>            <span class="at">idF1 =</span> <span class="dv">1</span><span class="sc">:</span>n_females) <span class="sc">|&gt;</span> </span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mom_quality =</span> mom_qualities[idF1],</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">general_temp =</span> general_temp[year],</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">general_temp_c =</span> general_temp_c[year],</span>
-<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>         <span class="do">## adding the biology</span></span>
-<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>         <span class="do">## Effect of temperature -- does it depend on quality? let's say that it DOES (for now) </span></span>
-<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">effet_temp_dponte_qual =</span> <span class="sc">-</span>.<span class="dv">7</span><span class="sc">*</span>mom_quality,</span>
-<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">effet_temp_csize_qual =</span> .<span class="dv">1</span><span class="sc">*</span><span class="fu">log</span>(mom_quality),</span>
-<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>         <span class="co"># csize</span></span>
-<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">mom_avg_csize =</span> <span class="fu">log</span>(pop_average_csize) <span class="sc">+</span>  quality_on_csize<span class="sc">*</span><span class="fu">log</span>(mom_quality),</span>
-<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>         <span class="at">temp_avg_csize =</span> <span class="fu">exp</span>(mom_avg_csize <span class="sc">+</span> effet_temp_csize_qual<span class="sc">*</span>general_temp_c),</span>
-<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a>         <span class="co"># dponte</span></span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>         <span class="at">mom_avg_dponte =</span> pop_average_dponte <span class="sc">+</span> quality_on_dponte<span class="sc">*</span>mom_quality,</span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>         <span class="at">temp_avg_dponte =</span> mom_avg_dponte <span class="sc">+</span> effet_temp_dponte_qual<span class="sc">*</span>general_temp_c,</span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>         <span class="do">## observations</span></span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>         <span class="at">obs_csize =</span> <span class="fu">rpois</span>(<span class="at">n =</span> <span class="fu">length</span>(year), <span class="at">lambda =</span> temp_avg_csize),</span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>         <span class="at">obs_dponte =</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">length</span>(year), <span class="at">mean =</span> temp_avg_dponte, <span class="at">sd =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> <span class="fu">round</span>()</span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>simulate_many_moms</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>function (pop_average_dponte = 138, pop_average_csize = 4, mom_quality_max = 4, 
+    quality_on_dponte = 2, quality_on_csize = 0.2, n_females = 42, 
+    lifespan = 5, temp_range = c(2, 12)) 
+{
+    general_temp &lt;- runif(lifespan, temp_range[1], max = temp_range[2])
+    general_temp_c &lt;- general_temp - mean(general_temp)
+    mom_qualities &lt;- runif(n_females, min = 0, max = 4)
+    many_moms_temperature &lt;- mutate(expand_grid(year = 1:lifespan, 
+        idF1 = 1:n_females), mom_quality = mom_qualities[idF1], 
+        general_temp = general_temp[year], general_temp_c = general_temp_c[year], 
+        effet_temp_dponte_qual = -0.7 * mom_quality, effet_temp_csize_qual = 0.1 * 
+            log(mom_quality), mom_avg_csize = log(pop_average_csize) + 
+            quality_on_csize * log(mom_quality), temp_avg_csize = exp(mom_avg_csize + 
+            effet_temp_csize_qual * general_temp_c), mom_avg_dponte = pop_average_dponte + 
+            quality_on_dponte * mom_quality, temp_avg_dponte = mom_avg_dponte + 
+            effet_temp_dponte_qual * general_temp_c, obs_csize = rpois(n = length(year), 
+            lambda = temp_avg_csize), obs_dponte = round(rnorm(n = length(year), 
+            mean = temp_avg_dponte, sd = 3)))
+    return(many_moms_temperature)
+}</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>many_moms_temperature <span class="ot">&lt;-</span> <span class="fu">simulate_many_moms</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>let’s plot it!</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>many_moms_temperature <span class="sc">|&gt;</span> </span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> general_temp, <span class="at">y =</span> obs_dponte)) <span class="sc">+</span> </span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
-</div>
+<div>
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>many_moms_temperature <span class="sc">|&gt;</span> </span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> general_temp, <span class="at">y =</span> obs_dponte, <span class="at">group =</span> idF1)) <span class="sc">+</span> </span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> general_temp, <span class="at">y =</span> obs_dponte)) <span class="sc">+</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>many_moms_temperature <span class="sc">|&gt;</span> </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> general_temp, <span class="at">y =</span> obs_dponte, <span class="at">group =</span> idF1)) <span class="sc">+</span> </span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">se =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>`geom_smooth()` using formula 'y ~ x'</code></pre>
 </div>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-22-2.png" class="img-fluid" width="672"></p>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">simulations for all females in all years</figcaption><p></p>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-22-2.png" class="img-fluid figure-img" width="672"></p>
+<p></p><figcaption class="figure-caption">simple linear models fit to each female, showing the variation in slopes (i.e.&nbsp;in plasticity</figcaption><p></p>
+</figure>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="cell">
@@ -498,74 +524,6 @@ F-statistic: 29.88 on 1 and 3 DF,  p-value: 0.01204</code></pre>
 </section>
 <section id="model-in-brms" class="level2">
 <h2 class="anchored" data-anchor-id="model-in-brms">model in brms</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(brms)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: Rcpp</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: package 'Rcpp' was built under R version 4.1.3</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading 'brms' package (version 2.16.6). Useful instructions
-can be found by typing help('brms'). A more detailed introduction
-to the package is available through vignette('brms_overview').</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'brms'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following objects are masked from 'package:tidybayes':
-
-    dstudent_t, pstudent_t, qstudent_t, rstudent_t</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:stats':
-
-    ar</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glimpse</span>(many_moms_temperature)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Rows: 210
-Columns: 13
-$ year                   &lt;int&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,~
-$ idF1                   &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, ~
-$ mom_quality            &lt;dbl&gt; 0.2340745, 2.8196834, 3.4440948, 3.1010931, 3.7~
-$ general_temp           &lt;dbl&gt; 11.79175, 11.79175, 11.79175, 11.79175, 11.7917~
-$ general_temp_c         &lt;dbl&gt; 4.00622, 4.00622, 4.00622, 4.00622, 4.00622, 4.~
-$ effet_temp_dponte_qual &lt;dbl&gt; -0.16385216, -1.97377840, -2.41086634, -2.17076~
-$ effet_temp_csize_qual  &lt;dbl&gt; -0.14521158, 0.10366246, 0.12366611, 0.11317546~
-$ mom_avg_csize          &lt;dbl&gt; 1.0958712, 1.5936193, 1.6336266, 1.6126453, 1.6~
-$ temp_avg_csize         &lt;dbl&gt; 1.6721691, 7.4552160, 8.4069626, 7.8935906, 8.9~
-$ mom_avg_dponte         &lt;dbl&gt; 138.4681, 143.6394, 144.8882, 144.2022, 145.585~
-$ temp_avg_dponte        &lt;dbl&gt; 137.8117, 135.7320, 135.2297, 135.5056, 134.949~
-$ obs_csize              &lt;int&gt; 2, 12, 3, 5, 5, 4, 2, 10, 1, 6, 4, 2, 5, 3, 8, ~
-$ obs_dponte             &lt;dbl&gt; 128, 134, 131, 139, 138, 131, 134, 137, 139, 13~</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="do">## define formulae</span></span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>csize_model_bf <span class="ot">&lt;-</span> <span class="fu">bf</span>(obs_csize <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> general_temp_c <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> general_temp_c<span class="sc">|</span>f<span class="sc">|</span>idF1),</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">family =</span> <span class="fu">poisson</span>())</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>dponte_model_bf <span class="ot">&lt;-</span> <span class="fu">bf</span>(obs_dponte <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> general_temp_c <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> general_temp_c<span class="sc">|</span>f<span class="sc">|</span>idF1),</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>                      <span class="at">family =</span> <span class="fu">gaussian</span>())</span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a><span class="do">## set priors</span></span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="do">## run full model</span></span>
-<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>full_model <span class="ot">&lt;-</span> <span class="fu">brm</span>(csize_model_bf <span class="sc">+</span> dponte_model_bf, </span>
-<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>                  <span class="at">data =</span> many_moms_temperature,</span>
-<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>                  <span class="at">cores =</span> <span class="dv">2</span>, <span class="at">chains =</span> <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Setting 'rescor' to FALSE by default for this model</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Compiling Stan program...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Start sampling</code></pre>
-</div>
-</div>
 </section>
 <section id="fitness" class="level2">
 <h2 class="anchored" data-anchor-id="fitness">fitness</h2>

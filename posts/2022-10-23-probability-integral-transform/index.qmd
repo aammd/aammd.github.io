@@ -3,7 +3,7 @@ title: "Probability integral transforms"
 author: "Andrew"
 date: 23 Oct 2022
 editor: visual
-freeze: true
+freeze: false
 ---
 
 take random numbers from a distribution

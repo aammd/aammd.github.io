@@ -1,0 +1,18 @@
+---
+title: "Updating R and your R packages"
+author: "Andrew MacDonald"
+description: |
+  Because sometimes: you have to
+date: 11 Nov 2022
+editor: visual
+categories: [UdeS, stan]
+---
+
+## Doctor, update thyself
+
+I teach a few R workshops a year, and I often send out the typical "make sure R and Rstudio is up-to-date, using [these](https://cran.r-project.org/) helpful [links](https://posit.co). And then of course the workshop starts, and all the class notices that I myself have not updated R in .. 7 months. 
+
+When I do decide to do it, I find I often need to google the correct procedure. 
+In the spirit of this blog, here is a short note detailing the process, inspired by this [stackoverflow note](https://stackoverflow.com/questions/13656699/update-r-using-rstudio)
+
+

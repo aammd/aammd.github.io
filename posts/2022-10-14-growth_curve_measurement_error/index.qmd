@@ -4,7 +4,6 @@ author: "Andrew"
 date: "2022-10-14"
 categories: [stan, simulation]
 freeze: false
-
 ---
 
 ```{r eval=TRUE, message=FALSE, warning=FALSE}
@@ -91,7 +90,7 @@ expected_df <- one_tree_post |>
   mutate(Lt = Lmax * (1 - exp(-r * time)))
 
 expected_plot <- expected_df |> 
-  ggplot(aes(x = time, y = Lt)) + 
+  ggplot(aes(x = time, ydist = Lt)) + 
   stat_lineribbon()
 expected_plot
 ```
