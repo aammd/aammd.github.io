@@ -71,19 +71,17 @@ one_animal |>
   labs(x = "Age", y = "Size") 
 ```
 
-
 ## Nonlinear modelling with BRMS
 
 There are three steps to defining and elementary model with `brms`:
 
-1. write the model
-1. write down some priors
-1. condition the model on data
+1.  write the model
+2.  write down some priors
+3.  condition the model on data
 
 In practice there are many more steps, including prior predictive checks to make sure our priors make sense. In this post I'm going to focus on the mechanistic how-to of fitting a nonlinear model in `brms` and I'll come back to Prior Predictive checks, which I love, in another post.
 
-First we define the model, here we need to indicate what are parameters by doing a `~1` after each. 
-Yes it is a formula with multiple little formulae inside it! Feel the power flow through you.
+First we define the model, here we need to indicate what are parameters by doing a `~1` after each. Yes it is a formula with multiple little formulae inside it! Feel the power flow through you.
 
 ```{r}
 

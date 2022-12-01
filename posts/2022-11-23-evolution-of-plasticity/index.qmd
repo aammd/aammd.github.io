@@ -49,8 +49,6 @@ $$
 $$
 
 ```{r}
-library(tidyverse)
-
 effet_temp <- .1
 
 one_bird <- tibble(year = 1:lifespan,
@@ -193,6 +191,17 @@ many_moms_temperature |>
 ```
 
 ## model in brms
+
+The model above describes a situation where female swallows have some underlying trait ("quality").
+This trait determines if this female will be above or below the rest of her population in two different outcomes: the timeing of her laying and the size of her clutch. 
+This is a model structure that can't be easily fit in `lme4` at least as far as I know. 
+However we can specify it in a very straightforward way using `brms`:
+
+```{r}
+#| echo: false
+#| class.output: r
+brms_dponte_csize
+```
 
 
 ## fitness

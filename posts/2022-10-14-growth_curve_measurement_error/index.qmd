@@ -43,13 +43,13 @@ vb_one_tree |>
   theme_bw()
 ```
 
-simulate this same data\`\`\` in targets
+simulate this same data in targets
 
 fit a stan model to it! here is the Stan model: formatted?
 
 ```{r}
 #| echo: FALSE
-#| class-output: .stan
+#| class.output: stan
 
 suppressPackageStartupMessages(library(cmdstanr))
 vb_one_tree <- cmdstan_model(here::here("posts", 
