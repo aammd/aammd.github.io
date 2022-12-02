@@ -1,0 +1,61 @@
+---
+title: "Selection on plasticity"
+author: "Andrew MacDonald"
+description: |
+  Stan model where a slope is also a prdictor
+date: 11 Nov 2022
+editor: visual
+categories: [UdeS, stan, plasticity]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+source("posts/2022-11-29-selection-on-plasticity/functions.R")
+```
+
+## Model for measuring selection directly:
+
+
+
+```{r}
+true_corr_plasticity_avg <- .7
+sd_avg <- .9
+sd_plasticity <- .3
+n_females <- 47
+
+corrmat <- matrix(c(1, true_corr_plasticity_avg, true_corr_plasticity_avg, 1),
+       byrow = TRUE, ncol = 2)
+
+var_covar <- diag(c(sd_avg, sd_plasticity)) %*% corrmat %*% diag(c(sd_avg, sd_plasticity))
+
+female_avg_and_plasticity <- MASS::mvrnorm(
+  n = n_females,
+  mu = c(0,0),
+  Sigma = var_covar)
+
+```
+
+We have the average and the slope for each female. 
+
+For a bit of extra realism, lets simulate several years and let the females belong to different cohorts. 
+for simplicity, lets say each female lives for 
+
+```{r}
+twenty_years_environment <- runif(20, min = -3, max = 3)
+
+female_start_years <- sample(1:16, size = n_females, replace = TRUE)
+library(tidyverse)
+
+df <- tibble(
+  female_id = rep(1:n_females, each = 4),
+  year_id = rep(female_start_years, each = 4) + 0:3,
+  env = twenty_years_environment[year_id]
+)
+
+df$env |> mean()
+
+```
+
