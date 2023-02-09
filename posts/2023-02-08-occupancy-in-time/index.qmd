@@ -1,0 +1,111 @@
+---
+title: "Modelling occupancy plus phenology"
+author: "Andrew MacDonald and Gabriel Bergeron"
+description: |
+  Are they really there and when.
+date: 11 Nov 2022
+editor: visual
+categories: [UdeS, stan]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+## occupancy models
+
+
+$$ 
+\begin{align}
+Pr(y = 1) &= \text{Bernoulli}(wp) \\
+w &= 1 - (1 - d)^{\text{effort}} \\
+\text{logit}(p) &= \alpha \\
+\text{logit}(d) &= \beta \\
+\alpha &\sim \text{N}(-1,0.5) \\
+\beta &\sim \text{N}(0,0.5) \\
+\end{align}
+$$
+
+
+$$ 
+\begin{align}
+Pr(y = 0) &= (1 - d) ^ {\text{effort}}p + 1 - p \\
+{logit}(p) &= \alpha 
+\end{align}
+$$
+
+ very simple occupancy model that controls for effort
+
+$$
+y = 
+\begin{cases}
+ y = 1, wp \\
+ y = 0, (1 - w)p + 1 - p
+\end{cases}
+$$
+
+
+
+```{r}
+curve(1 - (1 - .4)^x, xlim = c(0, 20))
+abline(v = 1, h = .4)
+```
+
+
+This can also be done with the cloglog link
+
+```{r}
+fake_data <- tibble(sample_id = 1:200,
+                    real_pres = rbinom(n = length(sample_id),
+                                       p = .7,
+                                       size = 1),
+                    sample_size = round(
+                      runif(
+                        n = length(sample_id),
+                        min = 2, max = 40)
+                    )) |>
+  rowwise() |> 
+  mutate(pa = list(rbinom(n = sample_size,
+                          p = .1,
+                          size = 1)),
+         abd = sum(pa) * real_pres)
+
+ggplot(fake_data, aes(x = sample_size, y = abd)) + geom_point()
+
+```
+
+```{r}
+fake_data |> 
+  mutate(prop = abd/sample_size) |> 
+  pull(prop) |> mean()
+```
+
+
+## validate a simple Stan model
+
+```{r}
+library(cmdstanr)
+
+simple_occ_logit <- cmdstan_model("posts/2023-02-08-occupancy-in-time/simple_occ_logit.stan")
+
+```
+
+
+```{r}
+data_list <- list(N = nrow(fake_data),
+                  y = as.numeric(fake_data$abd>0),
+                  sample_size = fake_data$sample_size)
+data_list
+```
+
+```{r}
+model_result <- simple_occ_logit$sample(data = data_list)
+
+model_result$summary()
+```
+
+
+https://mc-stan.org/users/documentation/case-studies/dorazio-royle-occupancy.html
