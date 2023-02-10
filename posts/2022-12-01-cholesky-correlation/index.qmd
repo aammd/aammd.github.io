@@ -18,7 +18,6 @@ library(tidybayes)
 
 ## code
 
-
 ```{r}
 plot(density(tan(runif(5000,min = 0, max = pi/2))*.3, from = 0), 
      xlim = c(0, 100))
@@ -50,6 +49,16 @@ abline(v=eg[1,2])
 eg <- rethinking::rlkjcorr(1, 2, 5)
 cc <- chol(eg)
 
+mm <- matrix(rnorm(4000, mean = 0, sd = 1), ncol = 2)
+
+plot(mm)
+
+yy <- t(t(cc) %*% t(mm))
+
+plot(yy)
+
+cor(yy)
+
 purrr::rerun(50,{
   zz <- matrix(data = rnorm(500), ncol = 2)
   # plot(zz)
@@ -68,4 +77,3 @@ yy <- t(L %*% t(zz))
 plot(yy)
 cor(yy)
 ```
-
