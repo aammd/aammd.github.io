@@ -3,6 +3,8 @@ title: "Population growth with functional programming"
 author: "Andrew MacDonald"
 date: 2016-12-07
 categories: ["R"]
+execute:
+  freeze: auto
 ---
 
 ```{r echo=FALSE}
@@ -121,7 +123,7 @@ P_{t+1} = P_t \times (1 - m + c \times R_t \times a)
 $$
 
 ```{r fig-demo, fig.path=""}
-#| class: preview-image
+#| class.output: preview-image
 #| 
 res_cons <- function(vec, m, r, K, a, c){
   out1 <- vec[["res"]] * (1 + r * (1 - vec[["res"]] / K ) - vec[["con"]] * a)

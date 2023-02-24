@@ -4,9 +4,10 @@ author: "Andrew MacDonald"
 description: |
   Because I want to understand it.
 date: 11 Nov 2022
-editor: visual
 categories: [UdeS, stan]
 draft: true
+execute:
+  eval: false
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
@@ -18,11 +19,8 @@ library(tidybayes)
 
 ## What is this post
 
-There's a concise and optimized hierarchical model described in the Stan manual. I would like to understand it in its Final Form as much as possible. 
-So here I want to write out the stan code, simulate from the model (using Stan and R) and fit it to recover parameters.
+There's a concise and optimized hierarchical model described in the Stan manual. I would like to understand it in its Final Form as much as possible. So here I want to write out the stan code, simulate from the model (using Stan and R) and fit it to recover parameters.
 
 ## The model
 
 This model is described in detail [in the Stan user's manual](https://mc-stan.org/docs/stan-users-guide/multivariate-hierarchical-priors.html)
-
-

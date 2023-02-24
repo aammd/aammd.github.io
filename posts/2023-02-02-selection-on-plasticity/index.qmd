@@ -4,8 +4,9 @@ author: "Andrew MacDonald"
 description: |
   Plus ça change, plus c'est la change qui change
 date: 02 Feb 2023
-editor: visual
 categories: [UdeS, stan]
+execute:
+  eval: false
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
@@ -15,18 +16,17 @@ library(tidyverse)
 library(tidybayes)
 ```
 
-when an animal shows a difference 
+when an animal shows a difference
 
-All animals respond to the enbironment, adapting thei physical or biological characteristics into 
+All animals respond to the environment, adapting their physical or biological characteristics into
 
 all an
 
-the response that an animal has, is in part determined by heir genetics, by heritable variation in their ability 
+the response that an animal has, is in part determined by heir genetics, by heritable variation in their ability
 
-other factors can of course invluence who an animal responds to changing environment. It might be that animals only respond to changing environment when they are in good condition. or that changes in the environment always provoke differenc responses, but hat selection only happnens a few years out of the total 
+other factors can of course invluence who an animal responds to changing environment. It might be that animals only respond to changing environment when they are in good condition. or that changes in the environment always provoke differenc responses, but hat selection only happnens a few years out of the total
 
-
-anyway, we are going to simulate data from a complex model of selection on two correlated traits. 
+anyway, we are going to simulate data from a complex model of selection on two correlated traits.
 
 let's start small
 
@@ -75,9 +75,9 @@ fake_obs_2par |>
   ggplot(aes(x = x_c, y = y, group = indiv_id)) + geom_line()
 ```
 
-this is just a simple demo of a pretty general pattern! 
+this is just a simple demo of a pretty general pattern!
 
-centering just moves the line around -- I think we would model this this way, if we felt that the 
+centering just moves the line around -- I think we would model this this way, if we felt that the
 
 let's start simulating data and comparing the fit with models
 
@@ -101,7 +101,6 @@ m <- lmer(yobs ~ X + (X|indiv_id), data = fake_obs_error)
 m |> summary()
 ```
 
-
 works but not really helpful for the intercepts -- we need to fit a centered model to get those values:
 
 ```{r}
@@ -113,14 +112,13 @@ Now we can recover parameters that went in to the model.
 
 ## two correlated predictors
 
-This will come together with the rest of the model soon, but I want to get a start on this now. 
-The two traits we are mesauring are kind of weird and different from the tutal way of thinking about environemtnal traits. let me try to explain it. so there was another procedure earlier which attempted to measure the "window" of temperature which provokes the greatest change. 
+This will come together with the rest of the model soon, but I want to get a start on this now. The two traits we are mesauring are kind of weird and different from the tutal way of thinking about environemtnal traits. let me try to explain it. so there was another procedure earlier which attempted to measure the "window" of temperature which provokes the greatest change.
 
-as an aside, do we expect the greatest variation to be found with the greatest selection? consider the number of adjectives in a scientivi paper vs the number of refrerences. I don't know, but I would epect that the former is way more variable -- and matters far less. 
+as an aside, do we expect the greatest variation to be found with the greatest selection? consider the number of adjectives in a scientivi paper vs the number of refrerences. I don't know, but I would epect that the former is way more variable -- and matters far less.
 
 anyway that was done. So the two response variables here are measured in the same units but not exactly the same VALUES for each
 
-just makes me curious to start by simulating this (and perhaps also to look in the data for examples) 
+just makes me curious to start by simulating this (and perhaps also to look in the data for examples)
 
 ```{r}
 tibble(orig = rerun(350, runif(30, min = -1, max = 1))) |> 
@@ -130,14 +128,40 @@ tibble(orig = rerun(350, runif(30, min = -1, max = 1))) |>
   ggplot(aes(x = x1, y = x2)) + geom_point()
 ```
 
-Sure enough they are correlated. I'm sure with some effort I could calculate the equation for this correlation, but let's not. 
+Sure enough they are correlated. I'm sure with some effort I could calculate the equation for this correlation, but let's not.
 
-Did audrey do this differently for each bird? for each environmental variable or what? does it count as conditioning? 
+Did audrey do this differently for each bird? for each environmental variable or what? does it count as conditioning?
 
 TK ask her this question.
 
-## back to main question: measuring selection 
+## back to main question: measuring selection
 
+lets begin by replicating the bivariate model of fitness that you see, for example, in
 
+start with fake obs eror
 
+```{r}
+# environment 
+nindivid <- 38
+neach <- 4
 
+fake_obs <- expand_grid(indiv_id = rep(1:nindivid, each = neach)) |> 
+  mutate(X = runif(length(indiv_id), min = 11, max = 26))
+
+# slopes
+slope_mean <- 2.6
+slope_sd <- .9
+intercept_mean <- 45
+intercept_sd <- 6
+b_1 <- rnorm(nindivid, mean = slope_mean, sd = slope_sd)
+b_0 <-  rnorm(nindivid, mean = slope_mean, sd = slope_sd)
+
+fake_obs |> 
+  mutate(b_0 = b_0,
+         b_1 = b_1[indiv_id],
+         y = b_0 + b_1 * X)
+```
+
+```{r}
+fake_obs_error
+```

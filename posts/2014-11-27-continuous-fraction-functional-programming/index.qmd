@@ -3,6 +3,8 @@ title: "Continuous fractions with Map and Reduce"
 author: "Andrew MacDonald"
 date: 27 Sep 2014
 categories: [R]
+execute:
+  freeze: auto
 ---
 
 Over the summer, some of us here at UBC started a [reading group](https://github.com/aammd/UBCadv-r) based around Hadley Wickham's book, [Advanced R Programming](http://adv-r.had.co.nz/). The goal was to compare our answers to the exercises and our impressions of the content.
@@ -112,11 +114,11 @@ denominator <- function(k){
 
 ```
 
-## calculating `pi`
+## calculating $\pi$
 
 There are several ways to calculate $\pi$, based on different forms of this equation. Apparently they converge at different rates. here are some examples:
 
-```{r picomparion, message=FALSE, warniing = FALSE}
+```{r picomparion, message=FALSE, warning = FALSE}
 leibniz <- function(k){
   seqs <- seq(from = 1, by = 2, length.out = k -1)
   N <- c(4, seqs ^ 2)

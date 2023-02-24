@@ -32,8 +32,3 @@ I am currently a Research Associate at the Université de Sherbrooke. My goal is
 -   BSc, Cape Breton University, 2006
 
 ## Selected publications
-
----
-nocite: |
-  @macdonald2020a, @srivastava2012, @céréghino2018
----

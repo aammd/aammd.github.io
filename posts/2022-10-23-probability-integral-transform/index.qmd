@@ -2,11 +2,11 @@
 title: "Probability integral transforms"
 author: "Andrew"
 date: 23 Oct 2022
-editor: visual
-freeze: false
+execute:
+  freeze: auto
 ---
 
-take random numbers from a distribution
+Take random numbers from a distribution
 
 ```{r}
 some_numbers <- rnorm(1560, mean = 14, sd = 2.5)

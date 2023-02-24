@@ -3,7 +3,9 @@ title: "Growth curves"
 author: "Andrew"
 date: "2022-10-14"
 categories: [stan, simulation]
-freeze: false
+freeze: true
+execute: 
+  eval: false
 ---
 
 ```{r eval=TRUE, message=FALSE, warning=FALSE}

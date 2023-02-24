@@ -4,8 +4,9 @@ author: "Andrew MacDonald"
 description: |
   keep it realistic.
 date: 11 Nov 2022
-editor: visual
 categories: [UdeS, stan]
+execute: 
+  eval: false
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}

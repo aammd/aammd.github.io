@@ -314,8 +314,8 @@ r &amp;\sim ...
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="fu">get_prior</span>(vb_form, <span class="at">data =</span> one_animal)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>                 prior class      coef group resp dpar      nlpar bound
- student_t(3, 0, 25.9) sigma                                           
+<pre><code>                 prior class      coef group resp dpar      nlpar lb ub
+ student_t(3, 0, 17.1) sigma                                       0   
                 (flat)     b                           growthrate      
                 (flat)     b Intercept                 growthrate      
                 (flat)     b                              maxsize      
@@ -351,7 +351,7 @@ r &amp;\sim ...
 <span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_dist_lineribbon</span>() <span class="sc">+</span> </span>
 <span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> age, <span class="at">y =</span> obs_size), <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
