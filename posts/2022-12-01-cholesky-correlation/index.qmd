@@ -50,6 +50,8 @@ abline(v=eg[1,2])
 eg <- rethinking::rlkjcorr(1, 2, 5)
 cc <- chol(eg)
 
+t(cc) %*% cc
+
 mm <- matrix(rnorm(4000, mean = 0, sd = 1), ncol = 2)
 
 plot(mm)
@@ -78,3 +80,5 @@ yy <- t(L %*% t(zz))
 plot(yy)
 cor(yy)
 ```
+
+Another way to make correlation matrices is here: https://www.rdatagen.net/post/2023-02-14-flexible-correlation-generation-an-update-to-gencorgen-in-simstudy/
