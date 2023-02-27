@@ -1,8 +1,10 @@
 {
-  "hash": "2fd4f3b524e83de60f45f823440bbd45",
+  "hash": "7c1a48e910f5ecffb93f11a3a7dec88f",
   "result": {
     "markdown": "---\ntitle: \"Fitting a multispecies functional response in Stan\"\nauthor: \"Andrew MacDonald & Ben Mercier\"\ndate: 11 Nov 2022\neditor: visual\ncategories: [UdeS, stan]\nbibliography: references.bib\nexecute:\n  freeze: auto\n---\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(targets)\nlibrary(ggplot2)\nlibrary(tidyverse)\nlibrary(tidybayes)\n```\n:::\n\n\n## The equation\n\nPredators eat prey. They eat prey faster when there is more prey -- though they do have to slow down to catch, kill, and chew.[^1]\n\n[^1]: Things that eat plants have to do the same; replace \"kill\" with \"peel\" etc.\n\nIf a predator can eat multiple things, then they might end up eating less of any one prey because they spread their kills around among all their prey. In the very simplest case, they do this in proportion to how frequent the different prey are -- the predator has no preference, it just goes around randomly and eats what it finds\n\nThe classic OG version of this model comes from @holling1966\n\n$$\nA = \\frac{\\alpha N}{1 + h\\alpha N}\n$$ {#eq-type2}\n\nwhere\n\n-   N is the number of prey\n-   $\\alpha$ is the attack rate\n-   $h$ is the handling time\n\nAnd altogether you get the number of attacks $A$ on prey in some unit of time.\n\n## multiple species\n\nSuppose you have more than one species in this system. You could then rewrite @eq-type2 to allow multiple animals to be included in the predation:\n\n$$\nA_i = \\frac{\\alpha N_i}{1 + h\\alpha \\sum_{j = 1}^s N_j}\n$$ {#eq-mstype2}\n\nhere $\\sum_{j = 1}^s N_j$ means the sum over the abundances of all the prey. The subscript $i$ just means that we are talking about one particular prey, which we label $i$. This prey is included in the summation in the denominator.\n\nIt's common to consider that different prey species might be attacked or handled at different rates [@smith2020] [@smout2010a]\n",
-    "supporting": [],
+    "supporting": [
+      "index_files"
+    ],
     "filters": [
       "rmarkdown/pagebreak.lua"
     ],
