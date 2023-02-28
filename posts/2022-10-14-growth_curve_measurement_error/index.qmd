@@ -4,8 +4,10 @@ author: "Andrew"
 date: "2022-10-14"
 categories: [stan, simulation]
 freeze: true
+image: gq_fig-2.png
 execute: 
-  eval: false
+  eval: true
+  warning: false
 ---
 
 ```{r eval=TRUE, message=FALSE, warning=FALSE}
@@ -13,6 +15,7 @@ library(targets)
 library(ggplot2)
 library(tidyverse)
 library(tidybayes)
+suppressPackageStartupMessages(library(cmdstanr))
 ```
 
 Many animals and plants grow quickly when small and more slowly as they mature. There are many popular ways of describing this relationship; one very common and convenient relationship is the Von-Bertanalaffy (VB) growth curve:
@@ -36,7 +39,20 @@ I like this second way of writing the equation because it highlights that the VB
 I'm going to do a simple simulation of one tree growing. here is code that does that
 
 ```{r }
-tar_load(vb_one_tree)
+sim_vb_one_tree <- function(
+    time = seq(from = 10, to = 200, by = 5),
+    Lo = .01,
+    Lmax = 150,
+    r = .03,
+    sd = 5){
+  tibble::tibble(time,
+                 Lt = Lmax - (Lmax - Lo) * exp(-r*time),
+                 Lt_obs  = rnorm(length(Lt),
+                                 mean = Lt,
+                                 sd = 5))
+}
+
+vb_one_tree <- sim_vb_one_tree()
 
 vb_one_tree |> 
   ggplot(aes(x = time, y = Lt_obs)) + 
@@ -45,15 +61,13 @@ vb_one_tree |>
   theme_bw()
 ```
 
-simulate this same data in targets
+## Recover parameters
 
-fit a stan model to it! here is the Stan model: formatted?
+Here is a stan model that matches this data generating process:
 
 ```{r}
 #| echo: FALSE
 #| class.output: stan
-
-suppressPackageStartupMessages(library(cmdstanr))
 vb_one_tree <- cmdstan_model(here::here("posts", 
                                         "2022-10-14-growth_curve_measurement_error",
                                         "vb_one_tree.stan"))
@@ -63,11 +77,10 @@ vb_one_tree
 
 ```{r, warning=FALSE, message=FALSE}
 
-vb_one_tree <- cmdstan_model(here::here("posts", "2022-10-14-growth_curve_measurement_error","vb_one_tree.stan"))
-
-source(here::here("posts", "2022-10-14-growth_curve_measurement_error","vb-growth.R"))
-
-one_tree_sim <- sim_vb_one_tree()
+one_tree_sim <- sim_vb_one_tree(
+    Lmax = 150,
+    r = .03,
+    sd = 5)
 
 one_tree_list <- list(n = nrow(one_tree_sim),
                       time  = one_tree_sim$time, 
@@ -77,14 +90,15 @@ one_tree_post <- vb_one_tree$sample(data = one_tree_list,
                                     refresh = 0L,
                                     parallel_chains = 4)
 
-one_tree_post
+one_tree_post$summary() |> 
+  knitr::kable()
 ```
 
-plot it
+These posterior intervals cover the numbers used to make up the data pretty well! 
+Let's look at the model predictions on a figure:
 
 ```{r}
 #| fig-cap: Growth curve for one tree. the line shows the expected value, with posterior uncertainty around exactly what that average should be. 
-library(tidybayes)
 
 expected_df <- one_tree_post |> 
   spread_rvars(Lmax, r) |> 
@@ -93,7 +107,7 @@ expected_df <- one_tree_post |>
 
 expected_plot <- expected_df |> 
   ggplot(aes(x = time, ydist = Lt)) + 
-  stat_lineribbon()
+  stat_dist_lineribbon()
 expected_plot
 ```
 
@@ -104,12 +118,13 @@ one_tree_sim |>
   ggplot(aes(x = time, y = Lt_obs)) + 
   geom_point() +
   stat_dist_lineribbon(aes(x = time, dist = Lt),
-                  data = expected_df, inherit.aes = FALSE)
+                  data = expected_df, inherit.aes = FALSE) + 
+  theme_bw()
 ```
 
-At the time of this writing the error messages here are particularly unhelpful. If you try to use `stat_lineribbon` rather than `stat_dist_lineribbon` you get the foloing misleading message:
+At the time of this writing the error messages here are particularly unhelpful. If you try to use `stat_lineribbon` rather than `stat_dist_lineribbon` you get the following misleading message:
 
-```{r error=TRUE, eval=FALSE}
+```{r error=TRUE, eval=TRUE}
 one_tree_sim |> 
   ggplot(aes(x = time, y = Lt_obs)) + 
   geom_point() +
@@ -117,62 +132,65 @@ one_tree_sim |>
                   data = expected_df, inherit.aes = FALSE)
 ```
 
-## adding measurement error
+## Adding measurement error
 
-Not all trees are the same age. there are two ways for a tree to be different in size to its neighbhours: it could be a different age, or it could grow at a different rate. when we fit a growth curve to many individuals, we usually need to shift the curve to the left or right. We do this by modelling the starting size as a parameter in the model
+The above model reproduces predictions of the original line, but ignores measurement error. Here's a few ways to add that into this same approach:
 
-Here we kind of have two choices. We could subtract every trees first date of measurment from all measurements. This would start all trees off at 0. And then the likelihood for $L_1$ would be:
+### Simulating observations in R
 
-$$ 
-L_1 \sim \text{N}(L_0e^{-r0} + L_\infty(1 - e^{-r0}), \sigma_{obs})
-$$
-
-Or, we could split the likelihood into two parts: one for the first observations, and one for all subsequent ones:
-
-$$
-\begin{align}
-L_t &\sim \text{N}(L_oe^{-rt} + L_\infty(1 - e^{-rt}), \sigma_{obs}) \\
-L_1 &\sim \text{N}(L_o, \sigma_{obs})\\
-\end{align}
-$$
-
-If we don't know the size that the tree was at the beginning
-
--   create a new target to run tidybayes on both of these and extract them. look at the distributions of Lo.
-
--   think about how to work with differing growth rates across years -- taylor approx?
-
--   make a multi-individual version where everyone has a different Lo parameter -- just using indexing
-
--   make a multi-site version where everyone has a site offset too
-
--   can you do it like
-
-vector_of_plot_id -- as long as numbers of trees, having values up to the max plot id vector_of_plot_ids\[tree_id\] -- get the plot that a specific tree is in
-
-vector_of_plot_means\[vector_of_plot_ids\[tree_id\]\] vector_of_plot_sigmas\[vector_of_plot_ids\[tree_id\]\]
-
-as the two parameters for the distribution of all tree IDs
-
-then to calculate the Lo for a new tree you'd use these latter mean and sigma for that plot or whatever model you ahve
-
-how to add yearly variation?
-
-r is a year interval
-
-would it be possible to find the expectation of a range of values from a gaussian process?
-
-what would be the expectation of a t draws from a normal distribution? like every year, some are up and some are down -- have any of those years been observed already.
-
+One way to do this is after the fact, using the handy tidyverse `dplyr::rowwise()` syntax, combined with `posterior::rfun()`. The latter function transforms `rnorm` into a function that both takes and produces an `rvar`, the specialized format for working with posterior draws. 
+The latter function makes sure we redo this for every row of our dataframe.
+ 
 ```{r}
-tar_load(growth_curve_predict_mcmc_vb_one_tree_Lo_oneline_predictions)
-tar_load(growth_curve_predict_data)
+expected_df <- one_tree_post |> 
+  spread_rvars(Lmax, r, sigma_obs) |> 
+  expand_grid(time = seq(0, 200, length.out = 14)) |> 
+  mutate(Lt = Lmax * (1 - exp(-r * time))) |> 
+  rowwise() |> 
+  mutate(Lt_obs = posterior::rfun(rnorm)(n = 1, mean = Lt, sd = sigma_obs))
 
-growth_curve_predict_mcmc_vb_one_tree_Lo_oneline_predictions |> 
-  gather_rvars(Lnew[t_id]) |> 
-  mutate(time = growth_curve_predict_data$timenew[t_id]) |> 
-  ggplot(aes(x = time, dist = .value)) + 
-  stat_dist_lineribbon()
+expected_df |> 
+  ggplot(aes(x = time, dist = Lt_obs)) + 
+  stat_lineribbon() + 
+  scale_fill_brewer(palette = "Greens") + 
+  geom_point(aes(y = Lt_obs), data = one_tree_sim,
+             pch = 21, fill = "darkorange") + 
+  theme_bw()
 ```
 
-Is it as simple as: a generated quantites model which takes the new observations, models them as N(lo, sigma_obs), then computes the expectation as a generated quantity?
+This has the advantage of happening all in R, keeping our posterior distribution slim.  
+However sometimes it can be both convenient and more readable to keep the whole process inside Stan, and here's how:
+
+### Posterior predictive simulations in Stan
+
+```{r gq_demo}
+#| class.output: stan
+vb_one_tree_gq <- cmdstan_model(here::here("posts", 
+                                        "2022-10-14-growth_curve_measurement_error",
+                                        "vb_one_tree_gq.stan"))
+
+vb_one_tree_gq
+```
+
+
+```{r gq_fig, fig.path=""}
+one_tree_predictions <- vb_one_tree_gq$sample(
+  data = purrr::splice(one_tree_list,
+                       time_new = seq(0, 200, length.out = 14),
+                       n_new = 14),
+  refresh = 0L,
+  parallel_chains = 4)
+
+one_tree_predictions |> 
+  spread_rvars(Lt_predicted[i]) |> 
+  mutate(time_new = seq(0, 200, length.out = 14)) |> 
+  ggplot(aes(x = time_new, dist = Lt_predicted)) + 
+  stat_lineribbon() +
+  scale_fill_brewer(palette = "Greens") + 
+  geom_point(aes(x = time, y = Lt_obs), 
+             inherit.aes = FALSE,
+             data = one_tree_sim,
+             pch = 21, fill = "darkorange") + 
+  theme_bw()
+```
+

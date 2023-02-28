@@ -17,9 +17,6 @@ format:
     theme: sketchy
     css: styles.css
 
-editor: visual
+editor: source
 
-comments:
-  hypothesis:
-    theme: clean
-
+# don't forget to also check the posts/_metadata folder for

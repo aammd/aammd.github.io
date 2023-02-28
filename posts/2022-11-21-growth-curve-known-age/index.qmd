@@ -5,8 +5,6 @@ description: |
   How to model the growth of an individual of known age.
 date: 21 Nov 2022
 categories: [UdeS, stan]
-execute: 
-  freeze: auto
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}

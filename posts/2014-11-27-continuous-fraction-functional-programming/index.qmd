@@ -3,8 +3,7 @@ title: "Continuous fractions with Map and Reduce"
 author: "Andrew MacDonald"
 date: 27 Sep 2014
 categories: [R]
-execute:
-  freeze: auto
+image: piplot-1.png
 ---
 
 Over the summer, some of us here at UBC started a [reading group](https://github.com/aammd/UBCadv-r) based around Hadley Wickham's book, [Advanced R Programming](http://adv-r.had.co.nz/). The goal was to compare our answers to the exercises and our impressions of the content.
@@ -154,7 +153,7 @@ data.frame(ks = seq(2, 100, by = 5)) %>%
 
 If we zoom in we can see that the third form outperforms Somayaji's:
 
-```{r piplot}
+```{r piplot, fig.path=""}
 data.frame(ks = seq(5, 10, by = 1)) %>%
   rowwise %>%
   mutate(somayaji = somayaji(ks),

@@ -5,8 +5,6 @@ date: 11 Nov 2022
 editor: visual
 categories: [UdeS, stan]
 bibliography: references.bib
-execute:
-  freeze: auto
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}

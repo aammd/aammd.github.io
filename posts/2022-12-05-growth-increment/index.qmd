@@ -4,7 +4,6 @@ author: "Will Vieira, Andrew MacDonald"
 description: |
   Process and Measurement error in a simple growth process.
 date: 11 Nov 2022
-editor: visual
 categories: [UdeS, stan]
 ---
 

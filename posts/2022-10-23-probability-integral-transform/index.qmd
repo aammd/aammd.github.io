@@ -2,8 +2,7 @@
 title: "Probability integral transforms"
 author: "Andrew"
 date: 23 Oct 2022
-execute:
-  freeze: auto
+image: PIT_when_wrong-1.png
 ---
 
 Take random numbers from a distribution
@@ -20,13 +19,13 @@ some_pit <- pnorm(some_numbers, mean = 14, sd = 2.5)
 hist(some_pit)
 ```
 
-sure enough it is uniform!
+Sure enough we get a uniform shape!
 
-## what happens when you are wrong
+## What happens when you are wrong
 
 let's make some curves that don't really match
 
-```{r}
+```{r, fig.path=""}
 library(tidyverse)
 n <- 4000
 tibble(meanval = seq(from = 1, to = 14, length.out = 6),
@@ -96,7 +95,7 @@ expand_grid(meanval = seq(from = 1, to = 14, length.out = 6),
 
 and with the lognormal
 
-```{r}
+```{r PIT_when_wrong, fig.path=""}
 n <- 4000
 expand_grid(meanval = seq(from = 1, 
                           to = 14, 

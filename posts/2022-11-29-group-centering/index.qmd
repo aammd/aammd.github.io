@@ -4,8 +4,9 @@ author: "Andrew MacDonald"
 description: |
   Quick notes on how to make a blog with Quarto and also targets.
 date: 11 Nov 2022
-editor: visual
 categories: [UdeS, stan]
+execute:
+  freeze: true
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
@@ -59,7 +60,4 @@ so far it is very straightforward!
 
 -   love LOVE the bibliography automatically appearing
 
--   DO think about changing the working directory for chunk evaluations to the project root, [as described here](https://bookdown.org/yihui/rmarkdown-cookbook/working-directory.html). 
-This is really important because that is the directory that `targets` uses when sourcing files.
-For example `tar_load(my_target_name)` will load in an object from your pipeline. 
-But run this same line from an `.qmd` file in a subfolder (say `posts/yourpostname/index.qmd`), then THAT will be the location the computer looks in.. 
+-   DO think about changing the working directory for chunk evaluations to the project root, [as described here](https://bookdown.org/yihui/rmarkdown-cookbook/working-directory.html). This is really important because that is the directory that `targets` uses when sourcing files. For example `tar_load(my_target_name)` will load in an object from your pipeline. But run this same line from an `.qmd` file in a subfolder (say `posts/yourpostname/index.qmd`), then THAT will be the location the computer looks in..

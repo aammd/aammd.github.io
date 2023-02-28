@@ -3,8 +3,7 @@ title: "Population growth with functional programming"
 author: "Andrew MacDonald"
 date: 2016-12-07
 categories: ["R"]
-execute:
-  freeze: auto
+image: fig-demo-1.png
 ---
 
 ```{r echo=FALSE}
@@ -145,8 +144,6 @@ accumulate(1:200, ~ paper_mod(.x), .init = c("res" = 50, "con" = 1)) %>%
   select(-value) %>%
   gather(trophic, abd, -name) %>% 
   ggplot(aes(x = name, y = abd, colour = trophic)) + geom_line()
-
-# ggplot2::ggsave(here::here("posts/population-growth-functional-programming/fig.png"))
 ```
 
 ## So, is this useful?

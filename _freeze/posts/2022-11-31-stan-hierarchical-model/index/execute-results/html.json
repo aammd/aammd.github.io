@@ -1,0 +1,14 @@
+{
+  "hash": "5112abf2bbcccd12c923d70e2827545f",
+  "result": {
+    "markdown": "---\ntitle: \"Stan hierarchical model\"\nauthor: \"Andrew MacDonald\"\ndescription: |\n  Because I want to understand it.\ndate: 11 Nov 2022\ncategories: [UdeS, stan]\ndraft: true\nexecute:\n  eval: false\n---\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(targets)\nlibrary(ggplot2)\nlibrary(tidyverse)\nlibrary(tidybayes)\n```\n:::\n\n\n## What is this post\n\nThere's a concise and optimized hierarchical model described in the Stan manual. I would like to understand it in its Final Form as much as possible. So here I want to write out the stan code, simulate from the model (using Stan and R) and fit it to recover parameters.\n\n## The model\n\nThis model is described in detail [in the Stan user's manual](https://mc-stan.org/docs/stan-users-guide/multivariate-hierarchical-priors.html)\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

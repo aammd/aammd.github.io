@@ -4,7 +4,6 @@ author: "Andrew MacDonald and Gabriel Bergeron"
 description: |
   Are they really there and when.
 date: 11 Nov 2022
-editor: visual
 categories: [UdeS, stan]
 execute:
   eval: false
