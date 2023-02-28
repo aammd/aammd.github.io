@@ -4,7 +4,7 @@ author: "Andrew"
 date: "2022-10-14"
 categories: [stan, simulation]
 freeze: true
-image: gq_fig-2.png
+image: gq_fig-1.png
 execute: 
   eval: true
   warning: false

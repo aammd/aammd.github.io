@@ -307,14 +307,14 @@ L_t = L_\infty - (L_\infty - L_0)e^{-rt}
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 1 finished in 0.1 seconds.
-Chain 2 finished in 0.1 seconds.
-Chain 3 finished in 0.2 seconds.
-Chain 4 finished in 0.2 seconds.
+Chain 1 finished in 0.3 seconds.
+Chain 2 finished in 0.3 seconds.
+Chain 3 finished in 0.3 seconds.
+Chain 4 finished in 0.3 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.1 seconds.
-Total execution time: 0.5 seconds.</code></pre>
+Mean chain execution time: 0.3 seconds.
+Total execution time: 0.6 seconds.</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>one_tree_post<span class="sc">$</span><span class="fu">summary</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -349,51 +349,51 @@ Total execution time: 0.5 seconds.</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">lp__</td>
-<td style="text-align: right;">-81.3533547</td>
-<td style="text-align: right;">-81.0352000</td>
-<td style="text-align: right;">1.3015203</td>
-<td style="text-align: right;">1.0923056</td>
-<td style="text-align: right;">-83.9343300</td>
-<td style="text-align: right;">-79.9193950</td>
-<td style="text-align: right;">1.002236</td>
-<td style="text-align: right;">1626.969</td>
-<td style="text-align: right;">2329.101</td>
+<td style="text-align: right;">-81.8860891</td>
+<td style="text-align: right;">-81.5629000</td>
+<td style="text-align: right;">1.2657731</td>
+<td style="text-align: right;">0.9996431</td>
+<td style="text-align: right;">-84.3295600</td>
+<td style="text-align: right;">-80.5472350</td>
+<td style="text-align: right;">1.003900</td>
+<td style="text-align: right;">1703.367</td>
+<td style="text-align: right;">2248.792</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">r</td>
-<td style="text-align: right;">0.0310097</td>
-<td style="text-align: right;">0.0310023</td>
-<td style="text-align: right;">0.0010188</td>
-<td style="text-align: right;">0.0010244</td>
-<td style="text-align: right;">0.0294009</td>
-<td style="text-align: right;">0.0327187</td>
-<td style="text-align: right;">1.000457</td>
-<td style="text-align: right;">2233.798</td>
-<td style="text-align: right;">2353.174</td>
+<td style="text-align: right;">0.0304818</td>
+<td style="text-align: right;">0.0304662</td>
+<td style="text-align: right;">0.0009926</td>
+<td style="text-align: right;">0.0009715</td>
+<td style="text-align: right;">0.0289095</td>
+<td style="text-align: right;">0.0321072</td>
+<td style="text-align: right;">1.001307</td>
+<td style="text-align: right;">2264.785</td>
+<td style="text-align: right;">2502.303</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Lmax</td>
-<td style="text-align: right;">151.6287898</td>
-<td style="text-align: right;">151.5870000</td>
-<td style="text-align: right;">1.1356684</td>
-<td style="text-align: right;">1.1008305</td>
-<td style="text-align: right;">149.8148500</td>
-<td style="text-align: right;">153.5360000</td>
-<td style="text-align: right;">1.000559</td>
-<td style="text-align: right;">2300.164</td>
-<td style="text-align: right;">2045.231</td>
+<td style="text-align: right;">149.9838068</td>
+<td style="text-align: right;">149.9775000</td>
+<td style="text-align: right;">1.1024073</td>
+<td style="text-align: right;">1.1037957</td>
+<td style="text-align: right;">148.2009500</td>
+<td style="text-align: right;">151.7842500</td>
+<td style="text-align: right;">1.001047</td>
+<td style="text-align: right;">2435.377</td>
+<td style="text-align: right;">2339.762</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">sigma_obs</td>
-<td style="text-align: right;">4.4782455</td>
-<td style="text-align: right;">4.4312150</td>
-<td style="text-align: right;">0.5105588</td>
-<td style="text-align: right;">0.4879088</td>
-<td style="text-align: right;">3.7218830</td>
-<td style="text-align: right;">5.3736580</td>
-<td style="text-align: right;">1.002338</td>
-<td style="text-align: right;">2579.079</td>
-<td style="text-align: right;">2293.364</td>
+<td style="text-align: right;">4.5019228</td>
+<td style="text-align: right;">4.4569000</td>
+<td style="text-align: right;">0.5106312</td>
+<td style="text-align: right;">0.4890727</td>
+<td style="text-align: right;">3.7627420</td>
+<td style="text-align: right;">5.4062315</td>
+<td style="text-align: right;">1.000617</td>
+<td style="text-align: right;">2204.440</td>
+<td style="text-align: right;">2327.323</td>
 </tr>
 </tbody>
 </table>
@@ -518,13 +518,13 @@ However sometimes it can be both convenient and more readable to keep the whole 
 <pre><code>Running MCMC with 4 parallel chains...
 
 Chain 1 finished in 0.3 seconds.
-Chain 2 finished in 0.2 seconds.
+Chain 2 finished in 0.3 seconds.
 Chain 3 finished in 0.2 seconds.
 Chain 4 finished in 0.2 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.2 seconds.
-Total execution time: 0.4 seconds.</code></pre>
+Mean chain execution time: 0.3 seconds.
+Total execution time: 0.5 seconds.</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>one_tree_predictions <span class="sc">|&gt;</span> </span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread_rvars</span>(Lt_predicted[i]) <span class="sc">|&gt;</span> </span>
