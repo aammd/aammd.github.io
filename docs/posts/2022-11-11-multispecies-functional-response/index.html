@@ -2,12 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.335">
+<meta name="generator" content="quarto-1.2.269">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andrew MacDonald &amp; Ben Mercier">
 <meta name="dcterms.date" content="2022-11-11">
+<meta name="description" content="How many things get eaten, if more than one animal gets eaten?">
 
 <title>Andrew MacDonald - Fitting a multispecies functional response in Stan</title>
 <style>
@@ -142,6 +143,10 @@ div.csl-indent {
     "search-submit-button-title": "Submit"
   }
 }</script>
+<script src="../../site_libs/htmlwidgets-1.6.1/htmlwidgets.js"></script>
+<link href="../../site_libs/vis-9.1.0/vis-network.min.css" rel="stylesheet">
+<script src="../../site_libs/vis-9.1.0/vis-network.min.js"></script>
+<script src="../../site_libs/visNetwork-binding-2.1.2/visNetwork.js"></script>
 
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
@@ -189,7 +194,12 @@ div.csl-indent {
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <h1 class="title">Fitting a multispecies functional response in Stan</h1>
-                                <div class="quarto-categories">
+                  <div>
+        <div class="description">
+          <p>How many things get eaten, if more than one animal gets eaten?</p>
+        </div>
+      </div>
+                          <div class="quarto-categories">
                 <div class="quarto-category">UdeS</div>
                 <div class="quarto-category">stan</div>
               </div>
@@ -227,6 +237,8 @@ div.csl-indent {
   <ul>
   <li><a href="#the-equation" id="toc-the-equation" class="nav-link active" data-scroll-target="#the-equation">The equation</a></li>
   <li><a href="#multiple-species" id="toc-multiple-species" class="nav-link" data-scroll-target="#multiple-species">multiple species</a></li>
+  <li><a href="#one-species-model" id="toc-one-species-model" class="nav-link" data-scroll-target="#one-species-model">One species model</a></li>
+  <li><a href="#simulate-from-a-model" id="toc-simulate-from-a-model" class="nav-link" data-scroll-target="#simulate-from-a-model">simulate from a model:</a></li>
   </ul>
 </nav>
     </div>
@@ -240,7 +252,9 @@ div.csl-indent {
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(targets)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cmdstanr)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stantargets)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <section id="the-equation" class="level2">
 <h2 class="anchored" data-anchor-id="the-equation">The equation</h2>
@@ -266,6 +280,164 @@ A_i = \frac{\alpha N_i}{1 + h\alpha \sum_{j = 1}^s N_j}
 \tag{2}\]</span></span></p>
 <p>here <span class="math inline">\(\sum_{j = 1}^s N_j\)</span> means the sum over the abundances of all the prey. The subscript <span class="math inline">\(i\)</span> just means that we are talking about one particular prey, which we label <span class="math inline">\(i\)</span>. This prey is included in the summation in the denominator.</p>
 <p>It’s common to consider that different prey species might be attacked or handled at different rates <span class="citation" data-cites="smith2020">(<a href="#ref-smith2020" role="doc-biblioref">Smith and Smith 2020</a>)</span> <span class="citation" data-cites="smout2010a">(<a href="#ref-smout2010a" role="doc-biblioref">Smout et al. 2010</a>)</span></p>
+</section>
+<section id="one-species-model" class="level2">
+<h2 class="anchored" data-anchor-id="one-species-model">One species model</h2>
+<p>Let’s begin with the classic model and add complexity later.<br>
+I think it helps to think of predation as a binomial trial: out of so many prey individuals (<span class="math inline">\(N\)</span>), some of them get attacked (<span class="math inline">\(A\)</span>).</p>
+<p><span class="math display">\[
+\begin{align}
+A &amp;\sim \text{Binomial}(p, N) \\
+p &amp;= \frac{\alpha}{1 + h\alpha N} \\
+\alpha &amp;\sim \text{Beta}(2, 4) \\
+h &amp;\sim \text{LogNormal}(0,1)
+\end{align}
+\]</span> some things to note:</p>
+<ul>
+<li><p>the <span class="math inline">\(N\)</span> now appears in the Binomial distribution as a separate parameter, not in the expression for the probability of attack. Remember that the mean of a Binomial is <span class="math inline">\(pN\)</span>, so in this case we will come back to <a href="#eq-type2">Equation&nbsp;1</a></p></li>
+<li><p>both the parameters have constraints: <span class="math inline">\(a\)</span> cannot be outside of <span class="math inline">\([0,1]\)</span>, and <span class="math inline">\(h\)</span> cannot be negative. We choose priors that respect these constraints!</p></li>
+</ul>
+<p>Let’s translate this into Stan and take a look:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>simple_type2 <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts"</span>, </span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                                         <span class="st">"2022-11-11-multispecies-functional-response"</span>,</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                                         <span class="st">"simple_type2.stan"</span>))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>simple_type2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb3"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// simple predator-prey functional response for a binomial density</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; N;</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; attacks;</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[N] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; densities;</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>,<span class="kw">upper</span>=<span class="dv">1</span>&gt; a;</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; h;</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span>{</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span> = <span class="dv">1</span>&gt;[N] prob_attack;</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  prob_attack = a * inv(<span class="dv">1</span> + a * h * to_vector(densities));</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  a ~ beta(<span class="dv">2</span>,<span class="dv">6</span>);</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  h ~ lognormal(<span class="dv">0</span>, <span class="dv">1</span>);</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  attacks ~ binomial(densities, prob_attack);</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>the code above is mostly a direct translation of the equations. One technique is worth noting: the types of the input vectors. Binomial distributions deal in integers, and so we define <code>densities</code> and <code>attacks</code> as integers. However, in order to vectorize our calculations, we massage the input data from an array of integers to a vector of real numbers using <code>to_vector</code>. This highlights an important difference between R and Stan. Stan requires careful definition of the types of data, where R is much more informal.</p>
+</section>
+<section id="simulate-from-a-model" class="level2">
+<h2 class="anchored" data-anchor-id="simulate-from-a-model">simulate from a model:</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>generate_one_spp_type_2 <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  true_a <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">rbeta</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="dv">8</span>, <span class="dv">4</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  true_h <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">rlnorm</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="sc">-</span><span class="dv">2</span>, .<span class="dv">5</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  densities <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">5</span>, <span class="at">to =</span> <span class="dv">100</span>, <span class="at">by =</span><span class="dv">5</span>)</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  prob <span class="ot">&lt;-</span> true_a<span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> true_a <span class="sc">*</span> true_h <span class="sc">*</span> densities)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  attacks <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">length</span>(densities), <span class="at">size =</span> densities, <span class="at">prob =</span> prob)</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(<span class="at">true_a =</span> true_a,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">true_h =</span> true_h,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">densities =</span> densities,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>       <span class="at">attacks =</span> attacks, </span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>       <span class="at">prob =</span> prob)</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>one_spp_sim <span class="ot">&lt;-</span> <span class="fu">generate_one_spp_type_2</span>()</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>one_spp_sim</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$true_a
+[1] 0.7568304
+
+$true_h
+[1] 0.1605559
+
+$densities
+ [1]   5  10  15  20  25  30  35  40  45  50  55  60  65  70  75  80  85  90  95
+[20] 100
+
+$attacks
+ [1] 2 3 4 5 7 6 3 6 3 7 6 4 5 2 8 6 4 5 5 6
+
+$prob
+ [1] 0.47079213 0.34166316 0.26812246 0.22063275 0.18743446 0.16292010
+ [7] 0.14407649 0.12913995 0.11700947 0.10696221 0.09850396 0.09128539
+[13] 0.08505256 0.07961647 0.07483352 0.07059268 0.06680672 0.06340618
+[19] 0.06033505 0.05754769</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(one_spp_sim, <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">length</span>(densities), <span class="at">size =</span> densities, <span class="at">prob =</span> prob))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 4 5 3 3 8 3 5 5 4 8 7 7 5 3 7 2 5 7 3 6</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(one_spp_sim, <span class="fu">plot</span>(densities, prob<span class="sc">*</span>densities))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(one_spp_sim, <span class="fu">plot</span>(densities, attacks))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>try it in targets:</p>
+<div class="cell" data-tar_globals="true" data-tar_interactive="false">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">tar_option_set</span>(<span class="at">packages =</span> <span class="fu">c</span>(<span class="st">"cmdstanr"</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>               <span class="st">"ggplot2"</span>, <span class="st">"tidybayes"</span>, </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>               <span class="st">"stantargets"</span>))</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>generate_one_spp_type_too <span class="ot">&lt;-</span> <span class="cf">function</span>(){</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  true_a <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">rbeta</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="dv">8</span>, <span class="dv">4</span>)</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  true_h <span class="ot">&lt;-</span> stats<span class="sc">::</span><span class="fu">rlnorm</span>(<span class="at">n =</span> <span class="dv">1</span>, <span class="sc">-</span><span class="dv">2</span>, .<span class="dv">5</span>)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  densities <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="dv">5</span>, <span class="at">to =</span> <span class="dv">100</span>, <span class="at">by =</span><span class="dv">5</span>)</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  prob <span class="ot">&lt;-</span> true_a<span class="sc">/</span>(<span class="dv">1</span> <span class="sc">+</span> true_a <span class="sc">*</span> true_h <span class="sc">*</span> densities)</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  attacks <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">length</span>(densities), <span class="at">size =</span> densities, <span class="at">prob =</span> prob)</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list</span>(</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">N =</span> <span class="fu">length</span>(attacks),</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">true_a =</span> true_a,</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">true_h =</span> true_h,</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">densities =</span> densities,</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">attacks =</span> attacks, </span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">prob =</span> prob</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Establish _targets.R and _targets_r/globals/some-globals.R.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">list</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  stantargets<span class="sc">::</span><span class="fu">tar_stan_mcmc</span>(<span class="at">name =</span> one_spp, </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">stan_files =</span> <span class="st">"simple_type2.stan"</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> <span class="fu">generate_one_spp_type_too</span>(),</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">stdout =</span> R.utils<span class="sc">::</span><span class="fu">nullfile</span>(),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">stderr =</span> R.utils<span class="sc">::</span><span class="fu">nullfile</span>()</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Establish _targets.R and _targets_r/targets/run_one_model.R.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar_visnetwork</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div class="visNetwork html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-6eec3939e62a645d29b4" style="width:100%;height:464px;"></div>
+<script type="application/json" data-for="htmlwidget-6eec3939e62a645d29b4">{"x":{"nodes":{"name":["one_spp_data","one_spp_diagnostics_simple_type2","one_spp_draws_simple_type2","one_spp_file_simple_type2","one_spp_mcmc_simple_type2","one_spp_summary_simple_type2","generate_one_spp_type_too"],"type":["stem","stem","stem","stem","stem","stem","function"],"status":["uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate"],"seconds":[0.63,0.02,0,0.01,3.69,0.58,null],"bytes":[316,86599,747708,470,716922,3018,null],"branches":[null,null,null,null,null,null,null],"label":["one_spp_data","one_spp_diagnostics_simple_type2","one_spp_draws_simple_type2","one_spp_file_simple_type2","one_spp_mcmc_simple_type2","one_spp_summary_simple_type2","generate_one_spp_type_too"],"color":["#354823","#354823","#354823","#354823","#354823","#354823","#354823"],"id":["one_spp_data","one_spp_diagnostics_simple_type2","one_spp_draws_simple_type2","one_spp_file_simple_type2","one_spp_mcmc_simple_type2","one_spp_summary_simple_type2","generate_one_spp_type_too"],"level":[2,4,4,1,3,4,1],"shape":["dot","dot","dot","dot","dot","dot","triangle"]},"edges":{"from":["one_spp_mcmc_simple_type2","one_spp_data","one_spp_mcmc_simple_type2","one_spp_data","one_spp_file_simple_type2","generate_one_spp_type_too","one_spp_mcmc_simple_type2"],"to":["one_spp_diagnostics_simple_type2","one_spp_summary_simple_type2","one_spp_summary_simple_type2","one_spp_mcmc_simple_type2","one_spp_mcmc_simple_type2","one_spp_data","one_spp_draws_simple_type2"],"arrows":["to","to","to","to","to","to","to"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"smooth":{"type":"cubicBezier","forceDirection":"horizontal"}},"physics":{"stabilization":false},"interaction":{"zoomSpeed":1},"layout":{"hierarchical":{"enabled":true,"direction":"LR"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":true,"hoverNearest":false,"degree":{"from":1,"to":1},"algorithm":"hierarchical","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"},"legend":{"width":0.2,"useGroups":false,"position":"right","ncol":1,"stepX":100,"stepY":100,"zoom":true,"nodes":{"label":["Up to date","Stem","Function"],"color":["#354823","#899DA4","#899DA4"],"shape":["dot","dot","triangle"]},"nodesToDataframe":true},"tooltipStay":300,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":[],"jsHooks":[]}</script>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tar_make</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>✔ skip target one_spp_data
+✔ skip target one_spp_file_simple_type2
+✔ skip target one_spp_mcmc_simple_type2
+✔ skip target one_spp_diagnostics_simple_type2
+✔ skip target one_spp_summary_simple_type2
+✔ skip target one_spp_draws_simple_type2
+✔ skip pipeline [0.17 seconds]</code></pre>
+</div>
+</div>
 
 
 

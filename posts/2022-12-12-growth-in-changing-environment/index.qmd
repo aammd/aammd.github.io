@@ -1,11 +1,12 @@
 ---
-title: "Andrew tries Quarto"
+title: "Growth in changing environments"
 author: "Andrew MacDonald"
 description: |
-  Quick notes on how to make a blog with Quarto and also targets.
+  Approximations and simulated population growth when the environment fluctuates.
 date: 11 Nov 2022
 editor: visual
 categories: [UdeS, stan]
+draft: true
 execute: 
   eval: false
 ---
