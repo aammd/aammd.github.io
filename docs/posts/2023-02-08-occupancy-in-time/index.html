@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.2.335">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andrew MacDonald and Gabriel Bergeron">
-<meta name="dcterms.date" content="2022-11-11">
-<meta name="description" content="Are they really there and when.">
+<meta name="dcterms.date" content="2023-03-03">
+<meta name="description" content="Are the birds really there and when.">
 
 <title>Andrew MacDonald - Modelling occupancy plus phenology</title>
 <style>
@@ -173,7 +173,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <h1 class="title">Modelling occupancy plus phenology</h1>
                   <div>
         <div class="description">
-          <p>Are they really there and when.</p>
+          <p>Are the birds really there and when.</p>
         </div>
       </div>
                           <div class="quarto-categories">
@@ -196,7 +196,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">November 11, 2022</p>
+        <p class="date">March 3, 2023</p>
       </div>
     </div>
     
@@ -214,6 +214,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <ul>
   <li><a href="#occupancy-models" id="toc-occupancy-models" class="nav-link active" data-scroll-target="#occupancy-models">occupancy models</a></li>
   <li><a href="#validate-a-simple-stan-model" id="toc-validate-a-simple-stan-model" class="nav-link" data-scroll-target="#validate-a-simple-stan-model">validate a simple Stan model</a></li>
+  <li><a href="#hof-functions" id="toc-hof-functions" class="nav-link" data-scroll-target="#hof-functions">HOF functions</a></li>
   </ul>
 </nav>
     </div>
@@ -258,12 +259,15 @@ y = 0, (1 - w)p + 1 - p
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="dv">1</span> <span class="sc">-</span> (<span class="dv">1</span> <span class="sc">-</span> .<span class="dv">4</span>)<span class="sc">^</span>x, <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">20</span>))</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="dv">1</span>, <span class="at">h =</span> .<span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 <p>This can also be done with the cloglog link</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fake_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">sample_id =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">200</span>,</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">real_pres =</span> <span class="fu">rbinom</span>(<span class="at">n =</span> <span class="fu">length</span>(sample_id),</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">p =</span> .<span class="dv">7</span>,</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">p =</span> .<span class="dv">2</span>,</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">size =</span> <span class="dv">1</span>),</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">sample_size =</span> <span class="fu">round</span>(</span>
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">runif</span>(</span>
@@ -272,37 +276,352 @@ y = 0, (1 - w)p + 1 - p
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>                    )) <span class="sc">|&gt;</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pa =</span> <span class="fu">list</span>(<span class="fu">rbinom</span>(<span class="at">n =</span> sample_size,</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                          <span class="at">p =</span> .<span class="dv">1</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>                          <span class="at">p =</span> .<span class="dv">6</span>,</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>                          <span class="at">size =</span> <span class="dv">1</span>)),</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">abd =</span> <span class="fu">sum</span>(pa) <span class="sc">*</span> real_pres)</span>
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(fake_data, <span class="fu">aes</span>(<span class="at">x =</span> sample_size, <span class="at">y =</span> abd)) <span class="sc">+</span> <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fake_data <span class="sc">|&gt;</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> abd<span class="sc">/</span>sample_size) <span class="sc">|&gt;</span> </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(prop) <span class="sc">|&gt;</span> <span class="fu">mean</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fake_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 200 × 5
+# Rowwise: 
+   sample_id real_pres sample_size pa           abd
+       &lt;int&gt;     &lt;int&gt;       &lt;dbl&gt; &lt;list&gt;     &lt;int&gt;
+ 1         1         0          36 &lt;int [36]&gt;     0
+ 2         2         0          13 &lt;int [13]&gt;     0
+ 3         3         0          36 &lt;int [36]&gt;     0
+ 4         4         0          13 &lt;int [13]&gt;     0
+ 5         5         0           8 &lt;int [8]&gt;      0
+ 6         6         0          33 &lt;int [33]&gt;     0
+ 7         7         1          12 &lt;int [12]&gt;    11
+ 8         8         0          37 &lt;int [37]&gt;     0
+ 9         9         0          34 &lt;int [34]&gt;     0
+10        10         0           4 &lt;int [4]&gt;      0
+# … with 190 more rows</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fake_data <span class="sc">|&gt;</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prop =</span> abd<span class="sc">/</span>sample_size) <span class="sc">|&gt;</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(prop) <span class="sc">|&gt;</span> <span class="fu">mean</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.1238422</code></pre>
+</div>
+</div>
+<p>plot pres / absence</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fake_detections <span class="ot">&lt;-</span> fake_data <span class="sc">|&gt;</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">at_least_one_detect =</span> <span class="fu">as.numeric</span>(abd<span class="sc">&gt;</span><span class="dv">0</span>))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>fake_detections <span class="sc">|&gt;</span> </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sample_size, <span class="at">y =</span> at_least_one_detect)) <span class="sc">+</span> </span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
 </div>
 </section>
 <section id="validate-a-simple-stan-model" class="level2">
 <h2 class="anchored" data-anchor-id="validate-a-simple-stan-model">validate a simple Stan model</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cmdstanr)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>simple_occ_logit <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(<span class="st">"posts/2023-02-08-occupancy-in-time/simple_occ_logit.stan"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cmdstanr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>This is cmdstanr version 0.5.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>- CmdStanR documentation and vignettes: mc-stan.org/cmdstanr</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>- CmdStan path: /Users/amacdonald/.cmdstan/cmdstan-2.31.0</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>- CmdStan version: 2.31.0</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>simple_occ_logit <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">stan_file =</span> here<span class="sc">::</span><span class="fu">here</span>(</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"posts/2023-02-08-occupancy-in-time/simple_occ_logit.stan"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>data_list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">nrow</span>(fake_data),</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">y =</span> <span class="fu">as.numeric</span>(fake_data<span class="sc">$</span>abd<span class="sc">&gt;</span><span class="dv">0</span>),</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">sample_size =</span> fake_data<span class="sc">$</span>sample_size)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>data_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>data_list <span class="ot">&lt;-</span> <span class="fu">list</span>(<span class="at">N =</span> <span class="fu">nrow</span>(fake_detections),</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>                  <span class="at">y =</span> fake_detections<span class="sc">$</span>at_least_one_detect,</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">sample_size =</span> fake_detections<span class="sc">$</span>sample_size)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>data_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$N
+[1] 200
+
+$y
+  [1] 0 0 0 0 0 0 1 0 0 0 1 1 0 0 0 0 0 1 0 0 0 1 0 1 1 0 1 0 0 1 0 0 0 0 0 0 0
+ [38] 1 0 0 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0
+ [75] 0 0 0 0 0 1 0 1 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1 0 0 1 0 0 0 0 0 0
+[112] 1 0 1 0 1 0 0 0 0 0 0 1 0 0 0 0 1 0 0 0 1 1 0 0 1 0 0 0 1 0 0 0 0 1 0 1 0
+[149] 1 0 0 0 0 0 1 0 0 0 1 1 1 0 0 0 0 0 0 0 0 1 1 0 0 0 0 0 0 0 0 0 0 0 1 0 0
+[186] 0 0 1 0 0 0 1 0 0 1 1 0 0 0 0
+
+$sample_size
+  [1] 36 13 36 13  8 33 12 37 34  4 29 20 22 17 27  4 36  4 20  9 18 30 35 15 29
+ [26] 39  8 28  7 19  5 12  8 27 10 30 20 17 24  6 14 24 31  5  5 31 22 31 28 25
+ [51]  4 23 27 14 30 34 26 12 35 11 15 23 35 21 14 25 12 25 34 29  2  5 33 24 14
+ [76] 11 29 28 33 12 34 18 13 39 22 31  4 15 26 13 15 33 31 20 36 31  9 26 22 38
+[101]  9  3 24 12 11 28 36 34 38 12 25  9 28  4  9 11 37  5 16 16 12 25 19  6 21
+[126]  5 37 27 31 23 38  4 31  3 29 38 33 24  7 27 12 19  8  8 23 18  9 37 10  3
+[151] 26 24 16  4  4 31 26 30 31 29 10 36 16 11 22 38 30 17  7 23 15 31  3 29 21
+[176] 27 23  4 33 19 31  4 22  5 15 38 38 23 20 24 13  5  7 23 26 17 31 32  3 14</code></pre>
 </div>
+</div>
+<p>todo: extend the above using stantargets</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>model_result <span class="ot">&lt;-</span> simple_occ_logit<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> data_list)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>model_result<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>model_result <span class="ot">&lt;-</span> simple_occ_logit<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> data_list, <span class="at">refresh =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 sequential chains...
+
+Chain 1 finished in 0.2 seconds.
+Chain 2 finished in 0.2 seconds.
+Chain 3 finished in 0.3 seconds.
+Chain 4 finished in 0.3 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.2 seconds.
+Total execution time: 1.5 seconds.</code></pre>
 </div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>model_result<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 3 × 10
+  variable     mean   median     sd    mad       q5      q95  rhat ess_bulk
+  &lt;chr&gt;       &lt;dbl&gt;    &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;
+1 lp__     -112.    -112.    1.09   0.715  -114.    -111.     1.00    1596.
+2 p           0.216    0.215 0.0297 0.0289    0.171    0.267  1.00    2519.
+3 d           0.558    0.551 0.160  0.172     0.297    0.827  1.00    2536.
+# … with 1 more variable: ess_tail &lt;dbl&gt;</code></pre>
+</div>
+</div>
+<p>A resource on occupancy modelling:</p>
 <p>https://mc-stan.org/users/documentation/case-studies/dorazio-royle-occupancy.html</p>
+</section>
+<section id="hof-functions" class="level2">
+<h2 class="anchored" data-anchor-id="hof-functions">HOF functions</h2>
+<p>the idea here is two logistic curves multiplied together.</p>
+<p>Let’s make it easier and use this form of the logistic:</p>
+<p><span class="math display">\[
+\frac{1}{1 + e^{-s(x - d)}}
+\]</span></p>
+<p>where <span class="math inline">\(s\)</span> is the slope (or sensitivity?) and <span class="math inline">\(d\)</span> the inflection point (in our use case, the date at which the probability of presence becomes &gt;.5)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="dv">2</span> <span class="sc">*</span> (x <span class="sc">-</span> <span class="dv">1</span>))), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">4</span>, <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>We multiply this by another curve, with some constraints:</p>
+<ul>
+<li>the first curve goes up but the second goes down (slopes have opposite signs)</li>
+<li>the second date is after the first</li>
+</ul>
+<p><span class="math display">\[
+\frac{1}{1 + e^{s_1(x - d_1)}} \times \frac{1}{1 + e^{s_2(x - d_2)}}
+\]</span></p>
+<p>When we place this in a modelling context, we will want to keep these constraints while using any real number for the parameters. For the slopes, we can use the exponential function to make sure the sign of the <span class="math inline">\(s\)</span> parameters is always the same:</p>
+<p><span class="math display">\[
+\frac{1}{1 + e^{-e^{s_1}(x - d_1)}} \times \frac{1}{1 + e^{e^{s_2}(x - d_2)}}
+\]</span></p>
+<p>let’s plot this and take a look:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>s1 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="dv">3</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>s2 <span class="ot">&lt;-</span> <span class="sc">-</span><span class="fl">3.5</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>d1 <span class="ot">&lt;-</span> <span class="dv">84</span> <span class="co"># approx Spring Equinox in JJ</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> <span class="dv">325</span> <span class="co"># approx Fall equinox in JJ</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  (<span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="sc">-</span><span class="fu">exp</span>(s1) <span class="sc">*</span> (x <span class="sc">-</span> d1)))) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(<span class="fu">exp</span>(s2) <span class="sc">*</span> (x <span class="sc">-</span> d2)))),</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">365</span>)</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>   )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Also worth noting that the slopes should be quite close to 0 – if the absolute value is too large then the curve doesn’t fit in a year</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>log1p_exp <span class="ot">&lt;-</span> <span class="cf">function</span>(x) <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">+</span> <span class="fu">exp</span>(x))</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>logHof <span class="ot">&lt;-</span> <span class="cf">function</span>(x, s1, s2, d1, d2) <span class="fu">exp</span>(<span class="sc">-</span><span class="fu">log1p_exp</span>((<span class="sc">-</span><span class="fu">exp</span>(s1) <span class="sc">*</span> (x <span class="sc">-</span> d1))) <span class="sc">-</span> <span class="fu">log1p_exp</span>(<span class="fu">exp</span>(s2) <span class="sc">*</span> (x <span class="sc">-</span> d2)))</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">logHof</span>(x, <span class="at">s1 =</span> <span class="sc">-</span><span class="dv">4</span>, <span class="at">s2 =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">d1 =</span> d1, <span class="at">d2 =</span> d2), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">365</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">logHof</span>(x, <span class="at">s1 =</span> <span class="sc">-</span><span class="fl">3.5</span>, <span class="at">s2 =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">d1 =</span> d1, <span class="at">d2 =</span> d2), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">365</span>), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">10</span>)[<span class="dv">1</span>])</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">logHof</span>(x, <span class="at">s1 =</span> <span class="sc">-</span><span class="dv">3</span>, <span class="at">s2 =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">d1 =</span> d1, <span class="at">d2 =</span> d2), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">365</span>), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">10</span>)[<span class="dv">2</span>])</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">logHof</span>(x, <span class="at">s1 =</span> <span class="sc">-</span><span class="fl">2.5</span>, <span class="at">s2 =</span> <span class="sc">-</span><span class="fl">0.5</span>, <span class="at">d1 =</span> d1, <span class="at">d2 =</span> d2), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">365</span>), <span class="at">add =</span> <span class="cn">TRUE</span>, <span class="at">col =</span> viridis<span class="sc">::</span><span class="fu">viridis</span>(<span class="dv">10</span>)[<span class="dv">3</span>])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">curve</span>(<span class="fu">logHof</span>(x,</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">s1 =</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="sc">-</span><span class="dv">2</span>, <span class="at">sd =</span> .<span class="dv">5</span>),</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">s2 =</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="sc">-</span><span class="fl">2.5</span>, <span class="at">sd =</span> .<span class="dv">5</span>),</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>             <span class="at">d1 =</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="dv">130</span>, <span class="at">sd =</span> <span class="dv">7</span>),</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">d2 =</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="dv">230</span>, <span class="at">sd =</span> <span class="dv">7</span>)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>             ),</span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>      <span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">365</span>),</span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>make fake data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>param_list <span class="ot">&lt;-</span> <span class="fu">list</span>(       </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">s1 =</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="sc">-</span><span class="dv">2</span>, <span class="at">sd =</span> .<span class="dv">5</span>),</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">s2 =</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="sc">-</span><span class="fl">2.5</span>, <span class="at">sd =</span> .<span class="dv">5</span>),</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">d1 =</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="dv">130</span>, <span class="at">sd =</span> <span class="dv">7</span>),</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">d2 =</span> <span class="fu">rnorm</span>(<span class="dv">1</span>, <span class="at">mean =</span> <span class="dv">230</span>, <span class="at">sd =</span> <span class="dv">7</span>)</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>fake_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">300</span>, <span class="at">by =</span> <span class="dv">7</span>),</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>       <span class="at">p =</span> <span class="fu">do.call</span>(logHof, purrr<span class="sc">::</span><span class="fu">splice</span>(param_list, <span class="at">x =</span> x)))</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>fake_data <span class="sc">|&gt;</span> </span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> p)) <span class="sc">+</span> <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fake_obs <span class="ot">&lt;-</span> fake_data <span class="sc">|&gt;</span> </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obs =</span> <span class="fu">list</span>(<span class="fu">rbinom</span>(<span class="at">n =</span> <span class="dv">10</span>, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> p))) <span class="sc">|&gt;</span> </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(obs)</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>fake_obs <span class="sc">|&gt;</span> </span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> obs)) <span class="sc">+</span> <span class="fu">geom_count</span>() <span class="sc">+</span> </span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> p), <span class="at">col =</span> <span class="st">"darkorange"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-13-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">getwd</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "/Users/amacdonald/Documents/Projects/aammd.github.io/posts/2023-02-08-occupancy-in-time"</code></pre>
+</div>
+</div>
+<p>run the stan model</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>hof <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(<span class="at">stan_file =</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                       here<span class="sc">::</span><span class="fu">here</span>(</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>                         <span class="st">"posts/2023-02-08-occupancy-in-time/hof.stan"</span>),</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">pedantic =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>hof</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb30"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co">// HOF model with perfect detection</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; y;</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] jday;</span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> s1;</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> s2;</span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> d1;</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> d2;</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] p;</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  p = exp(-(log1p_exp(-exp(s1) * (jday - d1)) + log1p_exp(exp(s2) * (jday - d2))));</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>  s1 ~ normal(-<span class="dv">2</span>,   .<span class="dv">5</span>);</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a>  s2 ~ normal(-<span class="fl">2.5</span>, .<span class="dv">5</span>);</span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>  d1 ~ normal(<span class="dv">130</span>, <span class="dv">7</span>);</span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>  d2 ~ normal(<span class="dv">230</span>, <span class="dv">7</span>);</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>  y ~ bernoulli(p);</span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>hof_sample <span class="ot">&lt;-</span> hof<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(<span class="at">n =</span> <span class="fu">nrow</span>(fake_obs),</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">y =</span> fake_obs<span class="sc">$</span>obs,</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">jday =</span> fake_obs<span class="sc">$</span>x), </span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">refresh =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 sequential chains...
+
+Chain 1 finished in 1.5 seconds.
+Chain 2 finished in 1.5 seconds.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Rejecting initial value:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3   Log probability evaluates to log(0), i.e. negative infinity.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3   Stan can't start sampling from this initial value.</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 3 finished in 1.4 seconds.
+Chain 4 finished in 1.1 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 1.4 seconds.
+Total execution time: 5.7 seconds.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>hof_sample</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> variable    mean  median   sd  mad      q5     q95 rhat ess_bulk ess_tail
+     lp__ -163.33 -162.99 1.43 1.23 -166.12 -161.66 1.00     1815     2972
+     s1     -2.88   -2.88 0.15 0.15   -3.14   -2.64 1.00     3095     3025
+     s2     -3.01   -3.01 0.17 0.17   -3.29   -2.72 1.00     3009     3136
+     d1    142.06  142.01 3.73 3.67  136.08  148.44 1.00     2742     2897
+     d2    228.19  228.21 3.80 3.77  221.78  234.25 1.00     3279     3099</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>param_list</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$s1
+[1] -3.03759
+
+$s2
+[1] -2.835324
+
+$d1
+[1] 142.4126
+
+$d2
+[1] 234.9143</code></pre>
+</div>
+</div>
+<p>draw the curve</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a><span class="fu">spread_rvars</span>(hof_sample, s1, s2, d1, d2) <span class="sc">|&gt;</span> </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(<span class="at">x =</span> <span class="fu">seq</span>(<span class="dv">30</span>, <span class="dv">300</span>, <span class="at">by =</span> <span class="dv">7</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p =</span> <span class="fu">logHof</span>(x, s1, s2, d1, d2)) <span class="sc">|&gt;</span> </span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">dist =</span> p)) <span class="sc">+</span> </span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_lineribbon</span>() <span class="sc">+</span> </span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Greens"</span>) <span class="sc">+</span> </span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_count</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> obs), <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">data =</span> fake_obs, <span class="at">pch =</span> <span class="dv">21</span>, <span class="at">fill =</span> <span class="st">"darkorange"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Using the `size` aesthietic with geom_ribbon was deprecated in ggplot2 3.4.0.
+ℹ Please use the `linewidth` aesthetic instead.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Unknown or uninitialised column: `linewidth`.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Using the `size` aesthietic with geom_line was deprecated in ggplot2 3.4.0.
+ℹ Please use the `linewidth` aesthetic instead.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Unknown or uninitialised column: `linewidth`.
+Unknown or uninitialised column: `linewidth`.</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 
 
 </section>

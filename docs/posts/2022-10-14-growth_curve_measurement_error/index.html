@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.2.269">
+<meta name="generator" content="quarto-1.2.335">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -307,14 +307,14 @@ L_t = L_\infty - (L_\infty - L_0)e^{-rt}
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 1 finished in 0.3 seconds.
-Chain 2 finished in 0.3 seconds.
-Chain 3 finished in 0.3 seconds.
-Chain 4 finished in 0.3 seconds.
+Chain 1 finished in 0.1 seconds.
+Chain 2 finished in 0.1 seconds.
+Chain 3 finished in 0.1 seconds.
+Chain 4 finished in 0.1 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.3 seconds.
-Total execution time: 0.6 seconds.</code></pre>
+Mean chain execution time: 0.1 seconds.
+Total execution time: 0.4 seconds.</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>one_tree_post<span class="sc">$</span><span class="fu">summary</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -349,51 +349,51 @@ Total execution time: 0.6 seconds.</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">lp__</td>
-<td style="text-align: right;">-81.8860891</td>
-<td style="text-align: right;">-81.5629000</td>
-<td style="text-align: right;">1.2657731</td>
-<td style="text-align: right;">0.9996431</td>
-<td style="text-align: right;">-84.3295600</td>
-<td style="text-align: right;">-80.5472350</td>
-<td style="text-align: right;">1.003900</td>
-<td style="text-align: right;">1703.367</td>
-<td style="text-align: right;">2248.792</td>
+<td style="text-align: right;">-84.0475862</td>
+<td style="text-align: right;">-83.7282000</td>
+<td style="text-align: right;">1.2654516</td>
+<td style="text-align: right;">1.0264040</td>
+<td style="text-align: right;">-86.4815100</td>
+<td style="text-align: right;">-82.6899900</td>
+<td style="text-align: right;">1.002211</td>
+<td style="text-align: right;">1726.271</td>
+<td style="text-align: right;">2253.937</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">r</td>
-<td style="text-align: right;">0.0304818</td>
-<td style="text-align: right;">0.0304662</td>
-<td style="text-align: right;">0.0009926</td>
-<td style="text-align: right;">0.0009715</td>
-<td style="text-align: right;">0.0289095</td>
-<td style="text-align: right;">0.0321072</td>
-<td style="text-align: right;">1.001307</td>
-<td style="text-align: right;">2264.785</td>
-<td style="text-align: right;">2502.303</td>
+<td style="text-align: right;">0.0293271</td>
+<td style="text-align: right;">0.0292921</td>
+<td style="text-align: right;">0.0010091</td>
+<td style="text-align: right;">0.0009937</td>
+<td style="text-align: right;">0.0277237</td>
+<td style="text-align: right;">0.0310195</td>
+<td style="text-align: right;">1.002767</td>
+<td style="text-align: right;">2022.287</td>
+<td style="text-align: right;">2140.461</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">Lmax</td>
-<td style="text-align: right;">149.9838068</td>
-<td style="text-align: right;">149.9775000</td>
-<td style="text-align: right;">1.1024073</td>
-<td style="text-align: right;">1.1037957</td>
-<td style="text-align: right;">148.2009500</td>
-<td style="text-align: right;">151.7842500</td>
-<td style="text-align: right;">1.001047</td>
-<td style="text-align: right;">2435.377</td>
-<td style="text-align: right;">2339.762</td>
+<td style="text-align: right;">149.9431923</td>
+<td style="text-align: right;">149.9170000</td>
+<td style="text-align: right;">1.2118152</td>
+<td style="text-align: right;">1.1979408</td>
+<td style="text-align: right;">147.9899500</td>
+<td style="text-align: right;">151.9602000</td>
+<td style="text-align: right;">1.002967</td>
+<td style="text-align: right;">2163.288</td>
+<td style="text-align: right;">2291.239</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">sigma_obs</td>
-<td style="text-align: right;">4.5019228</td>
-<td style="text-align: right;">4.4569000</td>
-<td style="text-align: right;">0.5106312</td>
-<td style="text-align: right;">0.4890727</td>
-<td style="text-align: right;">3.7627420</td>
-<td style="text-align: right;">5.4062315</td>
-<td style="text-align: right;">1.000617</td>
-<td style="text-align: right;">2204.440</td>
-<td style="text-align: right;">2327.323</td>
+<td style="text-align: right;">4.7191941</td>
+<td style="text-align: right;">4.6703850</td>
+<td style="text-align: right;">0.5231559</td>
+<td style="text-align: right;">0.5085615</td>
+<td style="text-align: right;">3.9512310</td>
+<td style="text-align: right;">5.6504515</td>
+<td style="text-align: right;">1.000848</td>
+<td style="text-align: right;">2331.954</td>
+<td style="text-align: right;">2412.225</td>
 </tr>
 </tbody>
 </table>
@@ -409,7 +409,8 @@ Total execution time: 0.6 seconds.</code></pre>
 <span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>expected_plot <span class="ot">&lt;-</span> expected_df <span class="sc">|&gt;</span> </span>
 <span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">ydist =</span> Lt)) <span class="sc">+</span> </span>
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_dist_lineribbon</span>()</span>
-<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>expected_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>expected_plot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
@@ -474,9 +475,9 @@ However sometimes it can be both convenient and more readable to keep the whole 
 <section id="posterior-predictive-simulations-in-stan" class="level3">
 <h3 class="anchored" data-anchor-id="posterior-predictive-simulations-in-stan">Posterior predictive simulations in Stan</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>vb_one_tree_gq <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts"</span>, </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"2022-10-14-growth_curve_measurement_error"</span>,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                                        <span class="st">"vb_one_tree_gq.stan"</span>))</span>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>vb_one_tree_gq <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">stan_file =</span> here<span class="sc">::</span><span class="fu">here</span>(</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    <span class="st">"posts/2022-10-14-growth_curve_measurement_error/vb_one_tree_gq.stan"</span>))</span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>vb_one_tree_gq</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -519,12 +520,12 @@ However sometimes it can be both convenient and more readable to keep the whole 
 
 Chain 1 finished in 0.3 seconds.
 Chain 2 finished in 0.3 seconds.
-Chain 3 finished in 0.2 seconds.
+Chain 3 finished in 0.3 seconds.
 Chain 4 finished in 0.2 seconds.
 
 All 4 chains finished successfully.
 Mean chain execution time: 0.3 seconds.
-Total execution time: 0.5 seconds.</code></pre>
+Total execution time: 0.4 seconds.</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>one_tree_predictions <span class="sc">|&gt;</span> </span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread_rvars</span>(Lt_predicted[i]) <span class="sc">|&gt;</span> </span>
