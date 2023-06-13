@@ -5,7 +5,7 @@ description: "Plus ça change, plus c'est la change qui change"
 date: 2023-02-02
 categories: [UdeS, stan]
 execute:
-  eval: false
+  eval: true
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
