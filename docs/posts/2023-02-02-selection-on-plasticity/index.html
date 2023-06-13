@@ -172,7 +172,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <h1 class="title">Validating a model of selection on plasticity</h1>
                   <div>
         <div class="description">
-          <p>Plus ça change, plus c’est la change qui change</p>
+          Plus ça change, plus c’est la change qui change
         </div>
       </div>
                           <div class="quarto-categories">
@@ -211,8 +211,11 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#two-correlated-predictors" id="toc-two-correlated-predictors" class="nav-link active" data-scroll-target="#two-correlated-predictors">two correlated predictors</a></li>
-  <li><a href="#back-to-main-question-measuring-selection" id="toc-back-to-main-question-measuring-selection" class="nav-link" data-scroll-target="#back-to-main-question-measuring-selection">back to main question: measuring selection</a></li>
+  <li><a href="#no-0-birds" id="toc-no-0-birds" class="nav-link active" data-scroll-target="#no-0-birds">No 0 birds</a>
+  <ul class="collapse">
+  <li><a href="#truncating-using-a-different-syntax" id="toc-truncating-using-a-different-syntax" class="nav-link" data-scroll-target="#truncating-using-a-different-syntax">Truncating using a different syntax</a></li>
+  <li><a href="#zero-inflated-binomial-success" id="toc-zero-inflated-binomial-success" class="nav-link" data-scroll-target="#zero-inflated-binomial-success">Zero inflated binomial success</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -223,128 +226,329 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 
 <div class="cell">
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(targets)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cmdstanr)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>when an animal shows a difference</p>
-<p>All animals respond to the environment, adapting their physical or biological characteristics into</p>
-<p>all an</p>
-<p>the response that an animal has, is in part determined by heir genetics, by heritable variation in their ability</p>
-<p>other factors can of course invluence who an animal responds to changing environment. It might be that animals only respond to changing environment when they are in good condition. or that changes in the environment always provoke differenc responses, but hat selection only happnens a few years out of the total</p>
-<p>anyway, we are going to simulate data from a complex model of selection on two correlated traits.</p>
-<p>let’s start small</p>
+<p>Let’s begin just with a simulation of three interrelated traits:</p>
+<ul>
+<li>when a bird arrives, which determines</li>
+<li>how many eggs they lay, out of which there is</li>
+<li>some number of surviving offspring</li>
+</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># environment </span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>nindivid <span class="ot">&lt;-</span> <span class="dv">38</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>neach <span class="ot">&lt;-</span> <span class="dv">4</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>fake_obs <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">indiv_id =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>nindivid, <span class="at">each =</span> neach)) <span class="sc">|&gt;</span> </span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">X =</span> <span class="fu">runif</span>(<span class="fu">length</span>(indiv_id), <span class="at">min =</span> <span class="dv">11</span>, <span class="at">max =</span> <span class="dv">26</span>))</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="co"># slopes</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>slope_mean <span class="ot">&lt;-</span> <span class="fl">2.6</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>slope_sd <span class="ot">&lt;-</span> .<span class="dv">9</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>b_1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(nindivid, <span class="at">mean =</span> slope_mean, <span class="at">sd =</span> slope_sd)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>b_0 <span class="ot">&lt;-</span> <span class="dv">3</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>fake_obs <span class="sc">|&gt;</span> </span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">b_0 =</span> b_0,</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">b_1 =</span> b_1[indiv_id],</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> b_0 <span class="sc">+</span> b_1 <span class="sc">*</span> X) <span class="sc">|&gt;</span> </span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> X, <span class="at">y =</span> y, <span class="at">group =</span> indiv_id)) <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## how many birds</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>nbirds <span class="ot">&lt;-</span> <span class="dv">57</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># simulate arrival dates -- two weeks before and after whatever the average is</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>darrive <span class="ot">&lt;-</span> <span class="fu">runif</span>(nbirds, <span class="at">min =</span> <span class="sc">-</span><span class="dv">14</span>, <span class="at">max =</span> <span class="dv">14</span>) <span class="sc">|&gt;</span> <span class="fu">round</span>()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate clutch sizes -- decrease by 4% each day</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>avg_clutch <span class="ot">&lt;-</span> <span class="fl">4.5</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>effect_per_day <span class="ot">&lt;-</span> .<span class="dv">97</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>clutch <span class="ot">&lt;-</span> <span class="fu">rpois</span>(nbirds, <span class="fu">exp</span>(<span class="fu">log</span>(avg_clutch) <span class="sc">+</span> <span class="fu">log</span>(effect_per_day)<span class="sc">*</span>darrive))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(darrive, clutch)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>it’s unlikely that everyone has the same yintercept</p>
-<p>a different approach, based on group-mean centering, will help us think about this</p>
+<p>As an aside, this would be 0-truncated, since birds who don’t lay eggs don’t get observed at all.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>b_0 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(nindivid, <span class="at">mean =</span> <span class="dv">45</span>, <span class="at">sd =</span> <span class="dv">6</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>fake_obs_2par <span class="ot">&lt;-</span> fake_obs <span class="sc">|&gt;</span> </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(indiv_id) <span class="sc">|&gt;</span> </span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">x_c =</span> X <span class="sc">-</span> <span class="fu">mean</span>(X), </span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> b_0[indiv_id] <span class="sc">+</span> b_1[indiv_id] <span class="sc">*</span> x_c)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>fake_obs_2par <span class="sc">|&gt;</span> </span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> X, <span class="at">y =</span> y, <span class="at">group =</span> indiv_id)) <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># simulate hatching success</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>success <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(nbirds, <span class="at">size =</span> clutch, <span class="at">prob =</span> .<span class="dv">86</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(darrive, success)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>contrast this with the display for the centered variable</p>
+<p>what’s important to see here is that there is a negative correlation, even though the arrival date has no direct effect on the outcome</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fake_obs_2par <span class="sc">|&gt;</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x_c, <span class="at">y =</span> y, <span class="at">group =</span> indiv_id)) <span class="sc">+</span> <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">glm</span>(success <span class="sc">~</span> darrive, <span class="at">family =</span> <span class="st">"poisson"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>this is just a simple demo of a pretty general pattern!</p>
-<p>centering just moves the line around – I think we would model this this way, if we felt that the</p>
-<p>let’s start simulating data and comparing the fit with models</p>
+<p>But, if we use a binomial model that knows about the number of possible successful chicks, then we see what we expect:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>sd_obs <span class="ot">&lt;-</span> <span class="dv">3</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>fake_obs_error <span class="ot">&lt;-</span> fake_obs_2par <span class="sc">|&gt;</span> </span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">yobs =</span> <span class="fu">rnorm</span>(<span class="at">n =</span> <span class="fu">length</span>(y), <span class="at">mean =</span> y, <span class="at">sd =</span> sd_obs))</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>fake_obs_error <span class="sc">|&gt;</span> </span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> X, <span class="at">y =</span> yobs)) <span class="sc">+</span> </span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>bin_mod <span class="ot">&lt;-</span> (<span class="fu">glm</span>(<span class="fu">cbind</span>(success, clutch <span class="sc">-</span> success) <span class="sc">~</span> <span class="dv">1</span>, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>)))</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plogis</span>(<span class="fu">coef</span>(bin_mod))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>We can already try to model this</p>
+<p>Which matches the simulation above.</p>
+<p>if we put <code>darrive</code> in the model, the effect should be very close to 0 with overlap.</p>
+<p>If we imagine that the laying date effects the survival p, then we should see an effect close to 0</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(lme4)</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> <span class="fu">lmer</span>(yobs <span class="sc">~</span> X <span class="sc">+</span> (X<span class="sc">|</span>indiv_id), <span class="at">data =</span> fake_obs_error)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>m <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(<span class="fu">glm</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cbind</span>(success, clutch <span class="sc">-</span> success) <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> darrive,</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>works but not really helpful for the intercepts – we need to fit a centered model to get those values:</p>
+<p>One Stan model can model all of these at the same time</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">lmer</span>(yobs <span class="sc">~</span> x_c <span class="sc">+</span> (x_c<span class="sc">|</span>indiv_id), <span class="at">data =</span> fake_obs_error) <span class="sc">|&gt;</span> </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>one_indiv <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-02-02-selection-on-plasticity/one_indiv.stan"</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>one_indiv</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now we can recover parameters that went in to the model.</p>
-<section id="two-correlated-predictors" class="level2">
-<h2 class="anchored" data-anchor-id="two-correlated-predictors">two correlated predictors</h2>
-<p>This will come together with the rest of the model soon, but I want to get a start on this now. The two traits we are mesauring are kind of weird and different from the tutal way of thinking about environemtnal traits. let me try to explain it. so there was another procedure earlier which attempted to measure the “window” of temperature which provokes the greatest change.</p>
-<p>as an aside, do we expect the greatest variation to be found with the greatest selection? consider the number of adjectives in a scientivi paper vs the number of refrerences. I don’t know, but I would epect that the former is way more variable – and matters far less.</p>
-<p>anyway that was done. So the two response variables here are measured in the same units but not exactly the same VALUES for each</p>
-<p>just makes me curious to start by simulating this (and perhaps also to look in the data for examples)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(<span class="at">orig =</span> <span class="fu">rerun</span>(<span class="dv">350</span>, <span class="fu">runif</span>(<span class="dv">30</span>, <span class="at">min =</span> <span class="sc">-</span><span class="dv">1</span>, <span class="at">max =</span> <span class="dv">1</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">x1 =</span> <span class="fu">mean</span>(<span class="fu">head</span>(orig, <span class="dv">21</span>)),</span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">x2 =</span> <span class="fu">mean</span>(<span class="fu">tail</span>(orig, <span class="dv">21</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">y =</span> x2)) <span class="sc">+</span> <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>one_indiv_post <span class="ot">&lt;-</span> one_indiv<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">nbirds =</span> nbirds,</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">clutch =</span> clutch, </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">success =</span> success, </span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">darrive =</span> darrive))</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>one_indiv_post</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Sure enough they are correlated. I’m sure with some effort I could calculate the equation for this correlation, but let’s not.</p>
-<p>Did audrey do this differently for each bird? for each environmental variable or what? does it count as conditioning?</p>
-<p>TK ask her this question.</p>
+<p>reasonably close to true values:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plogis</span>(<span class="fl">1.44</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(avg_clutch)</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(effect_per_day)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>simulate_some_birds <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">nbirds =</span> <span class="dv">57</span>, </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">log_b_date =</span> <span class="fu">log</span>(.<span class="dv">97</span>),</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">log_avgclutch =</span> <span class="fu">log</span>(<span class="fl">4.5</span>),</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">logit_psuccess =</span> <span class="fu">qlogis</span>(.<span class="dv">84</span>)){</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># simulate arrival dates -- two weeks before and after whatever the average is</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  darrive <span class="ot">&lt;-</span> <span class="fu">runif</span>(nbirds, <span class="at">min =</span> <span class="sc">-</span><span class="dv">14</span>, <span class="at">max =</span> <span class="dv">14</span>) <span class="sc">|&gt;</span> <span class="fu">round</span>()</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="do">## simulate clutch sizes -- decrease  each day</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  clutch <span class="ot">&lt;-</span> <span class="fu">rpois</span>(nbirds, <span class="fu">exp</span>(log_avgclutch <span class="sc">+</span> log_b_date<span class="sc">*</span>darrive))</span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="do">## simulate success</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>  success <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(nbirds, <span class="at">size =</span> clutch, <span class="at">prob =</span> <span class="fu">plogis</span>(logit_psuccess))</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">data_list =</span> <span class="fu">list</span>(</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">nbirds =</span> nbirds,</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">darrive =</span> darrive, </span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">clutch =</span> clutch, </span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">success =</span> success </span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">true_values =</span> <span class="fu">tribble</span>(</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>      <span class="sc">~</span>variable, <span class="sc">~</span>true_value,</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>      <span class="st">"log_b_date"</span>, log_b_date,</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>      <span class="st">"log_avgclutch"</span>, log_avgclutch,</span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>      <span class="st">"logit_psuccess"</span>, logit_psuccess</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>data_for_simulation <span class="ot">&lt;-</span> <span class="fu">simulate_some_birds</span>()</span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>one_indiv_post <span class="ot">&lt;-</span> one_indiv<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> data_for_simulation<span class="sc">$</span>data_list,</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">refresh =</span> <span class="dv">0</span>)</span>
+<span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a>comparison <span class="ot">&lt;-</span> one_indiv_post <span class="sc">|&gt;</span> </span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>  <span class="co"># tidybayes::gather_rvars(logit_psuccess, log_avgclutch, log_b_date) |&gt; </span></span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>  tidybayes<span class="sc">::</span><span class="fu">tidy_draws</span>() <span class="sc">|&gt;</span> tidybayes<span class="sc">::</span><span class="fu">gather_variables</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">right_join</span>(data_for_simulation<span class="sc">$</span>true_values, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">".variable"</span> <span class="ot">=</span> <span class="st">"variable"</span>))</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>comparison <span class="sc">|&gt;</span> </span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> .variable, <span class="at">x =</span> .value)) <span class="sc">+</span> </span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_halfeye</span>() <span class="sc">+</span> </span>
+<span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> variable, <span class="at">x =</span> true_value),</span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>             <span class="at">col =</span> <span class="st">"orange"</span>,</span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a>             <span class="at">pch =</span> <span class="st">"|"</span>,</span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a>             <span class="at">size =</span> <span class="dv">10</span>, <span class="at">data =</span> data_for_simulation<span class="sc">$</span>true_values)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="no-0-birds" class="level2">
+<h2 class="anchored" data-anchor-id="no-0-birds">No 0 birds</h2>
+<p>This system is a little challenging, since we never observe 0 eggs per bird – if a bird cannot lay eggs (e.g.&nbsp;it does not find a nest spot) then it goes uncounted</p>
+<p>To simulate this, I’ll drop the 0 clutches before doing the rest of the simulations. This means that sample size will be less than or equal to the “nbirds” argument.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>simulate_some_birds_nonzero <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">nbirds =</span> <span class="dv">57</span>, </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">log_b_date =</span> <span class="fu">log</span>(.<span class="dv">97</span>),</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">log_avgclutch =</span> <span class="fu">log</span>(<span class="fl">4.5</span>),</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">logit_psuccess =</span> <span class="fu">qlogis</span>(.<span class="dv">84</span>)){</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># simulate arrival dates -- two weeks before and after whatever the average is</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  darrive <span class="ot">&lt;-</span> <span class="fu">runif</span>(nbirds, <span class="at">min =</span> <span class="sc">-</span><span class="dv">14</span>, <span class="at">max =</span> <span class="dv">14</span>) <span class="sc">|&gt;</span> <span class="fu">round</span>()</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="do">## simulate clutch sizes -- decrease  each day</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  clutch <span class="ot">&lt;-</span> <span class="fu">rpois</span>(nbirds, <span class="fu">exp</span>(log_avgclutch <span class="sc">+</span> log_b_date<span class="sc">*</span>darrive))</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># drop 0 nests</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>  nonzero_clutch <span class="ot">&lt;-</span> <span class="fu">which</span>(clutch <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="do">## simulate success</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>  success <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(nbirds, <span class="at">size =</span> clutch, <span class="at">prob =</span> <span class="fu">plogis</span>(logit_psuccess))</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">data_list =</span> <span class="fu">list</span>(</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>      <span class="at">nbirds =</span> <span class="fu">length</span>(nonzero_clutch),</span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>      <span class="at">darrive =</span> darrive[nonzero_clutch], </span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a>      <span class="at">clutch  =</span>  clutch[nonzero_clutch], </span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>      <span class="at">success =</span> success[nonzero_clutch] </span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">true_values =</span> <span class="fu">tribble</span>(</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a>      <span class="sc">~</span>variable, <span class="sc">~</span>true_value,</span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a>      <span class="st">"log_b_date"</span>, log_b_date,</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>      <span class="st">"log_avgclutch"</span>, log_avgclutch,</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>      <span class="st">"logit_psuccess"</span>, logit_psuccess</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1234</span>)</span>
+<span id="cb11-34"><a href="#cb11-34" aria-hidden="true" tabindex="-1"></a>some_nonzeros <span class="ot">&lt;-</span> <span class="fu">simulate_some_birds_nonzero</span>(<span class="at">nbirds =</span> <span class="dv">200</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>a plot to confirm that it works:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>some_nonzeros<span class="sc">$</span>data_list <span class="sc">|&gt;</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.data.frame</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> darrive, <span class="at">y =</span> clutch)) <span class="sc">+</span> <span class="fu">geom_point</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And fit the posterior</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>plot_posterior_true <span class="ot">&lt;-</span> <span class="cf">function</span>(simdata, stanmodel){</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  model_post <span class="ot">&lt;-</span> stanmodel<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> simdata<span class="sc">$</span>data_list,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">refresh =</span> <span class="dv">0</span>, <span class="at">parallel_chains =</span> <span class="dv">4</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  comparison <span class="ot">&lt;-</span> model_post <span class="sc">|&gt;</span> </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    tidybayes<span class="sc">::</span><span class="fu">tidy_draws</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    tidybayes<span class="sc">::</span><span class="fu">gather_variables</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">right_join</span>(simdata<span class="sc">$</span>true_values, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">".variable"</span> <span class="ot">=</span> <span class="st">"variable"</span>))</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  comparison <span class="sc">|&gt;</span> </span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> .variable, <span class="at">x =</span> .value)) <span class="sc">+</span> </span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">stat_halfeye</span>() <span class="sc">+</span> </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">aes</span>(<span class="at">y =</span> variable, <span class="at">x =</span> true_value),</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>      <span class="at">col =</span> <span class="st">"orange"</span>,</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>      <span class="at">pch =</span> <span class="st">"|"</span>,</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> <span class="dv">10</span>, <span class="at">data =</span> simdata<span class="sc">$</span>true_values)</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_posterior_true</span>(some_nonzeros, one_indiv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>There’s already some bias happening! let’s try what happens when the average is lower (and gives more 0s)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">420</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate_some_birds_nonzero</span>(<span class="at">log_avgclutch =</span> <span class="fu">log</span>(<span class="fl">2.4</span>),</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">log_b_date =</span> <span class="fu">log</span>(.<span class="dv">7</span>),</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">nbirds =</span> <span class="dv">300</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_posterior_true</span>(one_indiv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>some preliminary repetitions show that it usually misses either the average or the hatching success, frequently both.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>one_indiv_noZero <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-02-02-selection-on-plasticity/one_indiv_noZero.stan"</span>))</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>one_indiv_noZero</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">420</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate_some_birds_nonzero</span>(<span class="at">log_avgclutch =</span> <span class="fu">log</span>(<span class="fl">4.4</span>),</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">log_b_date =</span> <span class="fu">log</span>(.<span class="dv">9</span>),</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">nbirds =</span> <span class="dv">300</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_posterior_true</span>(one_indiv_noZero)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="truncating-using-a-different-syntax" class="level3">
+<h3 class="anchored" data-anchor-id="truncating-using-a-different-syntax">Truncating using a different syntax</h3>
+<p>The manual <a href="https://mc-stan.org/docs/stan-users-guide/truncated-data.html">uses a different syntax</a>. To write the equation above this way, I found I needed to make a few changes:</p>
+<ul>
+<li><code>poisson_log</code> has to be replaced with <code>poisson</code> and the <code>exp()</code> link function</li>
+</ul>
+<p>… that was actually the only change. It runs at the same speed as the previous way of writing it, and gets the same answer:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>one_indiv_zerotrunc <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-02-02-selection-on-plasticity/one_indiv_zerotrunc.stan"</span>))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>one_indiv_zerotrunc</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">420</span>)</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">simulate_some_birds_nonzero</span>(<span class="at">log_avgclutch =</span> <span class="fu">log</span>(<span class="fl">4.4</span>),</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">log_b_date =</span> <span class="fu">log</span>(.<span class="dv">9</span>),</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">nbirds =</span> <span class="dv">300</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_posterior_true</span>(one_indiv_zerotrunc)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout-note callout callout-style-default callout-captioned">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-caption-container flex-fill">
+Two parameterizations diverged in a yellow wood
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>These two ways of writing the model both work. Which to choose? Well, I was pleased with myself for manually normalizing the Poisson likelihood in the first model. However the second is clearer to the reader. In the first, it takes two lines of code – not even necessarily next to each other. In the second, the big <code>T</code> for <em>T</em>runcation indicates clearly what is going on. Code is communication; clarity wins.</p>
+</div>
+</div>
 </section>
-<section id="back-to-main-question-measuring-selection" class="level2">
-<h2 class="anchored" data-anchor-id="back-to-main-question-measuring-selection">back to main question: measuring selection</h2>
-<p>lets begin by replicating the bivariate model of fitness that you see, for example, in</p>
-<p>start with fake obs eror</p>
+<section id="zero-inflated-binomial-success" class="level3">
+<h3 class="anchored" data-anchor-id="zero-inflated-binomial-success">Zero inflated binomial success</h3>
+<p>Once in a while, a nest will just be completely destroyed by, say, a predator. This has nothing to do with anything, probably, and is just a catastrophic Act of Weasel. Let’s imagine that some small proportion of the nests just die:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># environment </span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>nindivid <span class="ot">&lt;-</span> <span class="dv">38</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>neach <span class="ot">&lt;-</span> <span class="dv">4</span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>fake_obs <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">indiv_id =</span> <span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span>nindivid, <span class="at">each =</span> neach)) <span class="sc">|&gt;</span> </span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">X =</span> <span class="fu">runif</span>(<span class="fu">length</span>(indiv_id), <span class="at">min =</span> <span class="dv">11</span>, <span class="at">max =</span> <span class="dv">26</span>))</span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a><span class="co"># slopes</span></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>slope_mean <span class="ot">&lt;-</span> <span class="fl">2.6</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>slope_sd <span class="ot">&lt;-</span> .<span class="dv">9</span></span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>intercept_mean <span class="ot">&lt;-</span> <span class="dv">45</span></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>intercept_sd <span class="ot">&lt;-</span> <span class="dv">6</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>b_1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(nindivid, <span class="at">mean =</span> slope_mean, <span class="at">sd =</span> slope_sd)</span>
-<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>b_0 <span class="ot">&lt;-</span>  <span class="fu">rnorm</span>(nindivid, <span class="at">mean =</span> slope_mean, <span class="at">sd =</span> slope_sd)</span>
-<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>fake_obs <span class="sc">|&gt;</span> </span>
-<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">b_0 =</span> b_0,</span>
-<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">b_1 =</span> b_1[indiv_id],</span>
-<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">y =</span> b_0 <span class="sc">+</span> b_1 <span class="sc">*</span> X)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>simulate_some_birds_nonzero_zeroinflated <span class="ot">&lt;-</span> <span class="cf">function</span>(<span class="at">nbirds =</span> <span class="dv">57</span>, </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>         <span class="at">log_b_date =</span> <span class="fu">log</span>(.<span class="dv">97</span>),</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">log_avgclutch =</span> <span class="fu">log</span>(<span class="fl">4.5</span>),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">logit_psuccess =</span> <span class="fu">qlogis</span>(.<span class="dv">84</span>),</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">logit_pfail =</span> <span class="fu">qlogis</span>(.<span class="dv">1</span>)){</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># simulate arrival dates -- two weeks before and after whatever the average is</span></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  darrive <span class="ot">&lt;-</span> <span class="fu">runif</span>(nbirds, <span class="at">min =</span> <span class="sc">-</span><span class="dv">14</span>, <span class="at">max =</span> <span class="dv">14</span>) <span class="sc">|&gt;</span> <span class="fu">round</span>()</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="do">## simulate clutch sizes -- decrease  each day</span></span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  clutch <span class="ot">&lt;-</span> <span class="fu">rpois</span>(nbirds, <span class="fu">exp</span>(log_avgclutch <span class="sc">+</span> log_b_date<span class="sc">*</span>darrive))</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># drop 0 nests</span></span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  nonzero_clutch <span class="ot">&lt;-</span> <span class="fu">which</span>(clutch <span class="sc">&gt;</span> <span class="dv">0</span>)</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  n_laid <span class="ot">&lt;-</span> <span class="fu">length</span>(nonzero_clutch)</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  <span class="co"># simulate success -- among birds which laid at least 1 egg, there is a chance of failing completely</span></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>  success_among_nonzero <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n_laid,</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">size =</span> clutch[nonzero_clutch],</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">prob =</span> <span class="fu">plogis</span>(logit_psuccess))</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  failed_nests <span class="ot">&lt;-</span> <span class="fu">rbinom</span>(n_laid, <span class="at">size =</span> <span class="dv">1</span>, <span class="at">prob =</span> <span class="fu">plogis</span>(logit_pfail))</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>  success_zi <span class="ot">&lt;-</span> success_among_nonzero <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> failed_nests)</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># success &lt;- rbinom(nbirds, </span></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                   size = clutch,</span></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>  <span class="co">#                   prob = plogis(logit_psuccess))</span></span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>  <span class="co"># failed_nests &lt;- rbinom(nbirds, size = 1, prob = plogis(logit_pfail))</span></span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>  <span class="co"># </span></span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>  <span class="co"># success_zi &lt;- success * (1 - failed_nests)</span></span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(<span class="fu">list</span>(</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">data_list =</span> <span class="fu">list</span>(</span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">nbirds =</span> n_laid,</span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>      <span class="at">darrive =</span> darrive[nonzero_clutch], </span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>      <span class="at">clutch  =</span>  clutch[nonzero_clutch], </span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>      <span class="at">success =</span> success_zi<span class="co">#[nonzero_clutch]</span></span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">true_values =</span> <span class="fu">tribble</span>(</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>      <span class="sc">~</span>variable, <span class="sc">~</span>true_value,</span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>      <span class="st">"log_b_date"</span>, log_b_date,</span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>      <span class="st">"log_avgclutch"</span>, log_avgclutch,</span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>      <span class="st">"logit_psuccess"</span>, logit_psuccess,</span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a>      <span class="st">"logit_pfail"</span>, logit_pfail</span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fake_obs_error</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>one_indiv_ztrunc_zinf <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-02-02-selection-on-plasticity/one_indiv_ztrunc_zinf.stan"</span>))</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>one_indiv_ztrunc_zinf</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">477</span>)</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>some_zi_birds <span class="ot">&lt;-</span> <span class="fu">simulate_some_birds_nonzero_zeroinflated</span>(<span class="at">log_avgclutch =</span> <span class="fu">log</span>(<span class="fl">4.4</span>),</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>                            <span class="at">log_b_date =</span> <span class="fu">log</span>(.<span class="dv">9</span>),</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>                            <span class="at">nbirds =</span> <span class="dv">300</span>) </span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>some_zi_birds<span class="sc">|&gt;</span> </span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_posterior_true</span>(one_indiv_ztrunc_zinf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>I initially failed to recover the parameter for <code>logit_pfail</code>. Here I some things I learned:</p>
+<ul>
+<li>Simulating zero-inflated numbers can be tricky! I flipped back and forth between simulating 0-inflation for all nests, and simulating for only those with at least 1 egg. In retrospect, it is clear that these are equivalent. There are two independent things here: the probability of a clutch having 0 eggs and the probability of a 0 coming from the zero-inflated binomial.</li>
+<li>this zero-inflated model is quite <em>sensitive to the prior</em>. That’s because there are not very many zeros being inflated: in my simulation at least, failed nests are rare and success is naturally low. it would be pretty important to decide in advance if sudden nest failure (e.g.&nbsp;by predation) is rare or common</li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

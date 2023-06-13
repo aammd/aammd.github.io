@@ -129,7 +129,7 @@ https://mc-stan.org/users/documentation/case-studies/dorazio-royle-occupancy.htm
 
 ## HOF functions
 
-the idea here is two logistic curves multiplied together.
+The idea here is two logistic curves multiplied together. 
 
 Let's make it easier and use this form of the logistic:
 

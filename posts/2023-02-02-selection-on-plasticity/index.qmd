@@ -1,9 +1,8 @@
 ---
 title: "Validating a model of selection on plasticity"
 author: "Andrew MacDonald"
-description: |
-  Plus ça change, plus c'est la change qui change
-date: 02 Feb 2023
+description: "Plus ça change, plus c'est la change qui change"
+date: 2023-02-02
 categories: [UdeS, stan]
 execute:
   eval: false
