@@ -211,7 +211,9 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#no-0-birds" id="toc-no-0-birds" class="nav-link active" data-scroll-target="#no-0-birds">No 0 birds</a>
+  <li><a href="#the-challenge" id="toc-the-challenge" class="nav-link active" data-scroll-target="#the-challenge">The challenge</a></li>
+  <li><a href="#the-system" id="toc-the-system" class="nav-link" data-scroll-target="#the-system">The system</a></li>
+  <li><a href="#no-0-birds" id="toc-no-0-birds" class="nav-link" data-scroll-target="#no-0-birds">No 0 birds</a>
   <ul class="collapse">
   <li><a href="#truncating-using-a-different-syntax" id="toc-truncating-using-a-different-syntax" class="nav-link" data-scroll-target="#truncating-using-a-different-syntax">Truncating using a different syntax</a></li>
   <li><a href="#zero-inflated-binomial-success" id="toc-zero-inflated-binomial-success" class="nav-link" data-scroll-target="#zero-inflated-binomial-success">Zero inflated binomial success</a></li>
@@ -230,11 +232,17 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<section id="the-challenge" class="level2">
+<h2 class="anchored" data-anchor-id="the-challenge">The challenge</h2>
+<p>Studying selection on phenotypic plasticity is challenging. First, because phenotypic plasticity is a slope – it is the change in a trait when an environmental variable changes. Secondly, because many traits of animals also cause other traits. For example, arriving later at a breeding site causes an individual to lay fewer eggs (because less food is available).</p>
+</section>
+<section id="the-system" class="level2">
+<h2 class="anchored" data-anchor-id="the-system">The system</h2>
 <p>Let’s begin just with a simulation of three interrelated traits:</p>
 <ul>
-<li>when a bird arrives, which determines</li>
-<li>how many eggs they lay, out of which there is</li>
-<li>some number of surviving offspring</li>
+<li>The date when a bird arrives, which determines</li>
+<li>How many eggs they lay, out of which there is</li>
+<li>Some number of surviving offspring</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## how many birds</span></span>
@@ -272,21 +280,21 @@ Call:
 glm(formula = success ~ darrive, family = "poisson")
 
 Deviance Residuals: 
-    Min       1Q   Median       3Q      Max  
--2.7523  -1.0103  -0.2525   0.7268   2.3430  
+     Min        1Q    Median        3Q       Max  
+-3.10217  -0.67558  -0.03471   0.72290   2.20791  
 
 Coefficients:
              Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept)  1.232038   0.073856  16.682  &lt; 2e-16 ***
-darrive     -0.033225   0.009316  -3.567 0.000362 ***
+(Intercept)  1.370106   0.073503  18.640  &lt; 2e-16 ***
+darrive     -0.033492   0.008242  -4.064 4.83e-05 ***
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for poisson family taken to be 1)
 
-    Null deviance: 93.222  on 56  degrees of freedom
-Residual deviance: 80.200  on 55  degrees of freedom
-AIC: 251.06
+    Null deviance: 87.015  on 56  degrees of freedom
+Residual deviance: 69.548  on 55  degrees of freedom
+AIC: 251.66
 
 Number of Fisher Scoring iterations: 5</code></pre>
 </div>
@@ -298,7 +306,7 @@ Number of Fisher Scoring iterations: 5</code></pre>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plogis</span>(<span class="fu">coef</span>(bin_mod))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>(Intercept) 
-  0.8808511 </code></pre>
+  0.8784722 </code></pre>
 </div>
 </div>
 <p>Which matches the simulation above.</p>
@@ -316,20 +324,20 @@ glm(formula = cbind(success, clutch - success) ~ 1 + darrive,
 
 Deviance Residuals: 
     Min       1Q   Median       3Q      Max  
--2.2978  -0.4711   0.5172   0.9990   1.7302  
+-2.9768  -0.5478   0.6749   1.0866   1.8095  
 
 Coefficients:
             Estimate Std. Error z value Pr(&gt;|z|)    
-(Intercept) 2.027675   0.219104   9.254   &lt;2e-16 ***
-darrive     0.009266   0.027649   0.335    0.738    
+(Intercept) 2.015257   0.217113   9.282   &lt;2e-16 ***
+darrive     0.007689   0.024139   0.319     0.75    
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
 (Dispersion parameter for binomial family taken to be 1)
 
-    Null deviance: 68.734  on 56  degrees of freedom
-Residual deviance: 68.620  on 55  degrees of freedom
-AIC: 107.71
+    Null deviance: 76.324  on 55  degrees of freedom
+Residual deviance: 76.222  on 54  degrees of freedom
+AIC: 124.2
 
 Number of Fisher Scoring iterations: 4</code></pre>
 </div>
@@ -470,10 +478,10 @@ Total execution time: 0.7 seconds.</code></pre>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>one_indiv_post</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>       variable  mean median   sd  mad    q5   q95 rhat ess_bulk ess_tail
- lp__           10.41  10.71 1.19 1.01  8.07 11.73 1.00     2090     2888
- logit_psuccess  1.54   1.54 0.13 0.13  1.33  1.76 1.00     3445     2897
- log_avgclutch   1.31   1.31 0.07 0.07  1.20  1.42 1.00     3148     2910
- log_b_date     -0.04  -0.04 0.01 0.01 -0.05 -0.02 1.00     3535     3089</code></pre>
+ lp__           71.30  71.65 1.26 0.96 68.81 72.62 1.00     1973     2450
+ logit_psuccess  1.58   1.58 0.12 0.12  1.38  1.79 1.00     2708     2568
+ log_avgclutch   1.44   1.44 0.07 0.07  1.33  1.55 1.00     2362     2497
+ log_b_date     -0.04  -0.04 0.01 0.01 -0.05 -0.03 1.00     2769     2671</code></pre>
 </div>
 </div>
 <p>reasonably close to true values:</p>
@@ -530,7 +538,7 @@ Total execution time: 0.7 seconds.</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 sequential chains...
 
-Chain 1 finished in 0.1 seconds.
+Chain 1 finished in 0.0 seconds.
 Chain 2 finished in 0.1 seconds.
 Chain 3 finished in 0.1 seconds.
 Chain 4 finished in 0.1 seconds.
@@ -560,6 +568,7 @@ Total execution time: 0.5 seconds.</code></pre>
 <p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+</section>
 <section id="no-0-birds" class="level2">
 <h2 class="anchored" data-anchor-id="no-0-birds">No 0 birds</h2>
 <p>This system is a little challenging, since we never observe 0 eggs per bird – if a bird cannot lay eggs (e.g.&nbsp;it does not find a nest spot) then it goes uncounted</p>
@@ -636,14 +645,14 @@ Total execution time: 0.5 seconds.</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 1 finished in 0.4 seconds.
-Chain 2 finished in 0.5 seconds.
-Chain 3 finished in 0.5 seconds.
-Chain 4 finished in 0.5 seconds.
+Chain 1 finished in 0.2 seconds.
+Chain 2 finished in 0.2 seconds.
+Chain 3 finished in 0.2 seconds.
+Chain 4 finished in 0.2 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.5 seconds.
-Total execution time: 0.7 seconds.</code></pre>
+Mean chain execution time: 0.2 seconds.
+Total execution time: 0.4 seconds.</code></pre>
 </div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
@@ -659,14 +668,14 @@ Total execution time: 0.7 seconds.</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 1 finished in 0.8 seconds.
-Chain 3 finished in 0.8 seconds.
-Chain 2 finished in 0.8 seconds.
-Chain 4 finished in 0.8 seconds.
+Chain 1 finished in 0.7 seconds.
+Chain 2 finished in 0.7 seconds.
+Chain 3 finished in 0.7 seconds.
+Chain 4 finished in 0.7 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.8 seconds.
-Total execution time: 1.0 seconds.</code></pre>
+Mean chain execution time: 0.7 seconds.
+Total execution time: 0.9 seconds.</code></pre>
 </div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
@@ -711,14 +720,14 @@ Total execution time: 1.0 seconds.</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 1 finished in 1.5 seconds.
-Chain 2 finished in 1.5 seconds.
-Chain 4 finished in 1.4 seconds.
-Chain 3 finished in 1.6 seconds.
+Chain 1 finished in 1.4 seconds.
+Chain 2 finished in 1.4 seconds.
+Chain 3 finished in 1.4 seconds.
+Chain 4 finished in 1.3 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 1.5 seconds.
-Total execution time: 1.7 seconds.</code></pre>
+Mean chain execution time: 1.4 seconds.
+Total execution time: 1.5 seconds.</code></pre>
 </div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
@@ -767,14 +776,14 @@ Total execution time: 1.7 seconds.</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 1 finished in 1.7 seconds.
-Chain 3 finished in 1.6 seconds.
-Chain 2 finished in 1.8 seconds.
-Chain 4 finished in 1.7 seconds.
+Chain 3 finished in 1.3 seconds.
+Chain 1 finished in 1.4 seconds.
+Chain 2 finished in 1.4 seconds.
+Chain 4 finished in 1.4 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 1.7 seconds.
-Total execution time: 1.9 seconds.</code></pre>
+Mean chain execution time: 1.4 seconds.
+Total execution time: 1.6 seconds.</code></pre>
 </div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid" width="672"></p>
@@ -899,14 +908,14 @@ Two parameterizations diverged in a yellow wood
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 2 finished in 3.9 seconds.
-Chain 4 finished in 4.3 seconds.
-Chain 1 finished in 4.5 seconds.
-Chain 3 finished in 4.4 seconds.
+Chain 2 finished in 3.2 seconds.
+Chain 4 finished in 3.5 seconds.
+Chain 3 finished in 3.6 seconds.
+Chain 1 finished in 3.8 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 4.3 seconds.
-Total execution time: 4.6 seconds.</code></pre>
+Mean chain execution time: 3.5 seconds.
+Total execution time: 3.8 seconds.</code></pre>
 </div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>

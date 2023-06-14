@@ -4,6 +4,8 @@ author: "Andrew MacDonald"
 description: "Plus ça change, plus c'est la change qui change"
 date: 2023-02-02
 categories: [UdeS, stan]
+code-block-bg: true
+code-block-border-left: "#31BAE9"
 execute:
   eval: true
 ---
@@ -14,12 +16,21 @@ library(tidyverse)
 library(tidybayes)
 ```
 
+## The challenge
+
+Studying selection on phenotypic plasticity is challenging. 
+First, because phenotypic plasticity is a slope -- it is the change in a trait when an environmental variable changes.
+Secondly, because many traits of animals also cause other traits. For example, arriving later at a breeding site causes an individual to lay fewer eggs (because less food is available).
+
+## The system
 
 Let's begin just with a simulation of three interrelated traits:
 
-* when a bird arrives, which determines
-* how many eggs they lay, out of which there is 
-* some number of surviving offspring
+* The date when a bird arrives, which determines
+* How many eggs they lay, out of which there is 
+* Some number of surviving offspring
+
+
 
 ```{r}
 ## how many birds
