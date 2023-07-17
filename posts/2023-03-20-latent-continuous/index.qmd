@@ -6,7 +6,7 @@ description: |
 date: 20 March 2023
 editor: source
 categories: [UdeS, stan]
-draft: true
+draft: false
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
@@ -20,7 +20,7 @@ Imagine we have many measurments, all correlated with each other. Where do these
 One possibility is that all these measurents are _caused_ by the values of some unobservable, latent trait. 
 This happens in ecology when we imagine that, for example, the **Competitive Ability** of a species appears to us in the form of measurable traits that (to us) seem to represent this trait: leaf size, growth rate, alleopathy, etc. 
 
-![Five different observable variables (in squares), all caused by one latent variable (round).](posts/2023-03-20-latent-continuous/dag.png)
+![Five different observable variables (in squares), all caused by one latent variable (round).](dag.png)
 
 In mathematics, this model is the following:
 
