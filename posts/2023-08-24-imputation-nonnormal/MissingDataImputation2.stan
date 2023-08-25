@@ -23,8 +23,8 @@ transformed parameters {
 
 model {
   // Priors
-  mu ~ normal(0, 10);
-  sigma ~ exponential(1);
+  mu ~ normal(50, 10);
+  sigma ~ exponential(.1);
 
   // Likelihood for observed and imputated data
   y ~ normal(mu, sigma);
