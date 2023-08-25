@@ -4,7 +4,7 @@ author: "Andrew MacDonald, Flavio Affinito"
 description: |
   We could have counted them but we didn't.
 date: 22 Aug 2023
-draft: true
+draft: false
 editor: source
 categories: [UdeS, stan, QCBS]
 ---
