@@ -29,6 +29,7 @@ model {
   x_mu ~ normal(50, 10);
   x_sigma ~ exponential(.1);
   intercept ~ normal(10, 4);
+  slope ~ std_normal();
   y_sigma ~ exponential(.1);
 
   // Likelihood for observed and imputated data (x)
