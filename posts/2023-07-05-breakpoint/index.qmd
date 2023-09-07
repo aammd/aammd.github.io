@@ -22,7 +22,7 @@ In breakpoint regression, we think that the relationship between two things can 
 
 When might this happen? One case is when a rate is determined by the _minimum_ value of two functions^[see Leibig's Law of the Minimum, and also Dune]. For an example, consider cars driving down a series of roads. The roads vary in their speed limit, and each car is driven by very lawful drivers who always drive precisely the speed limit
 
-```{r}
+```{r concept}
 
 tibble(x = 0:1, y = 0:1) |> 
   ggplot(aes(x = x, y = y)) + 
@@ -126,28 +126,62 @@ prior_draws |>
   facet_wrap(~.draw)
 ```
 
-## extending it
+<!-- ## extending it -->
 
-I want to play with reparameterizing the model using a proportion. 
-This represents the location of the breakpoint: somewhere between 0 and the maximum of the x axis.
+<!-- I want to play with reparameterizing the model using a proportion.  -->
+<!-- This represents the location of the breakpoint: somewhere between 0 and the maximum of the x axis. -->
+
+<!-- ```{r} -->
+<!-- breakpoint <- cmdstanr::cmdstan_model( -->
+<!--   here::here("posts/2023-07-05-breakpoint/breakpoint.stan")) -->
+
+<!-- set.seed(4812) -->
+
+<!-- xvar <- runif(42, min = 1, max=55) -->
+
+<!-- breakpoint_prior <- breakpoint$sample(chains=1, -->
+<!--                                       data = list(x = xvar, -->
+<!--                                                   n = 42)) -->
+
+<!-- ``` -->
+
+
+<!-- ```{r} -->
+<!-- prior_draws <- breakpoint_prior |>  -->
+<!--   tidybayes::gather_draws(y[i], ndraws = 12) |>  -->
+<!--   mutate(x = xvar[i]) -->
+
+<!-- prior_draws |>  -->
+<!--   ggplot(aes(x = x, y = .value)) + geom_point() +  -->
+<!--   facet_wrap(~.draw) -->
+<!-- ``` -->
+
+
+
+## Rewriting this with `step()`
+
+I learned from PhD student Dominique Caron that breakpoint regression can be written in brms using `step()`. 
+This is described in [this forum discussion](https://discourse.mc-stan.org/t/piecewise-linear-mixed-models-with-a-random-change-point/5306/4) and demonstrated in Stan code [here](https://gist.github.com/mbjoseph/25d649e46602a419f9765638d5a2bfbc).
+The Stan manual [discusses step() among other logical functions](https://mc-stan.org/docs/functions-reference/logical-functions.html#logical-functions-1)
+
 
 ```{r}
-breakpoint <- cmdstanr::cmdstan_model(
-  here::here("posts/2023-07-05-breakpoint/breakpoint.stan"))
+#| class-output: stan
+breakpoint_step_prior <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-07-05-breakpoint/breakpoint_step_prior.stan"))
+breakpoint_step_prior
+```
 
+```{r}
 set.seed(4812)
 
 xvar <- runif(42, min = 1, max=55)
 
-breakpoint_prior <- breakpoint$sample(chains=1,
+breakpoint_step_prior_samples <- breakpoint_step_prior$sample(chains=1,
                                       data = list(x = xvar,
-                                                  n = 42))
+                                                  n = 42, B = 33), refresh = 0L)
 
-```
-
-
-```{r}
-prior_draws <- breakpoint_prior |> 
+prior_draws <- breakpoint_step_prior_samples |> 
   tidybayes::gather_draws(y[i], ndraws = 12) |> 
   mutate(x = xvar[i])
 
@@ -157,8 +191,62 @@ prior_draws |>
 ```
 
 
-generating quantities from a mixture:
+estimating breakpoints with some prior knowledge
 
-first use beta ccdf to decide if it is below or above the breakpoint using a random number
-then pick from one or the other of the two normal distributions
+We assume here that we have some unmeasured maximum. 
+in my car example, the maximum speed of each kind of car is measured at the factory, by taking a random sample of cars and measuring their max speeds
+
+```{r}
+#| class-output: stan
+## take just one 
+one_dataset <- prior_draws |> 
+  arrange(.draw) |> 
+  head(42)
+
+breakpoint_step_meas <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-07-05-breakpoint/breakpoint_step_meas.stan"))
+
+breakpoint_step_meas
+```
+
+```{r}
+breakpoint_step_meas$sample(data = list(n  = 42, speed_limit = one_dataset$x, 
+                                        obs_speed = one_dataset$.value,
+                                        max_avg = 30,
+                                        max_sd = 5), refresh = 0L)
+
+```
+
+## Objects on the road are slower than they appear
+
+the factory-measured speed is probably a lot higher than the top speed of the average car on the road. 
+lots of factors intervene: the particular car's defects, its maitenance history, the fuel used, the driver's skill. 
+
+All of these factors will only DECREASE, and never increase, a car's speed relative to the maximum possible. 
+
+```{r}
+#| class-output: stan
+breakpoint_step_p <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-07-05-breakpoint/breakpoint_step_p.stan"))
+breakpoint_step_p
+```
+
+```{r}
+breakpoint_step_p$sample(data = list(n  = 42, 
+                                     speed_limit = one_dataset$x, 
+                                     obs_speed = one_dataset$.value,
+                                     max_avg = 30,
+                                     max_sd = 5), refresh = 0L)
+```
+
+first thing that doesn't work well (admittedly, there is nothing in these simulated data to support this)
+
+suggestion that the probability prior is very important
+
+perhaps if the same kind of car travelled on different highways in _several different countries_? in all countries the car would have the same theoretical maximum, but the difference in country-level factors mean that the proportion $p$ below that max, where the average car has its top speed, is going to vary.
+
+what other uncertainty is there to include? uncertainty in the speed limit perhaps? 
+
+switch for gamma errors
+
 

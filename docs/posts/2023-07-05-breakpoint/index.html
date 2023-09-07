@@ -219,7 +219,8 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   </ul></li>
   <li><a href="#write-that-in-mathematics" id="toc-write-that-in-mathematics" class="nav-link" data-scroll-target="#write-that-in-mathematics">Write that in mathematics</a></li>
   <li><a href="#simple-stan-code-with-prior-predictions" id="toc-simple-stan-code-with-prior-predictions" class="nav-link" data-scroll-target="#simple-stan-code-with-prior-predictions">Simple Stan code with prior predictions</a></li>
-  <li><a href="#extending-it" id="toc-extending-it" class="nav-link" data-scroll-target="#extending-it">extending it</a></li>
+  <li><a href="#rewriting-this-with-step" id="toc-rewriting-this-with-step" class="nav-link" data-scroll-target="#rewriting-this-with-step">Rewriting this with <code>step()</code></a></li>
+  <li><a href="#objects-on-the-road-are-slower-than-they-appear" id="toc-objects-on-the-road-are-slower-than-they-appear" class="nav-link" data-scroll-target="#objects-on-the-road-are-slower-than-they-appear">Objects on the road are slower than they appear</a></li>
   </ul>
 </nav>
     </div>
@@ -245,7 +246,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>(<span class="at">slope =</span> <span class="dv">1</span>, <span class="at">intercept =</span> <span class="dv">0</span>) <span class="sc">+</span> </span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"speed limit"</span>, <span class="at">y =</span> <span class="st">"Car speed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/concept-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>However, some of these highways have VERY high speed limits. The cars, however, can’t keep up: eventually they hit their max speed. When that happens, the lawful drivers hold steady at the fastest speed their car can maintain. Together, you get a kind of “hockey stick” shape:</p>
@@ -391,16 +392,16 @@ Chain 1 finished in 0.1 seconds.</code></pre>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>breakpoint_B_prior</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> variable  mean median    sd   mad     q5   q95 rhat ess_bulk ess_tail
-    lp__  -2.22  -1.84  1.17  0.85  -4.79 -1.07 1.00      343      477
-    b2     1.00   1.01  1.06  1.02  -0.72  2.78 1.00      504      446
-    sigma  1.04   0.71  1.09  0.80   0.04  3.15 1.00      464      350
-    y[1]  10.05  10.31 10.76 10.35  -7.35 27.93 1.00      515      483
-    y[2]  12.06  12.27 12.94 12.44  -9.36 33.46 1.00      500      510
-    y[3]  25.03  25.37 26.59 25.91 -17.43 69.54 1.00      505      447
-    y[4]  24.96  25.52 26.54 25.56 -18.15 69.41 1.00      505      444
-    y[5]  25.02  24.87 26.62 25.81 -18.28 69.16 1.00      506      456
-    y[6]  24.97  25.14 26.68 25.96 -18.58 69.22 1.00      501      455
-    y[7]  25.04  25.53 26.53 25.60 -18.65 68.77 1.00      506      444
+    lp__  -2.03  -1.74  1.02  0.75  -4.05 -1.05 1.00      369      698
+    b2     0.99   1.00  0.98  0.99  -0.60  2.56 1.00      903      756
+    sigma  0.98   0.68  0.99  0.68   0.05  2.91 1.00      474      472
+    y[1]  24.67  24.77 24.41 25.18 -15.78 63.32 1.00      905      756
+    y[2]  24.54  24.62 24.44 24.75 -15.88 63.44 1.00      910      756
+    y[3]  16.28  16.52 16.09 16.26 -10.15 41.77 1.00      900      755
+    y[4]  11.00  11.17 11.06 11.33  -7.27 28.69 1.00      924      781
+    y[5]  24.60  24.89 24.48 24.84 -15.86 63.72 1.00      906      780
+    y[6]  24.57  24.70 24.50 24.73 -16.28 63.97 1.00      908      781
+    y[7]  24.67  25.09 24.40 25.02 -14.97 64.21 1.00      909      738
 
  # showing 10 of 45 rows (change via 'max_rows' argument or 'cmdstanr_max_rows' option)</code></pre>
 </div>
@@ -415,66 +416,256 @@ Chain 1 finished in 0.1 seconds.</code></pre>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> .value)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>.draw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<!-- ## extending it -->
+<!-- I want to play with reparameterizing the model using a proportion.  -->
+<!-- This represents the location of the breakpoint: somewhere between 0 and the maximum of the x axis. -->
+<!-- ```{r} -->
+<!-- breakpoint <- cmdstanr::cmdstan_model( -->
+<!--   here::here("posts/2023-07-05-breakpoint/breakpoint.stan")) -->
+<!-- set.seed(4812) -->
+<!-- xvar <- runif(42, min = 1, max=55) -->
+<!-- breakpoint_prior <- breakpoint$sample(chains=1, -->
+<!--                                       data = list(x = xvar, -->
+<!--                                                   n = 42)) -->
+<!-- ``` -->
+<!-- ```{r} -->
+<!-- prior_draws <- breakpoint_prior |>  -->
+<!--   tidybayes::gather_draws(y[i], ndraws = 12) |>  -->
+<!--   mutate(x = xvar[i]) -->
+<!-- prior_draws |>  -->
+<!--   ggplot(aes(x = x, y = .value)) + geom_point() +  -->
+<!--   facet_wrap(~.draw) -->
+<!-- ``` -->
 </section>
-<section id="extending-it" class="level2">
-<h2 class="anchored" data-anchor-id="extending-it">extending it</h2>
-<p>I want to play with reparameterizing the model using a proportion. This represents the location of the breakpoint: somewhere between 0 and the maximum of the x axis.</p>
+<section id="rewriting-this-with-step" class="level2">
+<h2 class="anchored" data-anchor-id="rewriting-this-with-step">Rewriting this with <code>step()</code></h2>
+<p>I learned from PhD student Dominique Caron that breakpoint regression can be written in brms using <code>step()</code>. This is described in <a href="https://discourse.mc-stan.org/t/piecewise-linear-mixed-models-with-a-random-change-point/5306/4">this forum discussion</a> and demonstrated in Stan code <a href="https://gist.github.com/mbjoseph/25d649e46602a419f9765638d5a2bfbc">here</a>. The Stan manual <a href="https://mc-stan.org/docs/functions-reference/logical-functions.html#logical-functions-1">discusses step() among other logical functions</a></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>breakpoint <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-07-05-breakpoint/breakpoint.stan"</span>))</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4812</span>)</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>xvar <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">42</span>, <span class="at">min =</span> <span class="dv">1</span>, <span class="at">max=</span><span class="dv">55</span>)</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>breakpoint_prior <span class="ot">&lt;-</span> breakpoint<span class="sc">$</span><span class="fu">sample</span>(<span class="at">chains=</span><span class="dv">1</span>,</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">data =</span> <span class="fu">list</span>(<span class="at">x =</span> xvar,</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">n =</span> <span class="dv">42</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>breakpoint_step_prior <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-07-05-breakpoint/breakpoint_step_prior.stan"</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>breakpoint_step_prior</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb13"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> n;</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x;</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> B;</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a> <span class="dt">vector</span>[n] y;</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a> <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x2;</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n){</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    x2[i] = step(B - x[i]);</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] mu;</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>  mu = B + (x - B) .* x2;</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  y ~ normal(mu, sigma);</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  sigma ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4812</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>xvar <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">42</span>, <span class="at">min =</span> <span class="dv">1</span>, <span class="at">max=</span><span class="dv">55</span>)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>breakpoint_step_prior_samples <span class="ot">&lt;-</span> breakpoint_step_prior<span class="sc">$</span><span class="fu">sample</span>(<span class="at">chains=</span><span class="dv">1</span>,</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                                      <span class="at">data =</span> <span class="fu">list</span>(<span class="at">x =</span> xvar,</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">n =</span> <span class="dv">42</span>, <span class="at">B =</span> <span class="dv">33</span>), <span class="at">refresh =</span> 0L)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 1 chain...
 
-Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) 
-Chain 1 Iteration:  100 / 2000 [  5%]  (Warmup) 
-Chain 1 Iteration:  200 / 2000 [ 10%]  (Warmup) 
-Chain 1 Iteration:  300 / 2000 [ 15%]  (Warmup) 
-Chain 1 Iteration:  400 / 2000 [ 20%]  (Warmup) 
-Chain 1 Iteration:  500 / 2000 [ 25%]  (Warmup) 
-Chain 1 Iteration:  600 / 2000 [ 30%]  (Warmup) 
-Chain 1 Iteration:  700 / 2000 [ 35%]  (Warmup) 
-Chain 1 Iteration:  800 / 2000 [ 40%]  (Warmup) 
-Chain 1 Iteration:  900 / 2000 [ 45%]  (Warmup) 
-Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
-Chain 1 Iteration: 1100 / 2000 [ 55%]  (Sampling) 
-Chain 1 Iteration: 1200 / 2000 [ 60%]  (Sampling) 
-Chain 1 Iteration: 1300 / 2000 [ 65%]  (Sampling) 
-Chain 1 Iteration: 1400 / 2000 [ 70%]  (Sampling) 
-Chain 1 Iteration: 1500 / 2000 [ 75%]  (Sampling) 
-Chain 1 Iteration: 1600 / 2000 [ 80%]  (Sampling) 
-Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling) 
-Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
-Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
-Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 1 finished in 0.1 seconds.</code></pre>
+Chain 1 finished in 0.7 seconds.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 1 of 1 chains had an E-BFMI less than 0.2.
+See https://mc-stan.org/misc/warnings for details.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>prior_draws <span class="ot">&lt;-</span> breakpoint_step_prior_samples <span class="sc">|&gt;</span> </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  tidybayes<span class="sc">::</span><span class="fu">gather_draws</span>(y[i], <span class="at">ndraws =</span> <span class="dv">12</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">x =</span> xvar[i])</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>prior_draws <span class="sc">|&gt;</span> </span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> .value)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>.draw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>estimating breakpoints with some prior knowledge</p>
+<p>We assume here that we have some unmeasured maximum. in my car example, the maximum speed of each kind of car is measured at the factory, by taking a random sample of cars and measuring their max speeds</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="do">## take just one </span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>one_dataset <span class="ot">&lt;-</span> prior_draws <span class="sc">|&gt;</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(.draw) <span class="sc">|&gt;</span> </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">head</span>(<span class="dv">42</span>)</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>breakpoint_step_meas <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-07-05-breakpoint/breakpoint_step_meas.stan"</span>))</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>breakpoint_step_meas</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb19"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> n;</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] speed_limit;</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] obs_speed;</span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> max_avg;</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> max_sd;</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> max_speed;</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] V2;</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n){</span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>    V2[i] = step(max_speed - speed_limit[i]);</span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] mu;</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>  mu = max_speed + (speed_limit - max_speed) .* V2;</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>  max_speed ~ normal(max_avg, max_sd);</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>  obs_speed ~ normal(mu, sigma);</span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>  sigma ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>prior_draws <span class="ot">&lt;-</span> breakpoint_prior <span class="sc">|&gt;</span> </span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  tidybayes<span class="sc">::</span><span class="fu">gather_draws</span>(y[i], <span class="at">ndraws =</span> <span class="dv">12</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">x =</span> xvar[i])</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>prior_draws <span class="sc">|&gt;</span> </span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> .value)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>.draw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>breakpoint_step_meas<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(<span class="at">n  =</span> <span class="dv">42</span>, <span class="at">speed_limit =</span> one_dataset<span class="sc">$</span>x, </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">obs_speed =</span> one_dataset<span class="sc">$</span>.value,</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">max_avg =</span> <span class="dv">30</span>,</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">max_sd =</span> <span class="dv">5</span>), <span class="at">refresh =</span> 0L)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 sequential chains...
+
+Chain 1 finished in 0.1 seconds.
+Chain 2 finished in 0.1 seconds.
+Chain 3 finished in 0.1 seconds.
+Chain 4 finished in 0.1 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.1 seconds.
+Total execution time: 0.8 seconds.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: NAs introduced by coercion
+
+Warning: NAs introduced by coercion</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  variable   mean median   sd  mad     q5    q95 rhat ess_bulk ess_tail
+ lp__      -18.53 -18.23 0.99 0.71 -20.57 -17.57 1.00     1745     1892
+ max_speed  33.17  33.17 0.23 0.23  32.79  33.54 1.00     2427     2370
+ sigma       0.93   0.91 0.11 0.10   0.77   1.11 1.00     3100     2272
+ V2[1]       1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
+ V2[2]       1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
+ V2[3]       1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
+ V2[4]       0.00   0.00 0.00 0.00   0.00   0.00   NA       NA       NA
+ V2[5]       1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
+ V2[6]       0.00   0.00 0.00 0.00   0.00   0.00   NA       NA       NA
+ V2[7]       1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
+
+ # showing 10 of 45 rows (change via 'max_rows' argument or 'cmdstanr_max_rows' option)</code></pre>
 </div>
 </div>
-<p>generating quantities from a mixture:</p>
-<p>first use beta ccdf to decide if it is below or above the breakpoint using a random number then pick from one or the other of the two normal distributions</p>
+</section>
+<section id="objects-on-the-road-are-slower-than-they-appear" class="level2">
+<h2 class="anchored" data-anchor-id="objects-on-the-road-are-slower-than-they-appear">Objects on the road are slower than they appear</h2>
+<p>the factory-measured speed is probably a lot higher than the top speed of the average car on the road. lots of factors intervene: the particular car’s defects, its maitenance history, the fuel used, the driver’s skill.</p>
+<p>All of these factors will only DECREASE, and never increase, a car’s speed relative to the maximum possible.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>breakpoint_step_p <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-07-05-breakpoint/breakpoint_step_p.stan"</span>))</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>breakpoint_step_p</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb25"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> n;</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] speed_limit;</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] obs_speed;</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> max_avg;</span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> max_sd;</span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> factory_speed;</span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> alpha;</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> max_speed;</span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  max_speed = factory_speed * inv_logit(alpha);</span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] V2;</span>
+<span id="cb25-17"><a href="#cb25-17" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n){</span>
+<span id="cb25-18"><a href="#cb25-18" aria-hidden="true" tabindex="-1"></a>    <span class="co">// step() is 0 if speed limit is over the maximum, 0 otherwise</span></span>
+<span id="cb25-19"><a href="#cb25-19" aria-hidden="true" tabindex="-1"></a>    <span class="co">// in other words, it gives the slope</span></span>
+<span id="cb25-20"><a href="#cb25-20" aria-hidden="true" tabindex="-1"></a>    V2[i] = step(max_speed - speed_limit[i]);</span>
+<span id="cb25-21"><a href="#cb25-21" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb25-22"><a href="#cb25-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb25-23"><a href="#cb25-23" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb25-24"><a href="#cb25-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] mu;</span>
+<span id="cb25-25"><a href="#cb25-25" aria-hidden="true" tabindex="-1"></a>  mu = max_speed + (speed_limit - max_speed) .* V2;</span>
+<span id="cb25-26"><a href="#cb25-26" aria-hidden="true" tabindex="-1"></a>  factory_speed ~ normal(max_avg, max_sd);</span>
+<span id="cb25-27"><a href="#cb25-27" aria-hidden="true" tabindex="-1"></a>  obs_speed ~ normal(mu, sigma);</span>
+<span id="cb25-28"><a href="#cb25-28" aria-hidden="true" tabindex="-1"></a>  alpha ~ normal(<span class="dv">3</span>, <span class="dv">2</span>);</span>
+<span id="cb25-29"><a href="#cb25-29" aria-hidden="true" tabindex="-1"></a>  sigma ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb25-30"><a href="#cb25-30" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>breakpoint_step_p<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(<span class="at">n  =</span> <span class="dv">42</span>, </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">speed_limit =</span> one_dataset<span class="sc">$</span>x, </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">obs_speed =</span> one_dataset<span class="sc">$</span>.value,</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">max_avg =</span> <span class="dv">30</span>,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">max_sd =</span> <span class="dv">5</span>), <span class="at">refresh =</span> 0L)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 sequential chains...
+
+Chain 1 finished in 0.3 seconds.
+Chain 2 finished in 0.3 seconds.
+Chain 3 finished in 0.2 seconds.
+Chain 4 finished in 0.2 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.3 seconds.
+Total execution time: 1.5 seconds.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 25 of 4000 (1.0%) transitions ended with a divergence.
+See https://mc-stan.org/misc/warnings for details.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: NAs introduced by coercion
+
+Warning: NAs introduced by coercion</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      variable   mean median   sd  mad     q5    q95 rhat ess_bulk ess_tail
+ lp__          -19.12 -18.78 1.21 0.94 -21.36 -17.87 1.00     1012     1330
+ factory_speed  34.06  33.75 0.98 0.71  33.02  36.11 1.02      374      315
+ sigma           0.93   0.92 0.10 0.09   0.78   1.11 1.00     1210     1446
+ alpha           4.30   4.12 1.38 1.39   2.41   6.87 1.01      361      358
+ max_speed      33.15  33.16 0.23 0.23  32.76  33.54 1.00     3873     2936
+ V2[1]           1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
+ V2[2]           1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
+ V2[3]           1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
+ V2[4]           0.00   0.00 0.00 0.00   0.00   0.00   NA       NA       NA
+ V2[5]           1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
+
+ # showing 10 of 47 rows (change via 'max_rows' argument or 'cmdstanr_max_rows' option)</code></pre>
+</div>
+</div>
+<p>first thing that doesn’t work well (admittedly, there is nothing in these simulated data to support this)</p>
+<p>suggestion that the probability prior is very important</p>
+<p>perhaps if the same kind of car travelled on different highways in <em>several different countries</em>? in all countries the car would have the same theoretical maximum, but the difference in country-level factors mean that the proportion <span class="math inline">\(p\)</span> below that max, where the average car has its top speed, is going to vary.</p>
+<p>what other uncertainty is there to include? uncertainty in the speed limit perhaps?</p>
+<p>switch for gamma errors</p>
 
 
 </section>

@@ -1,0 +1,116 @@
+---
+title: "Including measurement uncertainty"
+author: "Andrew MacDonald"
+description: |
+  Sometimes we have slightly-known knowns.
+date: 11 Nov 2022
+editor: source
+categories: [UdeS, stan]
+draft: true
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+library(cmdstanr)
+```
+
+## Two ways of thinking about measurement error
+
+* repeat independent measures of your predictor variable
+* standard error of the x variables 
+
+let's simulate each
+
+
+## repeated measures of your predictor
+
+
+Photosynthesis is often limited by phosphorous -- more P, more chlorophyll in lake water.
+let's say you're measuring phosphorous in lakes. For each lake you have one measure of primary productivity (chlorophyll concentration) and 5 measures of phosphorous (from water samples). 
+The P actually causes the chlorophyll -- but the _true_ average P concentration also causes the measurements we are making!
+
+```{r}
+avg_chl <- 60
+chl_per_P <- 5
+sd_chl <- 3
+sd_P <- .7
+
+chl_p <- tibble(Phos = seq(from = -1, to = 5, length.out = 25), 
+       chl = rnorm(n = 25, mean = avg_chl + chl_per_P * Phos, sd = sd_chl),
+       P_meas = map(Phos, ~ rnorm(n = 5, mean = .x, sd = sd_P)))
+
+chl_p  |> 
+  unnest(P_meas) |> 
+  ggplot(aes(x = P_meas, y = chl)) + geom_point()
+```
+
+
+```{r}
+#| class-output: stan
+repeat_measures <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-09-01-measurement-error/repeat_measures.stan"),
+  pedantic = TRUE)
+repeat_measures
+```
+
+```{r}
+repeat_measures_post <- repeat_measures$sample(
+  data = list(
+    n = 25, 
+    P = chl_p$P_meas,
+    chl = chl_p$chl
+  ),refresh = 0L)
+```
+
+plot the line
+
+plot the intervals for the two slope parameters
+
+plot the true P values
+
+## using SD and mean values
+
+```{r}
+#| class-output: stan
+sd_mean_only <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-09-01-measurement-error/sd_mean_only.stan"), pedantic = TRUE)
+sd_mean_only
+```
+
+```{r}
+sd_mean_only_post <- sd_mean_only$sample(
+  data = list(
+    n = 25, 
+    P_sds = map_dbl(chl_p$P_meas, sd),
+    P_means = map_dbl(chl_p$P_meas, sd),
+    chl = chl_p$chl
+  ),refresh = 0L)
+```
+
+
+```{r}
+#| label: fig-compare
+#| fig-cap: "The posterior distribution for the parameters is the same both ways"
+#| fig-subcap: 
+#|   - "using means and SDs"
+#|   - "using repeated measurements"
+#| layout-nrow: 2
+sd_mean_only_post$draws() |> 
+  bayesplot::mcmc_areas(c("intercept", "slope")) + 
+  labs(title = "from means and sd")
+
+
+repeat_measures_post$draws() |> 
+  bayesplot::mcmc_areas(c("intercept", "slope")) + 
+  labs(title = "from repeated measures")
+```
+
+
+## comparing inference from the two
+
+
+
+
