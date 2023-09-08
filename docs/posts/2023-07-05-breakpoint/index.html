@@ -221,6 +221,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   <li><a href="#simple-stan-code-with-prior-predictions" id="toc-simple-stan-code-with-prior-predictions" class="nav-link" data-scroll-target="#simple-stan-code-with-prior-predictions">Simple Stan code with prior predictions</a></li>
   <li><a href="#rewriting-this-with-step" id="toc-rewriting-this-with-step" class="nav-link" data-scroll-target="#rewriting-this-with-step">Rewriting this with <code>step()</code></a></li>
   <li><a href="#objects-on-the-road-are-slower-than-they-appear" id="toc-objects-on-the-road-are-slower-than-they-appear" class="nav-link" data-scroll-target="#objects-on-the-road-are-slower-than-they-appear">Objects on the road are slower than they appear</a></li>
+  <li><a href="#switch-for-gamma-errors" id="toc-switch-for-gamma-errors" class="nav-link" data-scroll-target="#switch-for-gamma-errors">switch for gamma errors</a></li>
   </ul>
 </nav>
     </div>
@@ -387,21 +388,21 @@ Chain 1 Iteration: 1700 / 2000 [ 85%]  (Sampling)
 Chain 1 Iteration: 1800 / 2000 [ 90%]  (Sampling) 
 Chain 1 Iteration: 1900 / 2000 [ 95%]  (Sampling) 
 Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 1 finished in 0.1 seconds.</code></pre>
+Chain 1 finished in 0.0 seconds.</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>breakpoint_B_prior</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> variable  mean median    sd   mad     q5   q95 rhat ess_bulk ess_tail
-    lp__  -2.03  -1.74  1.02  0.75  -4.05 -1.05 1.00      369      698
-    b2     0.99   1.00  0.98  0.99  -0.60  2.56 1.00      903      756
-    sigma  0.98   0.68  0.99  0.68   0.05  2.91 1.00      474      472
-    y[1]  24.67  24.77 24.41 25.18 -15.78 63.32 1.00      905      756
-    y[2]  24.54  24.62 24.44 24.75 -15.88 63.44 1.00      910      756
-    y[3]  16.28  16.52 16.09 16.26 -10.15 41.77 1.00      900      755
-    y[4]  11.00  11.17 11.06 11.33  -7.27 28.69 1.00      924      781
-    y[5]  24.60  24.89 24.48 24.84 -15.86 63.72 1.00      906      780
-    y[6]  24.57  24.70 24.50 24.73 -16.28 63.97 1.00      908      781
-    y[7]  24.67  25.09 24.40 25.02 -14.97 64.21 1.00      909      738
+    lp__  -2.00  -1.69  0.99  0.71  -3.84 -1.05 1.00      423      391
+    b2     0.98   0.97  0.91  0.93  -0.56  2.57 1.00      589      609
+    sigma  0.99   0.64  1.02  0.66   0.05  3.15 1.00      609      346
+    y[1]  24.52  23.87 22.87 23.49 -14.30 64.14 1.00      592      572
+    y[2]  24.58  24.27 22.87 23.19 -13.87 63.73 1.00      585      609
+    y[3]   3.59   3.42  3.56  3.53  -2.18  9.59 1.00      573      617
+    y[4]  24.55  24.04 22.91 23.51 -14.53 63.83 1.00      599      581
+    y[5]  24.70  24.28 22.82 22.93 -14.38 64.15 1.00      598      501
+    y[6]  15.98  15.66 14.87 14.93  -9.47 42.02 1.00      595      607
+    y[7]  24.55  24.02 22.78 23.27 -13.91 63.94 1.00      586      572
 
  # showing 10 of 45 rows (change via 'max_rows' argument or 'cmdstanr_max_rows' option)</code></pre>
 </div>
@@ -482,7 +483,7 @@ Chain 1 finished in 0.1 seconds.</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 1 chain...
 
-Chain 1 finished in 0.7 seconds.</code></pre>
+Chain 1 finished in 0.6 seconds.</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: 1 of 1 chains had an E-BFMI less than 0.2.
@@ -496,7 +497,7 @@ See https://mc-stan.org/misc/warnings for details.</code></pre>
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> .value)) <span class="sc">+</span> <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
 <span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>.draw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <p>estimating breakpoints with some prior knowledge</p>
@@ -553,7 +554,7 @@ Chain 4 finished in 0.1 seconds.
 
 All 4 chains finished successfully.
 Mean chain execution time: 0.1 seconds.
-Total execution time: 0.8 seconds.</code></pre>
+Total execution time: 0.7 seconds.</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: NAs introduced by coercion
@@ -627,17 +628,17 @@ Warning: NAs introduced by coercion</code></pre>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 sequential chains...
 
-Chain 1 finished in 0.3 seconds.
-Chain 2 finished in 0.3 seconds.
+Chain 1 finished in 0.2 seconds.
+Chain 2 finished in 0.2 seconds.
 Chain 3 finished in 0.2 seconds.
 Chain 4 finished in 0.2 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.3 seconds.
-Total execution time: 1.5 seconds.</code></pre>
+Mean chain execution time: 0.2 seconds.
+Total execution time: 1.1 seconds.</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Warning: 25 of 4000 (1.0%) transitions ended with a divergence.
+<pre><code>Warning: 80 of 4000 (2.0%) transitions ended with a divergence.
 See https://mc-stan.org/misc/warnings for details.</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
@@ -647,11 +648,11 @@ Warning: NAs introduced by coercion</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      variable   mean median   sd  mad     q5    q95 rhat ess_bulk ess_tail
- lp__          -19.12 -18.78 1.21 0.94 -21.36 -17.87 1.00     1012     1330
- factory_speed  34.06  33.75 0.98 0.71  33.02  36.11 1.02      374      315
- sigma           0.93   0.92 0.10 0.09   0.78   1.11 1.00     1210     1446
- alpha           4.30   4.12 1.38 1.39   2.41   6.87 1.01      361      358
- max_speed      33.15  33.16 0.23 0.23  32.76  33.54 1.00     3873     2936
+ lp__          -19.12 -18.82 1.21 0.95 -21.47 -17.84 1.01      985     1660
+ factory_speed  33.84  33.68 0.66 0.57  33.03  35.09 1.01      232      109
+ sigma           0.93   0.92 0.11 0.10   0.77   1.11 1.01      539      997
+ alpha           4.45   4.24 1.25 1.28   2.82   6.74 1.01      237      135
+ max_speed      33.16  33.17 0.24 0.23  32.76  33.55 1.00     2243      727
  V2[1]           1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
  V2[2]           1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
  V2[3]           1.00   1.00 0.00 0.00   1.00   1.00   NA       NA       NA
@@ -665,7 +666,225 @@ Warning: NAs introduced by coercion</code></pre>
 <p>suggestion that the probability prior is very important</p>
 <p>perhaps if the same kind of car travelled on different highways in <em>several different countries</em>? in all countries the car would have the same theoretical maximum, but the difference in country-level factors mean that the proportion <span class="math inline">\(p\)</span> below that max, where the average car has its top speed, is going to vary.</p>
 <p>what other uncertainty is there to include? uncertainty in the speed limit perhaps?</p>
-<p>switch for gamma errors</p>
+</section>
+<section id="switch-for-gamma-errors" class="level2">
+<h2 class="anchored" data-anchor-id="switch-for-gamma-errors">switch for gamma errors</h2>
+<p>Before advancing model building much farther, I want to correct the error distribution. Speeds might be variable, but they can never be negative!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>breakpoint_step_gamma_prior <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-07-05-breakpoint/breakpoint_step_gamma_prior.stan"</span>))</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>breakpoint_step_gamma_prior</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb32"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> n;</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x;</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> B;</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a> <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt;[n] y;</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a> <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x2;</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span>:n){</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>    x2[i] = step(B - x[i]);</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] mu;</span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>  mu = B + (x - B) .* x2;</span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] beta = mu/square(sigma);</span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>  y ~ gamma(mu .* beta, beta);</span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>  sigma ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">4812</span>)</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>xvar <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">42</span>, <span class="at">min =</span> <span class="dv">1</span>, <span class="at">max =</span> <span class="dv">55</span>)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>breakpoint_step_gamma_prior_samples <span class="ot">&lt;-</span> breakpoint_step_gamma_prior<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains=</span><span class="dv">1</span>,</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">x =</span> xvar,</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">n =</span> <span class="dv">42</span>, <span class="at">B =</span> <span class="dv">33</span>), <span class="at">refresh =</span> 1000L)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 1 chain...
+
+Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: gamma_lpdf: Random variable[1] is inf, but must be positive finite! (in '/var/folders/x7/l08zn2396g797m5ws54np_6w0000gp/T/Rtmp5fMbyc/model-5cb742e1f51c.stan', line 20, column 2 to column 30)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: gamma_lpdf: Random variable[1] is inf, but must be positive finite! (in '/var/folders/x7/l08zn2396g797m5ws54np_6w0000gp/T/Rtmp5fMbyc/model-5cb742e1f51c.stan', line 20, column 2 to column 30)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: gamma_lpdf: Random variable[4] is inf, but must be positive finite! (in '/var/folders/x7/l08zn2396g797m5ws54np_6w0000gp/T/Rtmp5fMbyc/model-5cb742e1f51c.stan', line 20, column 2 to column 30)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: gamma_lpdf: Shape parameter[1] is 0, but must be positive finite! (in '/var/folders/x7/l08zn2396g797m5ws54np_6w0000gp/T/Rtmp5fMbyc/model-5cb742e1f51c.stan', line 20, column 2 to column 30)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: gamma_lpdf: Shape parameter[1] is 0, but must be positive finite! (in '/var/folders/x7/l08zn2396g797m5ws54np_6w0000gp/T/Rtmp5fMbyc/model-5cb742e1f51c.stan', line 20, column 2 to column 30)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: gamma_lpdf: Shape parameter[1] is 0, but must be positive finite! (in '/var/folders/x7/l08zn2396g797m5ws54np_6w0000gp/T/Rtmp5fMbyc/model-5cb742e1f51c.stan', line 20, column 2 to column 30)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: gamma_lpdf: Shape parameter[1] is 0, but must be positive finite! (in '/var/folders/x7/l08zn2396g797m5ws54np_6w0000gp/T/Rtmp5fMbyc/model-5cb742e1f51c.stan', line 20, column 2 to column 30)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: gamma_lpdf: Shape parameter[1] is inf, but must be positive finite! (in '/var/folders/x7/l08zn2396g797m5ws54np_6w0000gp/T/Rtmp5fMbyc/model-5cb742e1f51c.stan', line 20, column 2 to column 30)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: gamma_lpdf: Shape parameter[1] is inf, but must be positive finite! (in '/var/folders/x7/l08zn2396g797m5ws54np_6w0000gp/T/Rtmp5fMbyc/model-5cb742e1f51c.stan', line 20, column 2 to column 30)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: gamma_lpdf: Shape parameter[1] is inf, but must be positive finite! (in '/var/folders/x7/l08zn2396g797m5ws54np_6w0000gp/T/Rtmp5fMbyc/model-5cb742e1f51c.stan', line 20, column 2 to column 30)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 1 finished in 0.5 seconds.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: 1 of 1 chains had an E-BFMI less than 0.2.
+See https://mc-stan.org/misc/warnings for details.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>prior_draws <span class="ot">&lt;-</span> breakpoint_step_gamma_prior_samples <span class="sc">|&gt;</span> </span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>  tidybayes<span class="sc">::</span><span class="fu">gather_draws</span>(y[i], <span class="at">ndraws =</span> <span class="dv">12</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">x =</span> xvar[i])</span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>prior_draws <span class="sc">|&gt;</span> </span>
+<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> .value)) <span class="sc">+</span> </span>
+<span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span> </span>
+<span id="cb87-8"><a href="#cb87-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>.draw)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/gamma-plot-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
 
 
 </section>

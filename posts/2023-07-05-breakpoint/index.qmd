@@ -165,7 +165,7 @@ This is described in [this forum discussion](https://discourse.mc-stan.org/t/pie
 The Stan manual [discusses step() among other logical functions](https://mc-stan.org/docs/functions-reference/logical-functions.html#logical-functions-1)
 
 
-```{r}
+```{r breakpoint_step_prior}
 #| class-output: stan
 breakpoint_step_prior <- cmdstanr::cmdstan_model(
   here::here("posts/2023-07-05-breakpoint/breakpoint_step_prior.stan"))
@@ -247,6 +247,37 @@ perhaps if the same kind of car travelled on different highways in _several diff
 
 what other uncertainty is there to include? uncertainty in the speed limit perhaps? 
 
-switch for gamma errors
+## switch for gamma errors
+
+Before advancing model building much farther, I want to correct the error distribution. Speeds might be variable, but they can never be negative!
+
+```{r breakpoint_step_gamma_prior}
+#| class-output: stan
+breakpoint_step_gamma_prior <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-07-05-breakpoint/breakpoint_step_gamma_prior.stan"))
+breakpoint_step_gamma_prior
+```
+
+```{r gamma-plot}
+set.seed(4812)
+
+xvar <- runif(42, min = 1, max = 55)
+
+breakpoint_step_gamma_prior_samples <- breakpoint_step_gamma_prior$sample(
+  chains=1,
+  data = list(x = xvar,
+              n = 42, B = 33), refresh = 1000L)
+
+prior_draws <- breakpoint_step_gamma_prior_samples |> 
+  tidybayes::gather_draws(y[i], ndraws = 12) |> 
+  mutate(x = xvar[i])
+
+prior_draws |> 
+  ggplot(aes(x = x, y = .value)) + 
+  geom_point() + 
+  facet_wrap(~.draw)
+```
+
+
 
 
