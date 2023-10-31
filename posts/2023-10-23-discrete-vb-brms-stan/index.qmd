@@ -1,0 +1,143 @@
+---
+title: "modelling discrete growth"
+author: "Andrew MacDonald, Kelly Forester"
+description: |
+  How to model the growth of things in a sensible fashion
+date: 11 Nov 2022
+editor: source
+categories: [UdeS, stan]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+##  growing things get bigger
+
+the classic Von Bertanaffy growth equation has animals growing from a starting size to a final size
+
+```{r}
+L0 <- 13
+Lmax <- 120
+r <- .3
+curve(L0 * exp(-r*x) + Lmax*(1 - exp(-r * x)), xlim = c(0, 20))
+```
+
+This is the equation in continuous time
+
+however we often measure animals at discreet moments in time, having as a reference their last measurement. We can use a discrete version of this equation in these cases:
+
+```{r}
+vb_disc <- function(L_tm1, r, time, Lmax) {
+  L_tm1 * exp(-r*time) + Lmax*(1 - exp(-r * time))
+}
+
+timevec <- rep(1, times = 13)
+size <- numeric(length(timevec)+1)
+size[1] <- 13
+
+for (t in 1:length(timevec)){
+  size[t+1] = vb_disc(size[t],
+                      r = r,
+                      time = timevec[t],
+                      Lmax = Lmax)
+}
+
+curve(L0 * exp(-r*x) + Lmax*(1 - exp(-r * x)),
+      xlim = c(0, 20))
+points(cumsum(c(0,timevec)), size)
+
+```
+
+This works even if the points we measure at are not regular:
+
+```{r}
+
+timevec <- runif(n = 13, min = .7, max = 3)
+size <- numeric(length(timevec)+1)
+size[1] <- 13
+
+for (t in 1:length(timevec)){
+  size[t+1] = vb_disc(size[t],
+                      r = r,
+                      time = timevec[t],
+                      Lmax = Lmax)
+}
+
+curve(L0 * exp(-r*x) + Lmax*(1 - exp(-r * x)),
+      xlim = c(0, 20))
+points(cumsum(c(0,timevec)), size)
+```
+
+So we can see that this is the same equation. Let's simulate observations of a growing animal with measurement error
+
+```{r}
+L0 <- 13
+Lmax <- 120
+r <- .3
+sigma = 2
+
+grow_data <- tibble(time = seq(from = .5, to = 21, length.out = 40),
+       size = L0 * exp(-r* time) + Lmax*(1 - exp(-r * time)),
+       size_obs = rnorm(n = length(size), mean = size, sd = sigma))
+
+grow_data |> 
+  ggplot(aes(x = time, y = size_obs)) + geom_point()
+```
+
+
+```{r}
+#| class-output: stan
+library(cmdstanr)
+vb_discrete <- cmdstan_model(
+  here::here(
+    "posts/2023-10-23-discrete-vb-brms-stan/vb_discrete_meas.stan"),
+  pedantic = TRUE)
+
+vb_discrete 
+
+```
+
+```{r}
+some_obs <- grow_data |> 
+  mutate(sampled = sample(sample(0:1, length(time), replace = TRUE, prob = c(.4, .6)))) |> 
+  filter(sampled > 0) |> 
+  # lagged time
+  mutate(time_diff = time - lag(time))
+
+first <- some_obs |> head(1)
+rest <- some_obs |> slice(-1)
+
+diff_pred <- c(rep(2, times = 5), rep(5, 3))
+
+vb_discrete_post <- vb_discrete$sample(data = list(
+  n = nrow(some_obs),
+  time_diff = rest$time_diff,
+  age_first_meas = first$time,
+  obs_size = some_obs$size_obs,
+  n_pred = length(diff_pred) + 1,
+  diff_pred = diff_pred
+))
+```
+
+```{r}
+vb_discrete_post$draws() |> 
+  gather_rvars(mu[i]) |> 
+  mutate(time = cumsum(c(0, diff_pred))) |> 
+  ggplot(aes(x = time, dist = .value)) + 
+  stat_lineribbon() + 
+  scale_fill_brewer(palette = "Greens") +
+  geom_point(aes(x = time, y = size_obs), 
+             inherit.aes = FALSE, data = grow_data)
+```
+
+```{r}
+vb_discrete_post$summary()
+```
+
+next steps: 
+* a better description
+* missing data, how to work with that? 
