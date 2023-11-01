@@ -1,0 +1,256 @@
+---
+title: "Ordered contrasts in two moments"
+author: "Andrew MacDonald"
+description: |
+  it's giving Goldilocks
+date: 11 Nov 2022
+editor: source
+draft: true
+categories: [UdeS, stan]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+library(cmdstanr)
+```
+
+## What this post is about
+
+I'm passionate about ordered contrasts. I think that very often ecologists have experimental treatments that are in the form of three levels:  less than normal, normal amount, more than normal amount
+
+lets program this into Stan
+
+```{r}
+lil_fac <- letters[1:3]
+lil_fac <- ordered(lil_fac)
+ord_contr <- cbind(1, contrasts(lil_fac))
+dimnames(ord_contr) <- NULL
+# dput(ord_contr)
+```
+
+
+```{r}
+ordinal_mean_prior <- cmdstan_model(here::here("posts/2023-08-29-ordinal-moments/ordinal_mean_prior.stan"))
+
+ordinal_mean_prior
+```
+
+
+```{r}
+ordinal_mean_prior_predictive <- ordinal_mean_prior$sample(data = list(n_each = 10))
+```
+
+
+```{r}
+ordinal_mean_prior_predictive$draws() |> 
+  gather_draws(obs[i], ndraws = 6) |> 
+  ggplot(aes(x = rep(rep(1:3, each = 10), times = 6), y = .value)) + geom_point() + 
+  facet_wrap(~ .draw)
+```
+
+Writing that whole thing in Stan was needlessly painful! here is an example with the id of the group instead (1, 2, or 3)
+
+```{r}
+#| class-output: stan
+ordinal_grpid_prior <- cmdstan_model(here::here("posts/2023-08-29-ordinal-moments/ordinal_grpid_prior.stan"))
+
+ordinal_grpid_prior
+```
+
+
+```{r}
+ordinal_grpid_prior_predictive <- ordinal_grpid_prior$sample(data = list(n = 30, group_id = rep(1:3, each = 10)))
+
+ordinal_grpid_prior_predictive$draws() |> 
+  gather_draws(obs[i], ndraws = 6) |> 
+  ggplot(aes(x = rep(rep(1:3, each = 10), times = 6), y = .value)) + geom_point() + 
+  facet_wrap(~ .draw)
+```
+
+## condition on (fake) observations
+
+its the same model as before except we move `obs` up to the data block:
+
+```{r}
+#| class-output: stan
+ordinal_contrasts <- cmdstan_model(here::here("posts/2023-08-29-ordinal-moments/ordinal_contrasts.stan"))
+
+ordinal_contrasts
+```
+
+
+We can try this out on simulated data to confirm that it matches what we'd like to see:
+
+```{r}
+means <- c(3,4,9)
+
+neach <-  25
+ys <- rnorm(n = neach*length(means), mean = rep(means, each = neach), sd = .3)
+group_ids <- rep(1:3, each = neach)
+
+
+ordinal_contrasts_post <- ordinal_contrasts$sample(data = list(n = length(ys),
+                                                               group_id = group_ids,
+                                                               obs = ys))
+
+
+ordinal_contrasts_post$draws() |> 
+  gather_rvars(yrep[i]) |> 
+  ggplot(aes(x = i, ydist = .value)) + 
+  stat_pointinterval() + 
+  geom_jitter(aes(x = group_ids, y = ys), 
+              width = .2, alpha = 0.3,
+             data = data.frame(group_ids, ys), 
+             inherit.aes = FALSE, col = "red")
+```
+
+## concrete example
+
+Let's consider the growth rate of seedlings in proportion to the distance from a parent plant. 
+We'd expect this to decline as you get farther away, and probably in a nonlinear way..
+
+```{r}
+true_values <-  c(5, -3, 1.1)
+gr_mu <- ord_contr %*% true_values
+
+plot(gr_mu)
+
+```
+
+::: .{callout-note}
+See how easy that was to make!? that's why this works! ordered contrasts are easier to think about. 
+:::
+
+```{r}
+growth_data <- tibble(group_id = rep(1:3, each = 30), 
+                      true_mean = gr_mu[group_id],
+                      distance = c("1m", "5m", "20m")[group_id],
+                      obs = rnorm(length(true_mean), mean = true_mean, sd = 1.1))
+
+growth_data |> 
+  ggplot(aes(x = distance, y = obs)) + geom_point()
+```
+
+
+fit it with the same model
+
+```{r}
+ordinal_contrasts_post <- ordinal_contrasts$sample(data = list(n = nrow(growth_data),
+                                                               group_id = growth_data$group_id,
+                                                               obs = growth_data$obs))
+
+ordinal_contrasts_post$summary(variables = "betas")
+true_values
+```
+
+So we get very very close to the true values! 
+
+
+## on the second moment also
+
+would that even work
+
+```{r}
+#| class-output: stan
+ordinal_contr_mu_sd <- cmdstan_model(here::here("posts/2023-08-29-ordinal-moments/ordinal_contr_mu_sd.stan"))
+
+ordinal_contr_mu_sd
+```
+
+
+```{r}
+ordinal_contr_mu_sd_post <- ordinal_contr_mu_sd$sample(data = list(n = nrow(growth_data),
+                                                               group_id = growth_data$group_id,
+                                                               obs = growth_data$obs))
+
+ordinal_contr_mu_sd_post$summary(variables = c("mu_beta", "sigma_beta"))
+true_values
+```
+
+
+```{r}
+#| class-output: stan
+ordinal_contr_mu_sd_prior <- cmdstan_model(here::here("posts/2023-08-29-ordinal-moments/ordinal_contr_mu_sd_prior.stan"))
+
+ord_mu_sd_sample <- ordinal_contr_mu_sd_prior$sample(data = list(
+  n = nrow(growth_data),
+  group_id = growth_data$group_id))
+
+some_samples <- ord_mu_sd_sample$draws(variables = "obs") |> 
+  tidybayes::spread_draws(obs[i], ndraws = 12) |> 
+  mutate(group = growth_data$group_id[i])
+
+some_samples |> 
+  ggplot(aes(x = group, y = obs)) + 
+  geom_point() + 
+  facet_wrap(~.iteration)
+```   
+
+## Mean - variance correlation
+
+```{r}
+
+ordinal_contr_mu_sd_matrix_prior <- cmdstan_model(here::here(
+  "posts/2023-08-29-ordinal-moments/ordinal_contr_mu_sd_matrix_prior.stan"))
+
+ord_mu_sd_sample <- ordinal_contr_mu_sd_matrix_prior$sample(data = list(
+  n = nrow(growth_data),
+  group_id = growth_data$group_id), chains = 1, refresh = 0)
+
+some_samples <- ord_mu_sd_sample$draws(variables = "obs") |> 
+  tidybayes::spread_draws(obs[i], ndraws = 12) |> 
+  mutate(group = growth_data$group_id[i])
+
+some_samples |> 
+  ggplot(aes(x = group, y = obs)) + 
+  geom_point() + 
+  facet_wrap(~.iteration)
+```
+
+
+## in a hierarchical context
+
+```{r}
+ordinal_contr_hier <- cmdstan_model(here::here(
+  "posts/2023-08-29-ordinal-moments/ordinal_contr_hier.stan"), pedantic = TRUE)
+
+
+
+fake_data <- expand_grid(
+  nesting(indiv_id = 1:15,
+          group_id = rep(1:3, each = 5)),
+  x_variable = seq(from = -15, to = 15, length.out = 12)
+)
+
+# ordinal_contr_hier$variables()$data
+
+ord_mu_sd_sample <- ordinal_contr_hier$sample(data = list(
+  n = nrow(fake_data),
+  x_variable = fake_data$x_variable,
+  group_id = fake_data |> 
+    select(indiv_id, group_id) |> 
+    distinct() |> 
+    pluck("group_id"), 
+  nindiv = max(fake_data$indiv_id),
+  indiv_id = fake_data$indiv_id), chains = 1, refresh = 0)
+
+some_samples <- ord_mu_sd_sample$draws(variables = "obs") |> 
+  tidybayes::spread_draws(obs[i], ndraws = 12) |> 
+  mutate(
+    group = fake_data$group_id[i],
+    x_variable = fake_data$x_variable[i]
+  )
+
+some_samples |> 
+  ggplot(aes(x = x_variable, y = obs, colour = group)) + 
+  geom_point() + 
+  facet_wrap(~.iteration)
+```
+
+
+Another thing we haven't been thinking of: treatment effects on the shape parameter? 
+
+When there is a mean-variance relationship, does this apply?

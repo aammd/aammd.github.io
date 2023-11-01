@@ -1,0 +1,165 @@
+---
+title: "Missing data in non-normal distributions"
+author: "Andrew MacDonald, Flavio Affinito"
+description: |
+  We could have counted them but we didn't.
+date: 22 Aug 2023
+draft: false
+editor: source
+categories: [UdeS, stan, QCBS]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+library(cmdstanr)
+```
+
+## working with missingness
+
+I wish the topic of missingness was introduced much earlier in statistical ecology! 
+Most ecological datasets have some examples of this. 
+Working directly with missing data has many advantages, including letting us use ALL the information we have. There are many arguments, but that's the one I find most compelling. In our science, each datapoint costs dearly in money and effort -- the least we can do is learn the tools to use them well! 
+
+## Roadmap
+
+1. normal distributions with missing data
+1. nonnormal distributions with missing data
+1. regression with missing information in just the x
+1. regression with missing data in both
+1. nonlinear, nonnormal missing data in both
+
+## Normal distributions with missing data
+
+Here is code from [Flavio Affinito](https://qcbs.ca/fr/membre-etudiant/?student=3066), adapting the code in the [Stan Guide](https://mc-stan.org/docs/stan-users-guide/sliced-missing-data.html) for continuous missing data: 
+
+
+```{r}
+#| class-output: stan
+MissingDataImputation2 <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-08-24-imputation-nonnormal/MissingDataImputation2.stan"))
+MissingDataImputation2
+```
+
+Let's try it out with 42 numbers, of which 6 are missing:
+
+```{r}
+set.seed(1234)
+xx<- rnorm(42, mean = 50, sd = 10)
+xx2 <- xx
+xx2[sample(42, 6, replace = FALSE)] <- NA
+
+hist(xx2)
+```
+
+```{r}
+normal_missing <- MissingDataImputation2$sample(
+  data = list(
+    N_tot = 42,
+    N_miss = 6,
+    N_obs = 42-6,
+    ii_obs = which(!is.na(xx2)),
+    ii_mis = which(is.na(xx2)),
+    y_obs = xx2[which(!is.na(xx2))]), 
+  parallel_chains = 4,
+  refresh = 0)
+```
+
+```{r}
+posterior_and_original <- normal_missing$draws() |> 
+  gather_rvars(y_imputed[i]) |> 
+  mutate(xx = xx[which(is.na(xx2))])
+
+
+
+library(tidybayes)
+posterior_and_original |> 
+  ggplot(aes(x = xx, ydist = .value)) + 
+  stat_pointinterval()
+
+```
+
+unsurprisingly this is the same distribution for all parameters
+
+## with a linear relationship
+
+let's imagine there is a clear linear relationship but we still have missing values:
+
+```{r}
+yy_bar <- 12 + 2*(xx - 50)
+
+yy <- rnorm(42, yy_bar, sd = 3)
+
+plot(xx, yy)
+```
+
+with the same 6 datapoints missing
+
+```{r}
+#| class-output: stan
+regression_imputation <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-08-24-imputation-nonnormal/regression_imputation.stan"))
+regression_imputation
+```
+
+```{r}
+regression_missing <- regression_imputation$sample(
+  data = list(
+    N_tot = 42,
+    N_miss = 6,
+    N_obs = 42 - 6,
+    ii_obs = which(!is.na(xx2)),
+    ii_mis = which(is.na(xx2)),
+    x_obs = xx2[which(!is.na(xx2))],
+    y = yy
+    ),
+  parallel_chains = 4,
+  refresh = 0)
+```
+
+
+```{r}
+#| layout-ncol: 2
+#| class-output: .preview-image
+#| fig-cap: 
+#|   - "imputed values (y axis) vs the real values (x axis), and the 1:1 line for comparison. The posterior distributions are close to the truth, because the regression equation lets information flow in both directions."
+#|   - "The original relationship, with posterior distributions for missing x variables."
+
+posterior_and_original <- regression_missing$draws() |> 
+  gather_rvars(x_imputed[i]) |> 
+  mutate(xx = xx[which(is.na(xx2))],
+         yy = yy[which(is.na(xx2))]
+  )
+
+
+posterior_and_original |> 
+  ggplot(aes(x = xx, ydist = .value)) + 
+  stat_pointinterval() + 
+  geom_abline(intercept = 0, slope = 1)
+
+
+posterior_and_original |> 
+  ggplot(aes(xdist = .value, y = yy)) + 
+  stat_pointinterval() + 
+  geom_point(aes(x = xx, y = yy), 
+             col = "red",
+             inherit.aes = FALSE,
+             data = tibble(
+               xx = xx[which(!is.na(xx2))],
+               yy = yy[which(!is.na(xx2))]
+               ))
+
+```
+
+The major takeaway from this model is that once we have created our merged parameter and data vector `x`, within the `transformed parameters` block, we can use it just like a vector made entirely of observations. The model structure causes information to "flow both ways" and automatically gives us the posterior distribution that is most consistent with our data and model. From the point of view of the model, there is no difference between a missing observation and any other unknown number, like a standard deviation or average.
+
+I also enjoy that we are modelling an average for the independent $x$ variable -- and then using that parameter to center the vector before modelling! This is useful if you want to set a prior on the intercept for what the average X value should be.  Normally it would be tricky to center a variable with missing data (if you don't know all the values, how can you know their average?) but Bayes makes it effortless.
+
+## Count data with missing numbers
+
+To extend this model further, I want to try modelling count data for both an independent and dependent variable.
+
+In this example, there will be missing data an independent variable. However, we're not going to be able to model the missing counts as _counts_, because Stan does not allow discrete missing data. Instead we'll treat the unobserved data as lognormal, and see how wrong we are.
+
+

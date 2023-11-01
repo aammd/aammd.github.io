@@ -6,7 +6,7 @@ description: |
 date: 20 March 2023
 editor: source
 categories: [UdeS, stan]
-draft: true
+draft: false
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
@@ -14,24 +14,26 @@ library(targets)
 library(ggplot2)
 library(tidyverse)
 library(tidybayes)
+library(cmdstanr)
 ```
 
 Imagine we have many measurments, all correlated with each other. Where do these correlations come from?
 One possibility is that all these measurents are _caused_ by the values of some unobservable, latent trait. 
 This happens in ecology when we imagine that, for example, the **Competitive Ability** of a species appears to us in the form of measurable traits that (to us) seem to represent this trait: leaf size, growth rate, alleopathy, etc. 
 
-![Five different observable variables (in squares), all caused by one latent variable (round).](posts/2023-03-20-latent-continuous/dag.png)
+![Five different observable variables (in squares), all caused by one latent variable (round).](dag.png)
 
 In mathematics, this model is the following:
 
 $$
+
 \begin{align}
 Y_{ij} &\sim \text{Normal}(\mu_{ij}, \sigma) \\
 \mu_{ij} &= \alpha_i \times \beta_j\\
 \boldsymbol{ \alpha } &\sim \text{Normal}(0, 1) \\
 \boldsymbol{ \beta } &\sim \text{Normal}(0, 1) \\
-
 \end{align}
+
 $$
 
 
@@ -64,40 +66,52 @@ My toxic trait is that I like for-loops but never write them
 pairs(yobs)
 ```
 
+### A first, simple stan model
+
+For a first attempt, I'll try a model that encodes the generative process above, coded in Stan:
 
 ```{r}
-library(cmdstanr)
+#| class-output: stan
 
 latent_continuous <- cmdstan_model(
   stan_file = here::here("posts/2023-03-20-latent-continuous/latent_continuous.stan"))
 
+latent_continuous
+```
 
+```{r latent-continuous-fit}
 datalist <- list(N = nrow(yobs),
                  y = yobs)
 
 latent_cont_samp <- latent_continuous$sample(
   data = datalist, parallel_chains = 4, refresh = 0)
-```
 
-```{r}
 latent_cont_samp
 ```
 
-that was.. a spectacular failure! is there a way that actully works
+that was.. a spectacular failure! I suspect this is because the parameters are not identifiable: there's no way to know, from the model's perspective, if a particular trait is in a positive or negative relationship to the latent state. What if I try constraining these?
+
+## Partially constrained model
+
+In this model I set constraints on the sign of the coefficients that relate the latent state to any observed variable. This is the sort of thing that would work in most ecological systems. For example, if an underlying state is "competitive ability" we might know it relates positively to traits like growth rate and leaf size, etc.
 
 ```{r}
-library(cmdstanr)
+#| class-output: stan
+
 latent_cont_constrained <- cmdstan_model(
   stan_file = here::here(
     "posts/2023-03-20-latent-continuous/latent_cont_constrained.stan"))
 
-latent_cont_constrained_samp <- latent_cont_constrained$sample(
-  data = datalist, parallel_chains = 4, refresh = 0)
-
-# tidybayes::get_variables(latent_cont_constrained_samp)
+latent_cont_constrained
 ```
 
 ```{r}
+latent_cont_constrained_samp <- latent_cont_constrained$sample(
+  data = datalist, parallel_chains = 4, refresh = 0)
+
+latent_cont_constrained_samp
+# tidybayes::get_variables(latent_cont_constrained_samp)
+
 tidybayes::gather_rvars(latent_cont_constrained_samp, betatrans[id]) |> 
   mutate(true_value = five_betas) |> 
   ggplot(aes(x = id, dist  = .value)) + 
@@ -126,10 +140,14 @@ tidybayes::summarise_draws(latent_cont_constrained_samp, quantile) |>
 What if we experiment with a standard deviation for the alpha (ie a hierarchical model)
 
 ```{r}
-
+#| class-output: stan
 latent_cont_constr_hier <- cmdstan_model(
   stan_file = here::here("posts/2023-03-20-latent-continuous/latent_cont_constr_hier.stan"))
 
+latent_cont_constr_hier
+```
+
+```{r}
 latent_cont_constr_hier_samp <- latent_cont_constr_hier$sample(
   data = datalist, parallel_chains = 4, refresh = 0)
 
