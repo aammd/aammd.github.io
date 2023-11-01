@@ -3,10 +3,8 @@ title: "Growth curves"
 author: "Andrew"
 date: "2022-10-14"
 categories: [stan, simulation]
-freeze: true
 image: gq_fig-1.png
 execute: 
-  eval: true
   warning: false
 ---
 
@@ -68,9 +66,8 @@ Here is a stan model that matches this data generating process:
 ```{r}
 #| echo: FALSE
 #| class.output: stan
-vb_one_tree <- cmdstan_model(here::here("posts", 
-                                        "2022-10-14-growth_curve_measurement_error",
-                                        "vb_one_tree.stan"))
+vb_one_tree <- cmdstan_model(
+  here::here("posts/2022-10-14-growth_curve_measurement_error/vb_one_tree.stan"))
 
 vb_one_tree
 ```
@@ -107,6 +104,7 @@ expected_df <- one_tree_post |>
 expected_plot <- expected_df |> 
   ggplot(aes(x = time, ydist = Lt)) + 
   stat_dist_lineribbon()
+
 expected_plot
 ```
 
@@ -163,9 +161,9 @@ However sometimes it can be both convenient and more readable to keep the whole 
 
 ```{r gq_demo}
 #| class.output: stan
-vb_one_tree_gq <- cmdstan_model(here::here("posts", 
-                                        "2022-10-14-growth_curve_measurement_error",
-                                        "vb_one_tree_gq.stan"))
+vb_one_tree_gq <- cmdstan_model(
+  stan_file = here::here(
+    "posts/2022-10-14-growth_curve_measurement_error/vb_one_tree_gq.stan"))
 
 vb_one_tree_gq
 ```

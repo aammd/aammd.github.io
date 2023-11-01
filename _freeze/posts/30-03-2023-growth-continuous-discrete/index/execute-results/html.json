@@ -1,0 +1,16 @@
+{
+  "hash": "0a14d0a2ee276afa1550cddd2ae7f648",
+  "result": {
+    "markdown": "---\ntitle: \"Should we model growth as continuous or discrete\"\nauthor: \"Andrew MacDonald\"\ndescription: |\n  How to model without making nonsensical predictions.\ndate: 11 Nov 2022\neditor: source\ncategories: [UdeS, stan]\n---\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(targets)\nlibrary(ggplot2)\nlibrary(tidyverse)\nlibrary(tidybayes)\n```\n:::\n\n\n## How do things grow (or: decay)\n\nLet's start with a simple simulation:\n\n\n::: {.cell}\n\n```{.r .cell-code}\nstart_size <- 45\ndecay_rate <- .3\ntibble(time = 0:20, \n       mass = start_size * exp(-decay_rate * time)) |> \n  ggplot(aes(x = time, y = mass)) + \n  geom_point()\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

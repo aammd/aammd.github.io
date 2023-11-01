@@ -1,0 +1,31 @@
+---
+title: "Should we model growth as continuous or discrete"
+author: "Andrew MacDonald"
+description: |
+  How to model without making nonsensical predictions.
+date: 11 Nov 2022
+editor: source
+categories: [UdeS, stan]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+## How do things grow (or: decay)
+
+Let's start with a simple simulation:
+
+```{r}
+
+start_size <- 45
+decay_rate <- .3
+tibble(time = 0:20, 
+       mass = start_size * exp(-decay_rate * time)) |> 
+  ggplot(aes(x = time, y = mass)) + 
+  geom_point()
+```
+

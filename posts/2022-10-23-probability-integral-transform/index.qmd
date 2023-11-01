@@ -1,9 +1,23 @@
 ---
 title: "Probability integral transforms"
+description: |
+  Understanding a diagnostic tool for models.
 author: "Andrew"
 date: 23 Oct 2022
 image: PIT_when_wrong-1.png
+bibliography: references.bib
+draft: true
 ---
+
+::: callout-tip
+This is not a review or a proof of the Probability Integral Transform. A grad student asked me "what is this and why does it work" and I wanted to explore it with them.
+:::
+
+Among the many wonderful plots that you can make with `bayesplot`, you will find one called [`ppc_loo_pit_overlay`](https://mc-stan.org/bayesplot/reference/PPC-loo.html). You can read a lot more about it in this fabulous paper on [Visualisation in Bayesian Workflow](https://rss.onlinelibrary.wiley.com/doi/full/10.1111/rssa.12378) [@gabry2019]
+
+So what is it, and how does it work?
+
+## 
 
 Take random numbers from a distribution
 

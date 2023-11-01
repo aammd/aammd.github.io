@@ -1,167 +1,387 @@
 ---
 title: "Validating a model of selection on plasticity"
 author: "Andrew MacDonald"
-description: |
-  Plus ça change, plus c'est la change qui change
-date: 02 Feb 2023
+description: "Plus ça change, plus c'est la change qui change"
+date: 2023-02-02
 categories: [UdeS, stan]
 execute:
-  eval: false
+  eval: true
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
-library(targets)
-library(ggplot2)
+library(cmdstanr)
 library(tidyverse)
 library(tidybayes)
 ```
 
-when an animal shows a difference
 
-All animals respond to the environment, adapting their physical or biological characteristics into
+Let's begin just with a simulation of three interrelated traits:
 
-all an
-
-the response that an animal has, is in part determined by heir genetics, by heritable variation in their ability
-
-other factors can of course invluence who an animal responds to changing environment. It might be that animals only respond to changing environment when they are in good condition. or that changes in the environment always provoke differenc responses, but hat selection only happnens a few years out of the total
-
-anyway, we are going to simulate data from a complex model of selection on two correlated traits.
-
-let's start small
+* when a bird arrives, which determines
+* how many eggs they lay, out of which there is 
+* some number of surviving offspring
 
 ```{r}
-# environment 
-nindivid <- 38
-neach <- 4
+## how many birds
+nbirds <- 57
+# simulate arrival dates -- two weeks before and after whatever the average is
+darrive <- runif(nbirds, min = -14, max = 14) |> round()
 
-fake_obs <- expand_grid(indiv_id = rep(1:nindivid, each = neach)) |> 
-  mutate(X = runif(length(indiv_id), min = 11, max = 26))
+## simulate clutch sizes -- decrease by 4% each day
+avg_clutch <- 4.5
+effect_per_day <- .97
 
-# slopes
-slope_mean <- 2.6
-slope_sd <- .9
-b_1 <- rnorm(nindivid, mean = slope_mean, sd = slope_sd)
-b_0 <- 3
+clutch <- rpois(nbirds, exp(log(avg_clutch) + log(effect_per_day)*darrive))
 
-fake_obs |> 
-  mutate(b_0 = b_0,
-         b_1 = b_1[indiv_id],
-         y = b_0 + b_1 * X) |> 
-  ggplot(aes(x = X, y = y, group = indiv_id)) + geom_line()
+plot(darrive, clutch)
+```
+
+As an aside, this would be 0-truncated, since birds who don't lay eggs don't get observed at all.
+
+```{r}
+# simulate hatching success
+success <- rbinom(nbirds, size = clutch, prob = .86)
+
+plot(darrive, success)
+```
+
+what's important to see here is that there is a negative correlation, even though the arrival date has no direct effect on the outcome
+
+```{r}
+summary(glm(success ~ darrive, family = "poisson"))
+```
+
+
+But, if we use a binomial model that knows about the number of possible successful chicks, then we see what we expect: 
+
+```{r}
+bin_mod <- (glm(cbind(success, clutch - success) ~ 1, family = binomial(link = "logit")))
+
+plogis(coef(bin_mod))
+```
+
+Which matches the simulation above. 
+
+if we put `darrive` in the model, the effect should be very close to 0 with overlap.
+
+If we imagine that the laying date effects the survival p, then we should see an effect close to 0
+
+```{r}
+summary(glm(
+  cbind(success, clutch - success) ~ 1 + darrive,
+            family = binomial(link = "logit")))
+```
+
+One Stan model can model all of these at the same time
+
+```{r}
+#| class-output: stan
+
+one_indiv <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-02-02-selection-on-plasticity/one_indiv.stan"))
+
+one_indiv
+```
+
+
+```{r}
+one_indiv_post <- one_indiv$sample(
+  data = list(nbirds = nbirds,
+              clutch = clutch, 
+              success = success, 
+              darrive = darrive))
+
+one_indiv_post
+```
+
+reasonably close to true values:
+
+```{r}
+plogis(1.44)
+log(avg_clutch)
+log(effect_per_day)
+```
+
+
+```{r}
+
+simulate_some_birds <- function(nbirds = 57, 
+         log_b_date = log(.97),
+         log_avgclutch = log(4.5),
+         logit_psuccess = qlogis(.84)){
+  
+  # simulate arrival dates -- two weeks before and after whatever the average is
+  darrive <- runif(nbirds, min = -14, max = 14) |> round()
+  
+  ## simulate clutch sizes -- decrease  each day
+  clutch <- rpois(nbirds, exp(log_avgclutch + log_b_date*darrive))
+  
+  ## simulate success
+  success <- rbinom(nbirds, size = clutch, prob = plogis(logit_psuccess))
+  
+  return(list(
+    data_list = list(
+      nbirds = nbirds,
+      darrive = darrive, 
+      clutch = clutch, 
+      success = success 
+    ),
+    true_values = tribble(
+      ~variable, ~true_value,
+      "log_b_date", log_b_date,
+      "log_avgclutch", log_avgclutch,
+      "logit_psuccess", logit_psuccess
+    )
+  ))
+}
+
+
+data_for_simulation <- simulate_some_birds()
+
+one_indiv_post <- one_indiv$sample(data = data_for_simulation$data_list,
+                                   refresh = 0)
+
+comparison <- one_indiv_post |> 
+  # tidybayes::gather_rvars(logit_psuccess, log_avgclutch, log_b_date) |> 
+  tidybayes::tidy_draws() |> tidybayes::gather_variables() |> 
+  right_join(data_for_simulation$true_values, by = c(".variable" = "variable"))
+
+
+comparison |> 
+  ggplot(aes(y = .variable, x = .value)) + 
+  stat_halfeye() + 
+  geom_point(aes(y = variable, x = true_value),
+             col = "orange",
+             pch = "|",
+             size = 10, data = data_for_simulation$true_values)
+```
+
+## No 0 birds
+
+This system is a little challenging, since we never observe 0 eggs per bird -- if a bird cannot lay eggs (e.g. it does not find a nest spot) then it goes uncounted
+
+To simulate this, I'll drop the 0 clutches before doing the rest of the simulations. This means that sample size will be less than or equal to the "nbirds" argument.
+
+```{r}
+
+simulate_some_birds_nonzero <- function(nbirds = 57, 
+         log_b_date = log(.97),
+         log_avgclutch = log(4.5),
+         logit_psuccess = qlogis(.84)){
+  
+  # simulate arrival dates -- two weeks before and after whatever the average is
+  darrive <- runif(nbirds, min = -14, max = 14) |> round()
+  
+  ## simulate clutch sizes -- decrease  each day
+  clutch <- rpois(nbirds, exp(log_avgclutch + log_b_date*darrive))
+  # drop 0 nests
+  nonzero_clutch <- which(clutch > 0)
+  
+  ## simulate success
+  success <- rbinom(nbirds, size = clutch, prob = plogis(logit_psuccess))
+  
+  return(list(
+    data_list = list(
+      nbirds = length(nonzero_clutch),
+      darrive = darrive[nonzero_clutch], 
+      clutch  =  clutch[nonzero_clutch], 
+      success = success[nonzero_clutch] 
+    ),
+    true_values = tribble(
+      ~variable, ~true_value,
+      "log_b_date", log_b_date,
+      "log_avgclutch", log_avgclutch,
+      "logit_psuccess", logit_psuccess
+    )
+  ))
+}
+
+set.seed(1234)
+some_nonzeros <- simulate_some_birds_nonzero(nbirds = 200)
 
 ```
 
-it's unlikely that everyone has the same yintercept
-
-a different approach, based on group-mean centering, will help us think about this
+a plot to confirm that it works:
 
 ```{r}
-b_0 <- rnorm(nindivid, mean = 45, sd = 6)
-fake_obs_2par <- fake_obs |> 
-  group_by(indiv_id) |> 
-  mutate(x_c = X - mean(X), 
-         y = b_0[indiv_id] + b_1[indiv_id] * x_c)
+some_nonzeros$data_list |> 
+  as.data.frame() |> 
+  ggplot(aes(x = darrive, y = clutch)) + geom_point()
+```
 
-fake_obs_2par |> 
-  ggplot(aes(x = X, y = y, group = indiv_id)) + geom_line()
+And fit the posterior
+
+```{r}
+plot_posterior_true <- function(simdata, stanmodel){
+  model_post <- stanmodel$sample(data = simdata$data_list,
+                                     refresh = 0, parallel_chains = 4)
+  
+  comparison <- model_post |> 
+    tidybayes::tidy_draws() |> 
+    tidybayes::gather_variables() |> 
+    right_join(simdata$true_values, by = c(".variable" = "variable"))
+  
+  
+  comparison |> 
+    ggplot(aes(y = .variable, x = .value)) + 
+    stat_halfeye() + 
+    geom_point(
+      aes(y = variable, x = true_value),
+      col = "orange",
+      pch = "|",
+      size = 10, data = simdata$true_values)
+}
+
+
+plot_posterior_true(some_nonzeros, one_indiv)
 
 ```
 
-contrast this with the display for the centered variable
+There's already some bias happening! let's try what happens when the average is lower (and gives more 0s)
 
 ```{r}
-fake_obs_2par |> 
-  ggplot(aes(x = x_c, y = y, group = indiv_id)) + geom_line()
+set.seed(420)
+simulate_some_birds_nonzero(log_avgclutch = log(2.4),
+                            log_b_date = log(.7),
+                            nbirds = 300) |> 
+  plot_posterior_true(one_indiv)
 ```
 
-this is just a simple demo of a pretty general pattern!
-
-centering just moves the line around -- I think we would model this this way, if we felt that the
-
-let's start simulating data and comparing the fit with models
+some preliminary repetitions show that it usually misses either the average or the hatching success, frequently both. 
 
 ```{r}
-sd_obs <- 3
-fake_obs_error <- fake_obs_2par |> 
-  mutate(yobs = rnorm(n = length(y), mean = y, sd = sd_obs))
+#| class-output: stan
 
-fake_obs_error |> 
-  ggplot(aes(x = X, y = yobs)) + 
-  geom_point()
-```
+one_indiv_noZero <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-02-02-selection-on-plasticity/one_indiv_noZero.stan"))
 
-We can already try to model this
-
-```{r}
-library(lme4)
-
-m <- lmer(yobs ~ X + (X|indiv_id), data = fake_obs_error)
-
-m |> summary()
-```
-
-works but not really helpful for the intercepts -- we need to fit a centered model to get those values:
-
-```{r}
-lmer(yobs ~ x_c + (x_c|indiv_id), data = fake_obs_error) |> 
-  summary()
-```
-
-Now we can recover parameters that went in to the model.
-
-## two correlated predictors
-
-This will come together with the rest of the model soon, but I want to get a start on this now. The two traits we are mesauring are kind of weird and different from the tutal way of thinking about environemtnal traits. let me try to explain it. so there was another procedure earlier which attempted to measure the "window" of temperature which provokes the greatest change.
-
-as an aside, do we expect the greatest variation to be found with the greatest selection? consider the number of adjectives in a scientivi paper vs the number of refrerences. I don't know, but I would epect that the former is way more variable -- and matters far less.
-
-anyway that was done. So the two response variables here are measured in the same units but not exactly the same VALUES for each
-
-just makes me curious to start by simulating this (and perhaps also to look in the data for examples)
-
-```{r}
-tibble(orig = rerun(350, runif(30, min = -1, max = 1))) |> 
-  rowwise() |> 
-  mutate(x1 = mean(head(orig, 21)),
-         x2 = mean(tail(orig, 21))) |> 
-  ggplot(aes(x = x1, y = x2)) + geom_point()
-```
-
-Sure enough they are correlated. I'm sure with some effort I could calculate the equation for this correlation, but let's not.
-
-Did audrey do this differently for each bird? for each environmental variable or what? does it count as conditioning?
-
-TK ask her this question.
-
-## back to main question: measuring selection
-
-lets begin by replicating the bivariate model of fitness that you see, for example, in
-
-start with fake obs eror
-
-```{r}
-# environment 
-nindivid <- 38
-neach <- 4
-
-fake_obs <- expand_grid(indiv_id = rep(1:nindivid, each = neach)) |> 
-  mutate(X = runif(length(indiv_id), min = 11, max = 26))
-
-# slopes
-slope_mean <- 2.6
-slope_sd <- .9
-intercept_mean <- 45
-intercept_sd <- 6
-b_1 <- rnorm(nindivid, mean = slope_mean, sd = slope_sd)
-b_0 <-  rnorm(nindivid, mean = slope_mean, sd = slope_sd)
-
-fake_obs |> 
-  mutate(b_0 = b_0,
-         b_1 = b_1[indiv_id],
-         y = b_0 + b_1 * X)
+one_indiv_noZero
 ```
 
 ```{r}
-fake_obs_error
+
+set.seed(420)
+simulate_some_birds_nonzero(log_avgclutch = log(4.4),
+                            log_b_date = log(.9),
+                            nbirds = 300) |> 
+  plot_posterior_true(one_indiv_noZero)
 ```
+
+### Truncating using a different syntax
+
+The manual [uses a different syntax](https://mc-stan.org/docs/stan-users-guide/truncated-data.html). 
+To write the equation above this way, I found I needed to make a few changes:
+
+* `poisson_log` has to be replaced with `poisson` and the `exp()` link function
+
+... that was actually the only change. 
+It runs at the same speed as the previous way of writing it, and gets the same answer:
+
+```{r}
+#| class-output: stan
+
+one_indiv_zerotrunc <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-02-02-selection-on-plasticity/one_indiv_zerotrunc.stan"))
+
+one_indiv_zerotrunc
+```
+
+```{r}
+
+set.seed(420)
+simulate_some_birds_nonzero(log_avgclutch = log(4.4),
+                            log_b_date = log(.9),
+                            nbirds = 300) |> 
+  plot_posterior_true(one_indiv_zerotrunc)
+```
+
+:::{.callout-note}
+# Two parameterizations diverged in a yellow wood
+These two ways of writing the model both work. Which to choose? 
+Well, I was pleased with myself for manually normalizing the Poisson likelihood in the first model. 
+However the second is clearer to the reader. In the first, it takes two lines of code -- not even necessarily next to each other. In the second, the big `T` for *T*runcation indicates clearly what is going on. Code is communication; clarity wins.
+:::
+
+### Zero inflated binomial success
+
+Once in a while, a nest will just be completely destroyed by, say, a predator. 
+This has nothing to do with anything, probably, and is just a catastrophic Act of Weasel. 
+Let's imagine that some small proportion of the nests just die:
+
+```{r}
+
+simulate_some_birds_nonzero_zeroinflated <- function(nbirds = 57, 
+         log_b_date = log(.97),
+         log_avgclutch = log(4.5),
+         logit_psuccess = qlogis(.84),
+         logit_pfail = qlogis(.1)){
+  
+  # simulate arrival dates -- two weeks before and after whatever the average is
+  darrive <- runif(nbirds, min = -14, max = 14) |> round()
+  
+  ## simulate clutch sizes -- decrease  each day
+  clutch <- rpois(nbirds, exp(log_avgclutch + log_b_date*darrive))
+  # drop 0 nests
+  nonzero_clutch <- which(clutch > 0)
+  n_laid <- length(nonzero_clutch)
+  
+  # simulate success -- among birds which laid at least 1 egg, there is a chance of failing completely
+  success_among_nonzero <- rbinom(n_laid,
+                                  size = clutch[nonzero_clutch],
+                                  prob = plogis(logit_psuccess))
+  failed_nests <- rbinom(n_laid, size = 1, prob = plogis(logit_pfail))
+
+  success_zi <- success_among_nonzero * (1 - failed_nests)
+  
+  # success <- rbinom(nbirds, 
+  #                   size = clutch,
+  #                   prob = plogis(logit_psuccess))
+  # failed_nests <- rbinom(nbirds, size = 1, prob = plogis(logit_pfail))
+  # 
+  # success_zi <- success * (1 - failed_nests)
+  
+  return(list(
+    data_list = list(
+      nbirds = n_laid,
+      darrive = darrive[nonzero_clutch], 
+      clutch  =  clutch[nonzero_clutch], 
+      success = success_zi#[nonzero_clutch]
+    ),
+    true_values = tribble(
+      ~variable, ~true_value,
+      "log_b_date", log_b_date,
+      "log_avgclutch", log_avgclutch,
+      "logit_psuccess", logit_psuccess,
+      "logit_pfail", logit_pfail
+    )
+  ))
+}
+
+```
+
+
+```{r}
+#| class-output: stan
+
+one_indiv_ztrunc_zinf <- cmdstanr::cmdstan_model(
+  here::here("posts/2023-02-02-selection-on-plasticity/one_indiv_ztrunc_zinf.stan"))
+
+one_indiv_ztrunc_zinf
+```
+
+```{r}
+
+set.seed(477)
+some_zi_birds <- simulate_some_birds_nonzero_zeroinflated(log_avgclutch = log(4.4),
+                            log_b_date = log(.9),
+                            nbirds = 300) 
+
+some_zi_birds|> 
+  plot_posterior_true(one_indiv_ztrunc_zinf)
+```
+
+
+I initially failed to recover the parameter for `logit_pfail`. Here I some things I learned: 
+
+* Simulating zero-inflated numbers can be tricky! I flipped back and forth between simulating 0-inflation for all nests, and simulating for only those with at least 1 egg. In retrospect, it is clear that these are equivalent. There are two independent things here: the probability of a clutch having 0 eggs and the probability of a 0 coming from the zero-inflated binomial. 
+* this zero-inflated model is quite _sensitive to the prior_. That's because there are not very many zeros being inflated: in my simulation at least, failed nests are rare and success is naturally low. it would be pretty important to decide in advance if sudden nest failure (e.g. by predation) is rare or common

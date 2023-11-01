@@ -2,11 +2,10 @@
 title: "Modelling occupancy plus phenology"
 author: "Andrew MacDonald and Gabriel Bergeron"
 description: |
-  Are they really there and when.
-date: 11 Nov 2022
+  Are the birds really there and when.
+date: "03 March 2023"
 categories: [UdeS, stan]
-execute:
-  eval: false
+draft: true
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
@@ -14,9 +13,13 @@ library(targets)
 library(ggplot2)
 library(tidyverse)
 library(tidybayes)
+library(cmdstanr)
 ```
 
-## occupancy models
+## Occupancy models
+
+Occupancy models are a huge area of applied statistics in ecology. 
+They are particular flavours of logistic regression where we model two probabilities at once: the probability an animal occupies a site, and the probability it is detected if it is there. 
 
 $$ 
 \begin{align}
@@ -36,42 +39,44 @@ Pr(y = 0) &= (1 - d) ^ {\text{effort}}p + 1 - p \\
 \end{align}
 $$
 
-very simple occupancy model that controls for effort
+Here is a very simple occupancy model that controls for effort:
 
-$$
-y = 
-\begin{cases}
- y = 1, wp \\
- y = 0, (1 - w)p + 1 - p
-\end{cases}
-$$
-
-```{r}
+```{r effort-curve, fig.cap="If an animal is present, you'll find it if you look hard enough. Think of dectability as the probability of finding the animal with 1 unit of effort (e.g. one person-hour), given that the animal is actually there."}
 curve(1 - (1 - .4)^x, xlim = c(0, 20))
 abline(v = 1, h = .4)
 ```
 
-This can also be done with the cloglog link
+This can also be done with the cloglog link, which is available in `glm`, `lmer` and friends using `family = binomial(link = 'cloglog')`. This lets you put effort in as an offset using `offset(log(effort))`
 
 ```{r}
-fake_data <- tibble(sample_id = 1:200,
-                    real_pres = rbinom(n = length(sample_id),
-                                       p = .7,
-                                       size = 1),
-                    sample_size = round(
-                      runif(
-                        n = length(sample_id),
-                        min = 2, max = 40)
-                    )) |>
+fake_data <- tibble(
+  sample_id = 1:200,
+  real_pres = rbinom(n = length(sample_id),
+                     p = .2,
+                     size = 1),
+  sample_size = round(
+    runif(
+      n = length(sample_id),
+      min = 2, max = 40)
+  )) |>
   rowwise() |> 
-  mutate(pa = list(rbinom(n = sample_size,
-                          p = .1,
-                          size = 1)),
-         abd = sum(pa) * real_pres)
+  mutate(pa = 
+           if_else(real_pres == 1,
+                   true = list(rbinom(n = sample_size,
+                                 p = .6,
+                                 size = 1)),
+                   false = list(0)),
+         abd = sum(pa))
 
-ggplot(fake_data, aes(x = sample_size, y = abd)) + geom_point()
+ggplot(fake_data, aes(x = sample_size, y = abd)) + 
+  geom_point()
 
 ```
+
+```{r}
+fake_data
+```
+
 
 ```{r}
 fake_data |> 
@@ -79,26 +84,194 @@ fake_data |>
   pull(prop) |> mean()
 ```
 
+plot pres / absence
+
+```{r}
+fake_detections <- fake_data |> 
+  mutate(at_least_one_detect = as.numeric(abd>0))
+
+fake_detections |> 
+  ggplot(aes(x = sample_size, y = at_least_one_detect)) + 
+  geom_point()
+```
+
+
 ## validate a simple Stan model
 
 ```{r}
 library(cmdstanr)
 
-simple_occ_logit <- cmdstan_model("posts/2023-02-08-occupancy-in-time/simple_occ_logit.stan")
+simple_occ_logit <- cmdstan_model(
+  stan_file = here::here(
+    "posts/2023-02-08-occupancy-in-time/simple_occ_logit.stan"))
 
 ```
 
 ```{r}
-data_list <- list(N = nrow(fake_data),
-                  y = as.numeric(fake_data$abd>0),
-                  sample_size = fake_data$sample_size)
+data_list <- list(N = nrow(fake_detections),
+                  y = fake_detections$at_least_one_detect,
+                  sample_size = fake_detections$sample_size)
 data_list
 ```
 
+todo: extend the above using stantargets
+
 ```{r}
-model_result <- simple_occ_logit$sample(data = data_list)
+model_result <- simple_occ_logit$sample(data = data_list, refresh = 0)
 
 model_result$summary()
 ```
 
+A resource on occupancy modelling: 
+
 https://mc-stan.org/users/documentation/case-studies/dorazio-royle-occupancy.html
+
+
+## HOF functions
+
+The idea here is two logistic curves multiplied together. 
+
+Let's make it easier and use this form of the logistic:
+
+$$
+\frac{1}{1 + e^{-s(x - d)}}
+$$
+
+where $s$ is the slope (or sensitivity?) and $d$ the inflection point (in our use case, the date at which the probability of presence becomes >.5)
+
+```{r}
+curve(1 / (1 + exp(-2 * (x - 1))), xlim = c(-4, 4))
+```
+
+We multiply this by another curve, with some constraints: 
+
+* the first curve goes up but the second goes down (slopes have opposite signs)
+* the second date is after the first
+
+$$
+\frac{1}{1 + e^{s_1(x - d_1)}} \times \frac{1}{1 + e^{s_2(x - d_2)}}
+$$
+
+When we place this in a modelling context, we will want to keep these constraints while using any real number for the parameters. For the slopes, we can use the exponential function to make sure the sign of the $s$ parameters is always the same:
+
+$$
+\frac{1}{1 + e^{-e^{s_1}(x - d_1)}} \times \frac{1}{1 + e^{e^{s_2}(x - d_2)}}
+$$
+
+let's plot this and take a look:
+
+```{r}
+s1 <- -3
+s2 <- -3.5
+d1 <- 84 # approx Spring Equinox in JJ
+d2 <- 325 # approx Fall equinox in JJ
+curve(
+  (1 / (1 + exp(-exp(s1) * (x - d1)))) * (1 / (1 + exp(exp(s2) * (x - d2)))),
+  xlim = c(0, 365)
+   )
+```
+
+Also worth noting that the slopes should be quite close to 0 -- if the absolute value is too large then the curve doesn't fit in a year
+
+```{r}
+log1p_exp <- function(x) log(1 + exp(x))
+
+logHof <- function(x, s1, s2, d1, d2) exp(-log1p_exp((-exp(s1) * (x - d1))) - log1p_exp(exp(s2) * (x - d2)))
+
+curve(logHof(x, s1 = -4, s2 = -0.5, d1 = d1, d2 = d2), xlim = c(0, 365), ylim = c(0,1))
+
+curve(logHof(x, s1 = -3.5, s2 = -0.5, d1 = d1, d2 = d2), xlim = c(0, 365), add = TRUE, col = viridis::viridis(10)[1])
+curve(logHof(x, s1 = -3, s2 = -0.5, d1 = d1, d2 = d2), xlim = c(0, 365), add = TRUE, col = viridis::viridis(10)[2])
+curve(logHof(x, s1 = -2.5, s2 = -0.5, d1 = d1, d2 = d2), xlim = c(0, 365), add = TRUE, col = viridis::viridis(10)[3])
+```
+
+
+```{r}
+
+curve(logHof(x,
+             s1 = rnorm(1, mean = -2, sd = .5),
+             s2 = rnorm(1, mean = -2.5, sd = .5),
+             d1 = rnorm(1, mean = 130, sd = 7),
+             d2 = rnorm(1, mean = 230, sd = 7)
+             ),
+      xlim = c(0, 365),
+      ylim = c(0,1))
+```
+
+
+make fake data
+
+```{r}
+
+
+param_list <- list(       
+  s1 = rnorm(1, mean = -2, sd = .5),
+  s2 = rnorm(1, mean = -2.5, sd = .5),
+  d1 = rnorm(1, mean = 130, sd = 7),
+  d2 = rnorm(1, mean = 230, sd = 7)
+)
+
+fake_data <- tibble(x = seq(30, 300, by = 7),
+       p = do.call(logHof, purrr::splice(param_list, x = x)))
+
+fake_data |> 
+  ggplot(aes(x = x, y = p)) + geom_point()
+
+fake_obs <- fake_data |> 
+  rowwise() |> 
+  mutate(obs = list(rbinom(n = 10, size = 1, prob = p))) |> 
+  unnest(obs)
+
+fake_obs |> 
+  ggplot(aes(x = x, y = obs)) + geom_count() + 
+  geom_line(aes(y = p), col = "darkorange")
+```
+
+```{r}
+getwd()
+```
+
+
+
+run the stan model
+
+```{r}
+#| class.output: stan
+  
+hof <- cmdstan_model(stan_file = 
+                       here::here(
+                         "posts/2023-02-08-occupancy-in-time/hof.stan"),
+                     pedantic = TRUE)
+
+hof
+```
+
+
+```{r}
+hof_sample <- hof$sample(data = list(n = nrow(fake_obs),
+                       y = fake_obs$obs,
+                       jday = fake_obs$x), 
+                       refresh = 0)
+```
+
+```{r}
+
+hof_sample
+param_list
+```
+
+draw the curve
+
+```{r}
+library(tidybayes)
+
+spread_rvars(hof_sample, s1, s2, d1, d2) |> 
+  bind_cols(x = seq(30, 300, by = 7)) |> 
+  mutate(p = logHof(x, s1, s2, d1, d2)) |> 
+  ggplot(aes(x = x, dist = p)) + 
+  stat_lineribbon() + 
+  scale_fill_brewer(palette = "Greens") + 
+  geom_count(aes(x = x, y = obs), inherit.aes = FALSE, data = fake_obs, pch = 21, fill = "darkorange")
+```
+
+

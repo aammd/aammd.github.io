@@ -103,7 +103,8 @@ vb_prior <- c(
 vb_model <- brm(formula = vb_form,
                 prior = vb_prior, 
                 data = one_animal, 
-                chains = 2, 
+                backend = "cmdstanr",
+                chains = 2)#, 
                 file = here::here("posts/2022-11-21-growth-curve-known-age/vb_model.rds"))
 ```
 
