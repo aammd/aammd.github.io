@@ -3,7 +3,7 @@ title: "Stan-dalone generated quantites"
 author: "Andrew MacDonald"
 description: |
   working with Stan after you've done that once already.
-date: 11 Nov 2022
+date: 01 Nov 2023
 editor: source
 categories: [UdeS, stan, generated quantities]
 ---

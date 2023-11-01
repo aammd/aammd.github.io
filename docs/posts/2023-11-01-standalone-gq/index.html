@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andrew MacDonald">
-<meta name="dcterms.date" content="2022-11-11">
+<meta name="dcterms.date" content="2023-11-01">
 <meta name="description" content="working with Stan after you’ve done that once already.">
 
 <title>Andrew MacDonald - Stan-dalone generated quantites</title>
@@ -169,7 +169,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <div>
       <div class="quarto-title-meta-heading">Published</div>
       <div class="quarto-title-meta-contents">
-        <p class="date">November 11, 2022</p>
+        <p class="date">November 1, 2023</p>
       </div>
     </div>
     
@@ -244,29 +244,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>multiple_regression <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(</span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"posts/2023-11-01-standalone-gq/multiple_regression.stan"</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    ))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>In file included from stan/src/stan/model/model_header.hpp:11:
-stan/src/stan/model/model_base_crtp.hpp:198: warning: 'void stan::model::model_base_crtp&lt;M&gt;::write_array(boost::random::ecuyer1988&amp;, std::vector&lt;double, std::allocator&lt;double&gt; &gt;&amp;, std::vector&lt;int&gt;&amp;, std::vector&lt;double, std::allocator&lt;double&gt; &gt;&amp;, bool, bool, std::ostream*) const [with M = multiple_regression_model_namespace::multiple_regression_model; boost::random::ecuyer1988 = boost::random::additive_combine_engine&lt;boost::random::linear_congruential_engine&lt;unsigned int, 40014, 0, 2147483563&gt;, boost::random::linear_congruential_engine&lt;unsigned int, 40692, 0, 2147483399&gt; &gt;; std::ostream = std::basic_ostream&lt;char&gt;]' was hidden [-Woverloaded-virtual=]
-  198 |   void write_array(boost::ecuyer1988&amp; rng, std::vector&lt;double&gt;&amp; theta,
-      | </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>C:/Users/UTILIS~1/AppData/Local/Temp/RtmpCWWESL/model-25ec8287909.hpp:419: note:   by 'multiple_regression_model_namespace::multiple_regression_model::write_array'
-  419 |   write_array(RNG&amp; base_rng, std::vector&lt;double&gt;&amp; params_r, std::vector&lt;int&gt;&amp;
-      | </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>stan/src/stan/model/model_base_crtp.hpp:136: warning: 'void stan::model::model_base_crtp&lt;M&gt;::write_array(boost::random::ecuyer1988&amp;, Eigen::VectorXd&amp;, Eigen::VectorXd&amp;, bool, bool, std::ostream*) const [with M = multiple_regression_model_namespace::multiple_regression_model; boost::random::ecuyer1988 = boost::random::additive_combine_engine&lt;boost::random::linear_congruential_engine&lt;unsigned int, 40014, 0, 2147483563&gt;, boost::random::linear_congruential_engine&lt;unsigned int, 40692, 0, 2147483399&gt; &gt;; Eigen::VectorXd = Eigen::Matrix&lt;double, -1, 1&gt;; std::ostream = std::basic_ostream&lt;char&gt;]' was hidden [-Woverloaded-virtual=]
-  136 |   void write_array(boost::ecuyer1988&amp; rng, Eigen::VectorXd&amp; theta,
-      | </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>C:/Users/UTILIS~1/AppData/Local/Temp/RtmpCWWESL/model-25ec8287909.hpp:419: note:   by 'multiple_regression_model_namespace::multiple_regression_model::write_array'
-  419 |   write_array(RNG&amp; base_rng, std::vector&lt;double&gt;&amp; params_r, std::vector&lt;int&gt;&amp;
-      | </code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>multiple_regression</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>multiple_regression</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>data{
   int&lt;lower=0&gt; n;
@@ -288,33 +268,33 @@ model{
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>multiple_post <span class="ot">&lt;-</span> multiple_regression<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(<span class="at">n =</span> <span class="fu">length</span>(soil_quality), <span class="at">soil =</span> soil_quality, <span class="at">insects =</span> insect_biomass, <span class="at">herbivory =</span> obs_herbivory), <span class="at">parallel_chains =</span> <span class="dv">2</span>, <span class="at">refresh =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>multiple_post <span class="ot">&lt;-</span> multiple_regression<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(<span class="at">n =</span> <span class="fu">length</span>(soil_quality), <span class="at">soil =</span> soil_quality, <span class="at">insects =</span> insect_biomass, <span class="at">herbivory =</span> obs_herbivory), <span class="at">parallel_chains =</span> <span class="dv">2</span>, <span class="at">refresh =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 chains, at most 2 in parallel...
 
 Chain 1 finished in 0.3 seconds.
-Chain 2 finished in 0.3 seconds.
-Chain 3 finished in 0.3 seconds.
-Chain 4 finished in 0.3 seconds.
+Chain 2 finished in 0.2 seconds.
+Chain 3 finished in 0.2 seconds.
+Chain 4 finished in 0.2 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.3 seconds.
-Total execution time: 0.9 seconds.</code></pre>
+Mean chain execution time: 0.2 seconds.
+Total execution time: 0.8 seconds.</code></pre>
 </div>
 </div>
 <p>We can see that the posteriors are close to the true values (not the point of this post, but always good to check)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>multiple_post<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>multiple_post<span class="sc">$</span><span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 10
   variable     mean   median     sd    mad       q5      q95  rhat ess_bulk
   &lt;chr&gt;       &lt;num&gt;    &lt;num&gt;  &lt;num&gt;  &lt;num&gt;    &lt;num&gt;    &lt;num&gt; &lt;num&gt;    &lt;num&gt;
-1 lp__     -415.    -415.    1.54   1.41   -418.    -413.     1.00    2186.
-2 avg_herb   32.9     32.9   0.335  0.338    32.4     33.5    1.00    4607.
-3 beta[1]     0.190    0.193 0.190  0.193    -0.129    0.499  1.00    4774.
-4 beta[2]     1.93     1.93  0.0572 0.0575    1.84     2.03   1.00    4286.
-5 beta[3]    -0.474   -0.473 0.0329 0.0332   -0.527   -0.420  1.00    4479.
-6 sigma       4.80     4.79  0.240  0.243     4.43     5.22   1.00    4685.
+1 lp__     -416.    -415.    1.63   1.48   -419.    -414.     1.00    1904.
+2 avg_herb   32.9     32.9   0.336  0.333    32.4     33.5    1.00    3855.
+3 beta[1]     0.192    0.190 0.191  0.192    -0.123    0.507  1.00    4847.
+4 beta[2]     1.93     1.93  0.0607 0.0589    1.83     2.03   1.00    4096.
+5 beta[3]    -0.474   -0.474 0.0341 0.0345   -0.530   -0.418  1.00    4922.
+6 sigma       4.80     4.79  0.238  0.235     4.43     5.20   1.00    4098.
 # ℹ 1 more variable: ess_tail &lt;num&gt;</code></pre>
 </div>
 </div>
@@ -323,14 +303,14 @@ Total execution time: 0.9 seconds.</code></pre>
 <li>keeping the output of any one model small(ish) so that you can actually work with it</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># class-output: stan</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>multi_reg_triptych <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(</span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(</span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"posts/2023-11-01-standalone-gq/multi_reg_triptych.stan"</span></span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    ))</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>multi_reg_triptych</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># class-output: stan</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>multi_reg_triptych <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  here<span class="sc">::</span><span class="fu">here</span>(</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>    <span class="st">"posts/2023-11-01-standalone-gq/multi_reg_triptych.stan"</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>    ))</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>multi_reg_triptych</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>data {
   int&lt;lower=0&gt; npred;
@@ -353,18 +333,18 @@ generated quantities {
 </div>
 <p>get the prediction data ready</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">new_insect =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">5</span>),</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">new_soil =</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="sc">-</span><span class="dv">10</span>, <span class="at">to =</span> <span class="dv">10</span>, <span class="at">length.out =</span> <span class="dv">11</span>))</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>multi_trip <span class="ot">&lt;-</span> multi_reg_triptych<span class="sc">$</span><span class="fu">generate_quantities</span>(</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">fitted_params =</span> multiple_post,</span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(</span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">new_insect =</span> newdata<span class="sc">$</span>new_insect,</span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">new_soil =</span> newdata<span class="sc">$</span>new_soil,</span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">npred =</span> <span class="fu">nrow</span>(newdata)</span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>newdata <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">new_insect =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">5</span>, <span class="dv">0</span>, <span class="dv">5</span>),</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>            <span class="at">new_soil =</span> <span class="fu">seq</span>(<span class="at">from =</span> <span class="sc">-</span><span class="dv">10</span>, <span class="at">to =</span> <span class="dv">10</span>, <span class="at">length.out =</span> <span class="dv">11</span>))</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>multi_trip <span class="ot">&lt;-</span> multi_reg_triptych<span class="sc">$</span><span class="fu">generate_quantities</span>(</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">fitted_params =</span> multiple_post,</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">new_insect =</span> newdata<span class="sc">$</span>new_insect,</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">new_soil =</span> newdata<span class="sc">$</span>new_soil,</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">npred =</span> <span class="fu">nrow</span>(newdata)</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running standalone generated quantities after 4 MCMC chains, 1 chain at a time ...
 
@@ -379,14 +359,14 @@ Total execution time: 1.0 seconds.</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>multi_trip <span class="sc">|&gt;</span> </span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather_rvars</span>(pred_herbivory[i]) <span class="sc">|&gt;</span> </span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(newdata) <span class="sc">|&gt;</span> </span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> new_soil, <span class="at">dist =</span> .value)) <span class="sc">+</span> </span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_lineribbon</span>() <span class="sc">+</span> </span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>new_insect) <span class="sc">+</span> </span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Greens"</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> </span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"new_soil"</span>, <span class="at">y =</span> <span class="st">"predicted herbivory"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>multi_trip <span class="sc">|&gt;</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather_rvars</span>(pred_herbivory[i]) <span class="sc">|&gt;</span> </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_cols</span>(newdata) <span class="sc">|&gt;</span> </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> new_soil, <span class="at">dist =</span> .value)) <span class="sc">+</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_lineribbon</span>() <span class="sc">+</span> </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>new_insect) <span class="sc">+</span> </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Greens"</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"new_soil"</span>, <span class="at">y =</span> <span class="st">"predicted herbivory"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
