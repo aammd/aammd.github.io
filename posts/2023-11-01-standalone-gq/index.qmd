@@ -1,0 +1,126 @@
+---
+title: "Stan-dalone generated quantites"
+author: "Andrew MacDonald"
+description: |
+  working with Stan after you've done that once already.
+date: 11 Nov 2022
+editor: source
+categories: [UdeS, stan, generated quantities]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(cmdstanr)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+## Breaking apart Stan programs
+
+Sometimes we don't want the output of a Stan model to become enormous. 
+However, Stan models can be very convenient for calculating `generated quantities`. 
+Of course this can be done in R, but sometimes it is just easier to have all the outputs presented in the same way.
+
+See a description of this in the [User's guide](https://mc-stan.org/docs/cmdstan-guide/standalone-generate-quantities.html) and in the [CmdStanR help file](https://mc-stan.org/cmdstanr/reference/model-method-generate-quantities.html)
+
+
+## example: Marginal effects in multiple regression
+
+Suppose there is a plant which, when growing in N-rich soil, is able to generate chemical defenses to prevent damage by a herbivorous insect. On poor soil the herbivore eats much more of the plant
+
+```{r}
+set.seed(4812)
+soil_quality <- runif(200, min = -3, max = 3)
+insect_biomass <- runif(200, min = -10, max = 10)
+# each gram of insect biomass eats 1.2 grams of plant biomass
+insect_eff_per_g <- 2
+
+soil_quality_eff_per_unit <- 0
+
+soil_quality_on_herb <- -.5
+
+herb_avg_soil_avg_density <- 33
+
+mu_herbivory <- herb_avg_soil_avg_density + 
+  soil_quality_eff_per_unit* soil_quality + 
+  (insect_eff_per_g + soil_quality_on_herb*soil_quality) * insect_biomass 
+
+sigma_herb <- 5
+obs_herbivory <- rnorm(n = 200, mu_herbivory, sigma_herb)
+
+tibble(soil_quality, insect_biomass, obs_herbivory) |> 
+  ggplot(aes(x = soil_quality, y = obs_herbivory, col = insect_biomass)) + 
+  geom_point()
+```
+
+Here is a Stan program to model this interaction
+
+```{r}
+# class-output: stan
+
+multiple_regression <- cmdstan_model(
+  here::here(
+    "posts/2023-11-01-standalone-gq/multiple_regression.stan"
+    ))
+
+multiple_regression
+```
+
+```{r}
+multiple_post <- multiple_regression$sample(data = list(n = length(soil_quality), soil = soil_quality, insects = insect_biomass, herbivory = obs_herbivory), parallel_chains = 2, refresh = 0)
+```
+
+We can see that the posteriors are close to the true values (not the point of this post, but always good to check)
+
+```{r}
+multiple_post$summary()
+```
+
+Now suppose we want to plot this interaction. We could do so in R, no problem. We could also do that in the model above. But you might not want to! reasons include:
+
+* keeping the output of any one model small(ish) so that you can actually work with it
+
+
+```{r}
+# class-output: stan
+
+multi_reg_triptych <- cmdstan_model(
+  here::here(
+    "posts/2023-11-01-standalone-gq/multi_reg_triptych.stan"
+    ))
+
+multi_reg_triptych
+```
+
+get the prediction data ready
+
+```{r}
+newdata <- expand_grid(new_insect = c(-5, 0, 5),
+            new_soil = seq(from = -10, to = 10, length.out = 11))
+
+
+multi_trip <- multi_reg_triptych$generate_quantities(
+  fitted_params = multiple_post,
+  data = list(
+    new_insect = newdata$new_insect,
+    new_soil = newdata$new_soil,
+    npred = nrow(newdata)
+  )
+)
+```
+
+
+```{r}
+#| fig-cap: Visualizing an interaction. The effect of soil quality on herbivory varies with herbivore biomass (in a very pretend, make-believe example).
+
+multi_trip |> 
+  gather_rvars(pred_herbivory[i]) |> 
+  bind_cols(newdata) |> 
+  ggplot(aes(x = new_soil, dist = .value)) + 
+  stat_lineribbon() + 
+  facet_wrap(~new_insect) + 
+  scale_fill_brewer(palette = "Greens", direction = -1) + 
+  labs(x = "new_soil", y = "predicted herbivory")
+```
+
+
