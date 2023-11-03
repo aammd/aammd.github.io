@@ -91,8 +91,7 @@ one_tree_post$summary() |>
   knitr::kable()
 ```
 
-These posterior intervals cover the numbers used to make up the data pretty well! 
-Let's look at the model predictions on a figure:
+These posterior intervals cover the numbers used to make up the data pretty well! Let's look at the model predictions on a figure:
 
 ```{r}
 #| fig-cap: Growth curve for one tree. the line shows the expected value, with posterior uncertainty around exactly what that average should be. 
@@ -136,9 +135,8 @@ The above model reproduces predictions of the original line, but ignores measure
 
 ### Simulating observations in R
 
-One way to do this is after the fact, using the handy tidyverse `dplyr::rowwise()` syntax, combined with `posterior::rfun()`. The latter function transforms `rnorm` into a function that both takes and produces an `rvar`, the specialized format for working with posterior draws. 
-The latter function makes sure we redo this for every row of our dataframe.
- 
+One way to do this is after the fact, using the handy tidyverse `dplyr::rowwise()` syntax, combined with `posterior::rfun()`. The latter function transforms `rnorm` into a function that both takes and produces an `rvar`, the specialized format for working with posterior draws. The latter function makes sure we redo this for every row of our dataframe.
+
 ```{r}
 expected_df <- one_tree_post |> 
   spread_rvars(Lmax, r, sigma_obs) |> 
@@ -156,7 +154,7 @@ expected_df |>
   theme_bw()
 ```
 
-This has the advantage of happening all in R, keeping our posterior distribution slim.  
+This has the advantage of happening all in R, keeping our posterior distribution slim.\
 However sometimes it can be both convenient and more readable to keep the whole process inside Stan, and here's how:
 
 ### Posterior predictive simulations in Stan
@@ -169,7 +167,6 @@ vb_one_tree_gq <- cmdstan_model(
 
 vb_one_tree_gq
 ```
-
 
 ```{r gq_fig, fig.path=""}
 one_tree_predictions <- vb_one_tree_gq$sample(
