@@ -17,7 +17,18 @@ library(tidybayes)
 
 ##  growing things get bigger
 
-the classic Von Bertanaffy growth equation has animals growing from a starting size to a final size
+Animals get bigger over time, and young change in size faster than more mature individuals. 
+The classic Von Bertanaffy growth equation has animals growing from a starting size to a final asymptotic size:
+
+$$
+L_t = L_0e^{-rt} + L_{max}(1 - e^{-rt})
+$$
+
+* $L_0$ is the starting size
+* $L_{max}$ is the final size
+* $r$ is a growth rate
+
+This equation yields a simple result
 
 ```{r}
 L0 <- 13
@@ -137,6 +148,8 @@ vb_discrete_post$draws() |>
 ```{r}
 vb_discrete_post$summary()
 ```
+
+
 
 next steps: 
 * a better description

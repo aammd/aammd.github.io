@@ -15,17 +15,72 @@ library(tidyverse)
 library(tidybayes)
 ```
 
-## How do things grow (or: decay)
+## How do things grow
 
-Let's start with a simple simulation:
+based on Kelly's question [here](https://discourse.mc-stan.org/t/non-linear-discrete-von-bertalanffy-growth-function/31301)
+
 
 ```{r}
+#Create simulated data for 5 IDs
+sim_data <- tibble(
+  ID = rep(1:5, each = 5),
+  Year = rep(2008:2012, times = 5),
+  Age = rep(1:5, times = 5), #Ages 1:5, assuming age 0 has size 0
+  Capture_date = rep(NA, 25), 
+  L = rep(NA, 25), #Length
+  L_prev = rep(NA, 25),
+  delta_t = rep(NA, 25) #Some change in time
+)
 
-start_size <- 45
-decay_rate <- .3
-tibble(time = 0:20, 
-       mass = start_size * exp(-decay_rate * time)) |> 
-  ggplot(aes(x = time, y = mass)) + 
-  geom_point()
+sim_data <- sim_data %>%
+  group_by(Year) %>%
+  mutate(Capture_date = as.Date(paste0(Year, "-08-01")) + 
+           sample(0:90, size = n(), replace = TRUE)) %>% #Random select some dates they were captured
+  group_by(ID) %>% 
+  mutate(L = ifelse(Age == 1, sample(200:270),
+                    ifelse(Age == 2, sample (370:430),
+                           ifelse(Age == 3, sample (430:460), 
+                                  ifelse(Age == 4, sample (460:500), 
+                                         ifelse(Age == 5, sample (500:510), NA))))), #Radnom select some Lengths
+         L_prev = lag(L), #previous leg measurement
+         delta_t = difftime(Capture_date, lag(Capture_date), units = "days"), 
+         delta_t = as.numeric(delta_t)/365.25) %>% #convert to years due to limitations of difftime() function
+  ungroup()
+
+
+vb_discrete <- function(L_prev, L_max, r, deltat){
+  L_now <- L_prev*exp(-r * deltat) + L_max * (1 - exp(-r * deltat))
+  return(L_now)
+} #Basic discrete VB growth function 
+
+loop_down_vb_discrete <- function(size_vec, Lmax, r, deltaT) {
+  L <- size_vec
+  
+  for(j in 2:length(L)){
+    if (!is.na(L[j-1]) & !is.na(deltaT[j])) {
+      L[j] <- vb_discrete(L_prev = L[j-1], 
+                          L_max = Lmax,
+                          r = r, 
+                          deltat = deltaT[j])
+    }
+  } 
+  return(L)
+} #second loop to take previous estimated Length as start point for the following measure
+
+
+sim_data2<- sim_data%>% 
+  mutate(L2 = loop_down_vb_discrete(L,
+                                    Lmax = 570, #Assume individuals reach asymptote at  570
+                                    r = .6,
+                                    deltaT = delta_t))
+
+#Though this is wrong, my model would look something like this, where I can loop in the previously estimate value at each time sequence, similar to the simulation:
+
+Discrete_vb_equation <- bf(Lnow ~ exp(Lprev) * exp(-exp(loggrowthrate) * deltat) + exp(logLmax ) * (1 - exp(-exp(loggrowthrate) * deltat)),
+                                          Lprev~ 1 + (1|r|ID), 
+                                          loggrowthrate ~ 1 + (1|r|ID), 
+                                          logLmax ~ 1 + (1|r|ID),
+                                          nl = TRUE,
+                                          family = gaussian()) 
 ```
 

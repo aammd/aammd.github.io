@@ -60,7 +60,12 @@ simulate_one_growth_known_age <- function(age, r,
 
 ```{r one_animal_plot}
 #| fig-cap: Growth curve for a single individual. The curved line is the true size, and the dots are observations around it. The observations are taken in the field while the semi-tranquilized animal is struggling, so they show some slight variation.
-one_animal <- simulate_one_growth_known_age(9, Lmax = 550, size_at_first = 277, r = .7, sd_obs = 6)
+one_animal <- simulate_one_growth_known_age(
+  9,
+  Lmax = 550,
+  size_at_first = 277,
+  r = .7, 
+  sd_obs = 6)
 
 one_animal |> 
   ggplot(aes(x = age, y = obs_size)) + 

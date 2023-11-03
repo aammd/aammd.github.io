@@ -8,7 +8,7 @@
 
 <meta name="author" content="Andrew MacDonald, Amélie Morin">
 <meta name="dcterms.date" content="2023-11-03">
-<meta name="description" content="how to make decelerating curves with lm.">
+<meta name="description" content="How to fit and plot Power Law curves with lm.">
 
 <title>Andrew MacDonald - Power laws on log-linear plots</title>
 <style>
@@ -154,7 +154,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <h1 class="title">Power laws on log-linear plots</h1>
                   <div>
         <div class="description">
-          <p>how to make decelerating curves with lm.</p>
+          <p>How to fit and plot Power Law curves with lm.</p>
         </div>
       </div>
                           <div class="quarto-categories">
@@ -193,11 +193,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#the-math" id="toc-the-math" class="nav-link active" data-scroll-target="#the-math">The Math</a></li>
-  <li><a href="#simulate-data" id="toc-simulate-data" class="nav-link" data-scroll-target="#simulate-data">simulate data</a></li>
-  <li><a href="#fit-a-power-law" id="toc-fit-a-power-law" class="nav-link" data-scroll-target="#fit-a-power-law">fit a power law</a></li>
-  <li><a href="#predict" id="toc-predict" class="nav-link" data-scroll-target="#predict">predict</a></li>
-  <li><a href="#plot" id="toc-plot" class="nav-link" data-scroll-target="#plot">plot</a></li>
+  <li><a href="#the-backgroung" id="toc-the-backgroung" class="nav-link active" data-scroll-target="#the-backgroung">The backgroung</a></li>
+  <li><a href="#the-math" id="toc-the-math" class="nav-link" data-scroll-target="#the-math">The Math</a></li>
+  <li><a href="#simulate-data" id="toc-simulate-data" class="nav-link" data-scroll-target="#simulate-data">Simulate data</a></li>
+  <li><a href="#fit-a-power-law" id="toc-fit-a-power-law" class="nav-link" data-scroll-target="#fit-a-power-law">Fit a power law</a></li>
+  <li><a href="#predict" id="toc-predict" class="nav-link" data-scroll-target="#predict">Predict</a></li>
+  <li><a href="#plot" id="toc-plot" class="nav-link" data-scroll-target="#plot">Plot</a></li>
   </ul>
 </nav>
     </div>
@@ -211,17 +212,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<section id="the-backgroung" class="level2">
+<h2 class="anchored" data-anchor-id="the-backgroung">The backgroung</h2>
+<p>Power laws are very common in ecology. One reason for this is surely how easy it is to fit and plot. There are also many reasons based on theory, for example famous work on metabolic scaling.</p>
+</section>
 <section id="the-math" class="level2">
 <h2 class="anchored" data-anchor-id="the-math">The Math</h2>
+<p>“Power law” is just a fancy name for a polynomial with an exponent between 0 and 1. This gives a declerating curve (figure below)</p>
+<p>Power laws look like this:</p>
 <p><span class="math display">\[
 y = ax^b
 \]</span></p>
+<p>It becomes linear if you log both sides, like this:</p>
 <p><span class="math display">\[
 \ln{y} = \ln{a} + b\ln{x}
 \]</span></p>
+<p>This is a format we can fit with our favourite linear OLS function, <code>lm()</code>.</p>
 </section>
 <section id="simulate-data" class="level2">
-<h2 class="anchored" data-anchor-id="simulate-data">simulate data</h2>
+<h2 class="anchored" data-anchor-id="simulate-data">Simulate data</h2>
+<p>We’re simulating data here to roughly imitate a dataset on bumblebees collected by <a href="https://www.fournierlab.com/eacutequipe.html">Amélie Morin</a> from Université Laval.</p>
+<p>This is a very simplified look at only one part of the dataset. Here we are asking if there are more bumblebees in longer strips of habitat. The independent variable is the length of the strip, in meters. The response is the observed counts of bumblebees.</p>
+<p>We begin by picking parameter values and a range of simulated X variables</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="dv">11</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fl">0.3</span></span>
@@ -235,7 +247,7 @@ y = ax^b
 <p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>simulate observations</p>
+<p>We simulate observations of counts using a Poisson distribution, so that the data resemble biological reality.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>obs_bourdons <span class="ot">&lt;-</span> <span class="fu">rpois</span>(<span class="dv">104</span>, <span class="at">lambda =</span> moy_bourdons)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -247,9 +259,23 @@ y = ax^b
 <p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Here we are using a model which is similar to, but not identical to, the model we used to generate the data. That is to emphasize that while this technique (i.e.&nbsp;a linear model on log-transformed data) is not perfect, it still gets very close and is a great solution in many cases.</p>
+</div>
+</div>
 </section>
 <section id="fit-a-power-law" class="level2">
-<h2 class="anchored" data-anchor-id="fit-a-power-law">fit a power law</h2>
+<h2 class="anchored" data-anchor-id="fit-a-power-law">Fit a power law</h2>
+<p>We fit the model by log-transforming and then fitting a straightforward linear model.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>bourdon_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(longeur, obs_bourdons)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -262,7 +288,14 @@ y = ax^b
 </div>
 </section>
 <section id="predict" class="level2">
-<h2 class="anchored" data-anchor-id="predict">predict</h2>
+<h2 class="anchored" data-anchor-id="predict">Predict</h2>
+<p>To draw a line and confidence intervals we make predictions. However these are NOT predictions on the original data, but on a nice even sequence of values on the x-axis.<br>
+A few points to note here:</p>
+<ul>
+<li>I take a range of x-values and then log-transform them, then transform them back. This imitates the same process that we went throught with the actual data</li>
+<li>I’m using <code>broom::augment</code> from the <code>broom</code> package. It is awesome! It takes a model and a dataset, and adds the prediction to the dataset as a new set of columns. See <code>?broom::augment</code> for all the details.</li>
+<li>Once we have the predictions, we need to back-transform everything by exponentiating with <code>exp()</code>: the average response (<code>.fitted</code>), the lower and upper confidence intervals (<code>.lower</code> and <code>.upper</code>) and of course the x-axis values. Here i use a little function from the tidyverse to apply <code>exp()</code> to all columns at once. Learn more by typing <code>vignette("colwise")</code>.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>new_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">log_longeur =</span> <span class="fu">log</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">25</span>))</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -273,7 +306,8 @@ y = ax^b
 </div>
 </section>
 <section id="plot" class="level2">
-<h2 class="anchored" data-anchor-id="plot">plot</h2>
+<h2 class="anchored" data-anchor-id="plot">Plot</h2>
+<p>Finally we plot the transformed predictions using ggplot2:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>predictions_pwr <span class="sc">|&gt;</span> </span>
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> log_longeur, <span class="at">y =</span> .fitted)) <span class="sc">+</span> </span>

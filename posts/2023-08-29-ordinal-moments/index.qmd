@@ -235,7 +235,7 @@ ord_mu_sd_sample <- ordinal_contr_hier$sample(data = list(
     distinct() |> 
     pluck("group_id"), 
   nindiv = max(fake_data$indiv_id),
-  indiv_id = fake_data$indiv_id), chains = 1, refresh = 0)
+  indiv_id = fake_data$indiv_id), chains = 1, refresh = 500L)
 
 some_samples <- ord_mu_sd_sample$draws(variables = "obs") |> 
   tidybayes::spread_draws(obs[i], ndraws = 12) |> 
