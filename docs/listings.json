@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/2023-11-03-power-law/index.html",
       "/posts/2023-08-22-transformed-regression/index.html",
       "/posts/2023-08-24-imputation-nonnormal/index.html",
       "/posts/2023-07-05-breakpoint/index.html",
@@ -16,6 +17,7 @@
       "/posts/2022-12-01-cholesky-correlation/index.html",
       "/posts/2022-12-05-growth-increment/index.html",
       "/posts/2022-12-15-setting-priors/index.html",
+      "/posts/2023-10-23-discrete-vb-brms-stan/index.html",
       "/posts/30-03-2023-growth-continuous-discrete/index.html",
       "/posts/9999-template/index.html",
       "/posts/2022-10-14-growth_curve_measurement_error/index.html",

@@ -2,7 +2,7 @@
 title: "Power laws on log-linear plots"
 author: "Andrew MacDonald, Amélie Morin"
 description: |
-  how to make decelerating curves with lm.
+  How to fit and plot Power Law curves with lm.
 date: 03 Nov 2023
 editor: source
 categories: [UdeS, stan]
@@ -12,18 +12,39 @@ categories: [UdeS, stan]
 library(tidyverse)
 ```
 
+## The backgroung
+
+Power laws are very common in ecology. 
+One reason for this is surely how easy it is to fit and plot. 
+There are also many reasons based on theory, for example famous work on metabolic scaling.
+
 ## The Math
+
+"Power law" is just a fancy name for a polynomial with an exponent between 0 and 1. This gives a declerating curve (figure below)
+
+Power laws look like this:
 
 $$
 y = ax^b
 $$
 
+It becomes linear if you log both sides, like this:
 
 $$ 
 \ln{y} = \ln{a} + b\ln{x}
 $$
 
-## simulate data
+This is a format we can fit with our favourite linear OLS function, `lm()`.
+
+## Simulate data
+
+We're simulating data here to roughly imitate a dataset on bumblebees collected by [Amélie Morin](https://www.fournierlab.com/eacutequipe.html) from Université Laval.
+
+This is a very simplified look at only one part of the dataset. 
+Here we are asking if there are more bumblebees in longer strips of habitat. The independent variable is the length of the strip, in meters. 
+The response is the observed counts of bumblebees.
+
+We begin by picking parameter values and a range of simulated X variables 
 
 ```{r}
 a <- 11
@@ -36,7 +57,7 @@ moy_bourdons <- a * longeur ^b
 plot(longeur, moy_bourdons)
 ```
 
-simulate observations
+We simulate observations of counts using a Poisson distribution, so that the data resemble biological reality.
 
 ```{r}
 obs_bourdons <- rpois(104, lambda = moy_bourdons)
@@ -47,9 +68,13 @@ tibble(longeur, obs_bourdons) |>
   geom_count()
 ```
 
+:::{.callout-note}
+Here we are using a model which is similar to, but not identical to, the model we used to generate the data. That is to emphasize that while this technique (i.e. a linear model on log-transformed data) is not perfect, it still gets very close and is a great solution in many cases.
+:::
 
+## Fit a power law
 
-## fit a power law
+We fit the model by log-transforming and then fitting a straightforward linear model.
 
 ```{r}
 bourdon_data <- tibble(longeur, obs_bourdons)
@@ -63,9 +88,15 @@ lm_pwr <- lm(log_obs_bourdons ~ log_longeur, data = bourdon_data_log)
 
 ```
 
+## Predict
 
+To draw a line and confidence intervals we make predictions. 
+However these are NOT predictions on the original data, but on a nice even sequence of values on the x-axis.  
+A few points to note here:
 
-## predict
+* I take a range of x-values and then log-transform them, then transform them back. This imitates the same process that we went throught with the actual data
+* I'm using `broom::augment` from the `broom` package. It is awesome! It takes a model and a dataset, and adds the prediction to the dataset as a new set of columns. See `?broom::augment` for all the details.
+* Once we have the predictions, we need to back-transform everything by exponentiating with `exp()`: the average response (`.fitted`), the lower and upper confidence intervals (`.lower` and `.upper`) and of course the x-axis values. Here i use a little function from the tidyverse to apply `exp()` to all columns at once. Learn more by typing `vignette("colwise")`.
 
 ```{r}
 new_data <- tibble(log_longeur = log(1:25))
@@ -79,7 +110,9 @@ predictions_pwr <- broom::augment(x = lm_pwr,
 
 
 
-## plot
+## Plot
+
+Finally we plot the transformed predictions using ggplot2:
 
 ```{r}
 predictions_pwr |> 
