@@ -1,0 +1,17 @@
+{
+  "hash": "3b1d05afe4bd57a1f99f092e5b579bef",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Power laws on log-linear plots\"\nauthor: \"Andrew MacDonald, Amélie Morin\"\ndescription: |\n  how to make decelerating curves with lm.\ndate: 03 Nov 2023\neditor: source\ncategories: [UdeS, stan]\n---\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(tidyverse)\n```\n:::\n\n\n## The Math\n\n$$\ny = ax^b\n$$\n\n\n$$ \n\\ln{y} = \\ln{a} + b\\ln{x}\n$$\n\n## simulate data\n\n\n::: {.cell}\n\n```{.r .cell-code}\na <- 11\nb <- 0.3\n# longeur <- runif(104, min = 2, max = 25)\nlongeur <- sample(c(2:7, 10, 12, 15, 25), size = 104, replace = TRUE)\n\nmoy_bourdons <- a * longeur ^b\n\nplot(longeur, moy_bourdons)\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n:::\n\n\nsimulate observations\n\n\n::: {.cell}\n\n```{.r .cell-code}\nobs_bourdons <- rpois(104, lambda = moy_bourdons)\n\n\ntibble(longeur, obs_bourdons) |> \n  ggplot(aes(x = longeur, y = obs_bourdons)) + \n  geom_count()\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-2-1.png){width=672}\n:::\n:::\n\n\n\n\n## fit a power law\n\n\n::: {.cell}\n\n```{.r .cell-code}\nbourdon_data <- tibble(longeur, obs_bourdons)\n\nbourdon_data_log <- bourdon_data |> \n  mutate(log_longeur = log(longeur),\n         log_obs_bourdons = log(obs_bourdons))\n\n\nlm_pwr <- lm(log_obs_bourdons ~ log_longeur, data = bourdon_data_log)\n```\n:::\n\n\n\n\n## predict\n\n\n::: {.cell}\n\n```{.r .cell-code}\nnew_data <- tibble(log_longeur = log(1:25))\n\npredictions_pwr <- broom::augment(x = lm_pwr,\n                                  newdata = new_data,\n                                  interval = \"confidence\") |>\n  mutate(across(everything(), exp))\n```\n:::\n\n\n\n\n## plot\n\n\n::: {.cell}\n\n```{.r .cell-code}\npredictions_pwr |> \n  ggplot(aes(x = log_longeur, y = .fitted)) + \n  geom_ribbon(\n    aes(x = log_longeur,\n        ymin = .lower,\n        ymax = .upper), \n    inherit.aes = FALSE, fill = \"lightgreen\") + \n  geom_line() + \n  geom_count(aes(x = longeur, y = obs_bourdons), data = bourdon_data) + \n  geom_vline(xintercept = 12, lty = 2, col = \"red\")\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-5-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}
