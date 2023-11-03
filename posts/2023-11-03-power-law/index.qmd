@@ -121,7 +121,7 @@ predictions_pwr |>
     aes(x = log_longeur,
         ymin = .lower,
         ymax = .upper), 
-    inherit.aes = FALSE, fill = "lightgreen") + 
+    inherit.aes = FALSE, fill = "lightgreen") +  
   geom_line() + 
   geom_count(aes(x = longeur, y = obs_bourdons), data = bourdon_data) + 
   geom_vline(xintercept = 12, lty = 2, col = "red")

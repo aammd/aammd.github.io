@@ -1,0 +1,65 @@
+---
+title: "Minimum observed"
+author: "Andrew MacDonald"
+description: |
+  Sometimes we have slightly-known knowns.
+date: 11 Nov 2022
+editor: source
+categories: [UdeS, stan]
+draft: true
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+library(cmdstanr)
+```
+
+I want to imaine a scenario where you know tht total duration of the land use at a site but tnot
+
+like you know the minimum numberf of years that the thing was abandoned, but not the maximum. at least not in every case
+
+then thee question becomes, how many of the sites do you need to see completely to know? 
+
+You can pass in a vector of lower bounds no problem
+
+```{r}
+lower_bound_sim <- cmdstan_model(here::here("posts/2023-09-28-interval-unknown/lower_bound_sim.stan"))
+
+lb_samples <- lower_bound_sim$sample(data = list(n = 7, 
+                                   lowers = c(-10, 2, 0, 2, 2.5, -0.6, -3)))
+
+lb_samples$draws() |> 
+  gather_rvars(alpha[i]) |> 
+  ggplot(aes(y = i, dist = .value)) + 
+  stat_halfeyeh()
+
+```
+
+
+
+## scenario
+
+42 places to work, each one with a different history
+
+```{r}
+n <- 42
+years <- 1970:2000
+# random start years
+startyrs <- sample(years, n, replace = TRUE)
+## they are all no longer clearcut, so final year is <2000
+library(purrr)
+durations <- map_dbl(2001 - startyrs, sample, size = 1)
+
+tibble(site_id = 1:n,
+       start_year = startyrs,
+       end_year = start_year + durations) |> 
+  ggplot(aes(y = site_id, yend = site_id, x = start_year, xend = end_year)) + geom_segment() + 
+  geom_vline(xintercept = 1987, col = "red", lwd = 2)
+
+```
+
+
+The idea is that each site has land-use history for various points in time
