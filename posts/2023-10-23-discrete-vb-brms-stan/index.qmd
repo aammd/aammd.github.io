@@ -139,7 +139,7 @@ vb_discrete_post <- vb_discrete$sample(
 ```
 
 ```{r}
-#| class-output: preview-image 
+#| classes: preview-image 
 
 vb_discrete_post$draws() |> 
   gather_rvars(mu[i]) |> 

@@ -791,14 +791,14 @@ font-style: inherit;">0</span></span>
 Chain 1 finished in 0.1 seconds.
 Chain 2 finished in 0.1 seconds.
 Chain 3 finished in 0.1 seconds.
-Chain 4 finished in 0.2 seconds.
+Chain 4 finished in 0.1 seconds.
 
 All 4 chains finished successfully.
 Mean chain execution time: 0.1 seconds.
-Total execution time: 1.0 seconds.</code></pre>
+Total execution time: 0.7 seconds.</code></pre>
 </div>
 </div>
-<div class="cell">
+<div class="cell preview-image">
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1">vb_discrete_post<span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
@@ -894,16 +894,16 @@ font-style: inherit;">summary</span>()</span></code></pre></div>
 <pre><code># A tibble: 23 × 10
    variable    mean  median     sd    mad      q5     q95  rhat ess_bulk
    &lt;chr&gt;      &lt;num&gt;   &lt;num&gt;  &lt;num&gt;  &lt;num&gt;   &lt;num&gt;   &lt;num&gt; &lt;num&gt;    &lt;num&gt;
- 1 lp__     -29.7   -29.3   1.56   1.31   -32.7   -27.9    1.00    1768.
- 2 Lstart    11.4    11.4   1.70   1.68     8.62   14.2    1.00    2837.
- 3 Lmax     120.    120.    2.70   2.63   116.    125.     1.00    2483.
- 4 r          0.297   0.296 0.0275 0.0264   0.253   0.343  1.00    2583.
- 5 sigma      2.50    2.46  0.383  0.362    1.96    3.20   1.00    3581.
- 6 mu[1]     11.4    11.4   1.70   1.68     8.62   14.2    1.00    2837.
- 7 mu[2]     60.0    60.0   2.64   2.47    55.6    64.3    1.00    3587.
- 8 mu[3]     86.8    86.9   2.79   2.66    82.0    91.2    1.00    3857.
- 9 mu[4]    102.    102.    2.34   2.23    97.7   105.     1.00    4545.
-10 mu[5]    110.    110.    2.01   1.91   107.    113.     1.00    4846.
+ 1 lp__     -21.6   -21.2   1.57   1.34   -24.6   -19.8    1.00    1697.
+ 2 Lstart    10.0    10.0   1.61   1.57     7.30   12.6    1.00    3028.
+ 3 Lmax     118.    118.    1.95   1.88   115.    122.     1.00    3063.
+ 4 r          0.332   0.332 0.0238 0.0226   0.295   0.372  1.00    2828.
+ 5 sigma      2.13    2.07  0.362  0.334    1.62    2.78   1.00    2748.
+ 6 mu[1]     10.0    10.0   1.61   1.57     7.30   12.6    1.00    3028.
+ 7 mu[2]     62.5    62.5   2.16   2.02    58.9    66.0    1.00    3801.
+ 8 mu[3]     89.4    89.5   2.18   2.05    85.8    92.9    1.00    4074.
+ 9 mu[4]    103.    103.    1.78   1.67   100.    106.     1.00    5036.
+10 mu[5]    110.    110.    1.56   1.51   108.    113.     1.00    4967.
 # ℹ 13 more rows
 # ℹ 1 more variable: ess_tail &lt;num&gt;</code></pre>
 </div>
@@ -999,7 +999,7 @@ background-color: null;
 font-style: inherit;">data =</span> lagged_obs)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                prior class      coef group resp dpar   nlpar lb ub
- student_t(3, 0, 4.8) sigma                                    0   
+ student_t(3, 0, 4.3) sigma                                    0   
                (flat)     b                              logR      
                (flat)     b Intercept                    logR      
                (flat)     b                           sizeMax      
