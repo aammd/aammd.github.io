@@ -1,5 +1,5 @@
 ---
-title: "modelling discrete growth"
+title: "Modelling discrete growth"
 author: "Andrew MacDonald, Kelly Forester"
 description: |
   How to model the growth of things in a sensible fashion
