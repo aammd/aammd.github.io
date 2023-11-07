@@ -8,3 +8,4 @@
 /_site/
 *.exe
 R/Old_script.R
+*.rds

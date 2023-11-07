@@ -3,7 +3,7 @@ title: "modelling discrete growth"
 author: "Andrew MacDonald, Kelly Forester"
 description: |
   How to model the growth of things in a sensible fashion
-date: 11 Nov 2022
+date: 7 Nov 2023
 editor: source
 categories: [UdeS, stan]
 ---
@@ -28,7 +28,7 @@ $$
 * $L_{max}$ is the final size
 * $r$ is a growth rate
 
-This equation yields a simple result
+This equation yields a simple result:
 
 ```{r}
 L0 <- 13
@@ -39,7 +39,7 @@ curve(L0 * exp(-r*x) + Lmax*(1 - exp(-r * x)), xlim = c(0, 20))
 
 This is the equation in continuous time
 
-however we often measure animals at discreet moments in time, having as a reference their last measurement. We can use a discrete version of this equation in these cases:
+However we often measure animals at discreet moments in time, having as a reference their last measurement. We can use a discrete version of this equation in these cases:
 
 ```{r}
 vb_disc <- function(L_tm1, r, time, Lmax) {
@@ -149,8 +149,64 @@ vb_discrete_post$draws() |>
 vb_discrete_post$summary()
 ```
 
+## can it be written in BRMS?
+
+I want to ask, what happens if we fit a similar model in brms? I'm using a lagged column of size.
+
+This feels like a different model, but at least in this simple example, the posterior is close to the real value. 
+
+```{r}
 
 
-next steps: 
-* a better description
-* missing data, how to work with that? 
+## add a lagged growth measurement
+lagged_obs <- some_obs |> 
+  mutate(sizelast = lag(size_obs)) |> 
+  # drop first row
+  slice(-1)
+
+library(brms)
+vb_formula <- bf(size_obs ~ sizelast * exp(- exp(logR) * time_diff) + 
+                   sizeMax * (1 - exp(-exp(logR) * time_diff)),
+                 logR ~ 1,
+                 sizeMax ~ 1, nl = TRUE)
+
+
+get_prior(vb_formula, data = lagged_obs)
+
+vb_prior <- c(
+  prior(normal(120, 10), nlpar = "sizeMax", class = "b"),
+  prior(normal(0, 1), nlpar = "logR", class = "b"),
+  prior(exponential(1), class = "sigma")
+)
+
+
+vb_post <- brm(vb_formula, 
+               data = lagged_obs,
+               prior = vb_prior,
+               file = here::here("posts/2023-10-23-discrete-vb-brms-stan/vb_brms.rds"), refresh = 0)
+
+```
+
+```{r}
+summary(vb_post)
+
+rv <- c("b_logR_Intercept" = "r", 
+        "b_sizeMax_Intercept" = "sizeMax")
+
+
+vb_post |> 
+  gather_rvars(b_logR_Intercept, b_sizeMax_Intercept) |> 
+  mutate(.value = if_else(.variable == "b_logR_Intercept", exp(.value), .value),
+         parname = rv[.variable]) |> 
+  ggplot(aes(x = parname, dist = .value)) + stat_pointinterval() + 
+  facet_wrap(~parname, scales = "free") + 
+  geom_point(aes(x = parname, y = value), 
+             inherit.aes = FALSE,
+             data = tribble(
+               ~parname, ~value,
+               "r"      , r,
+               "sizeMax", Lmax
+             ), col = "red", size = 4)
+```
+
+Hm! interestingly, it seems to work just fine.

@@ -20,7 +20,7 @@ There are also many reasons based on theory, for example famous work on metaboli
 
 ## The Math
 
-"Power law" is just a fancy name for a polynomial with an exponent between 0 and 1. This gives a declerating curve (figure below)
+"Power law" is just a fancy name for a polynomial with an exponent between 0 and 1. This gives a decelerating curve (figure below)
 
 Power laws look like this:
 
