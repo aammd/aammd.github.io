@@ -5,6 +5,7 @@ project:
 website:
   title: "Andrew MacDonald"
   description: "Demonstrating ecological concepts and statistical models using simulation"
+  site-url: "https://aammd.github.io"
   navbar:
     right:
       - blog.qmd
