@@ -1,0 +1,83 @@
+---
+title: "Reproduction of Ives 2003"
+author: "Andrew MacDonald"
+description: |
+  Autoregressive models.
+date: 11 Nov 2022
+editor: source
+categories: [UdeS, stan]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(cmdstanr)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+## History
+
+20 years ago a very influential paper was written by Ives, Dennis, Cottingham and Carpenter. I want to reproduce at least some of the figures here and understand this method.
+
+
+```{r}
+curve(200 + (.9)^x * (4 - 200), xlim = c(0, 100))
+```
+
+
+AR1 simulations
+
+```{r}
+simulate_pop_growth <- function(
+    a = 0, 
+    b, 
+    sigma = 1, 
+    tmax = 50, 
+    x0 = -8) {
+  
+  xvec <- numeric(tmax)
+  
+  xvec[1] <- x0
+  
+  ## process error
+  eta <- rnorm(tmax, mean = 0, sd = sigma)
+  
+  for(time in 2:tmax){
+    xvec[time] <- a + b*xvec[time-1] + eta[time]
+  }
+  
+  return(xvec)
+}
+
+map_dfr(1:10, ~ tibble(pop = simulate_pop_growth(b = 0.6, tmax = 100),
+                       time = 1:length(pop)), .id = "sim") |> 
+  ggplot(aes(x = time, y = pop, group = sim)) + 
+  geom_line() + 
+  geom_hline(yintercept = 0)
+
+map_dfr(1:10, ~ tibble(pop = simulate_pop_growth(b = 0.9, tmax = 100),
+                       time = 1:length(pop)), .id = "sim") |> 
+  ggplot(aes(x = time, y = pop, group = sim)) + 
+  geom_line() + 
+  geom_hline(yintercept = 0)
+
+
+```
+
+
+```{r}
+plot(0.7^(1:12), type = "l")
+plot(1 - 0.87^(1:12), type = "l", ylim = c(0, 1))
+
+```
+
+
+mean and variance
+
+```{r}
+mu_inf = 
+```
+
+
+
+
