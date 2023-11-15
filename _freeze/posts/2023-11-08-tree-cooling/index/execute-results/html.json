@@ -1,0 +1,17 @@
+{
+  "hash": "a9cfac868624aecff90d79b70c349c4b",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"causal DAGS and full-luxury shade trees\"\nauthor: \"Andrew MacDonald, Bella Richmond\"\ndescription: |\n  Shady DAGs\ndate: 8 Nov 2023\neditor: source\ncategories: [QCBS, stan]\n---\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(brms)\nlibrary(ggplot2)\nlibrary(tidyverse)\nlibrary(tidybayes)\nlibrary(cmdstanr)\nlibrary(ggdag)\n```\n:::\n\n\n##  The DAG\n\n\n::: {.cell .preview-image}\n\n```{.r .cell-code}\n dagified <- dagify(\n    cooling ~ tree_size,\n    cooling ~ tree_diversity,\n    cooling ~ tree_density,\n    tree_size ~ soil + age,\n    tree_diversity ~ soil + age,\n    tree_density ~ past_land_use,\n    soil ~ past_land_use,\n    labels = c(\n      \"cooling\" = \"Cooling\\n Benefit\",\n      \"tree_size\" = \"Tree\\n Size\",\n      \"tree_diversity\" = \"Tree\\n Diversity\",\n      \"tree_density\" = \"Tree\\n Density\",\n      \"soil\" = \"Soil\",\n      \"age\" = \"Age\", \n      \"past_land_use\" = \"Past Land\\n Use\"\n    ),\n    exposure = 'past_land_use',\n    outcome = 'cooling',\n    coords = list(x = c(cooling = 0, tree_density = -1, tree_size = 0, tree_diversity = 1, age = 1, soil = 0, past_land_use = 0),\n                  y = c(cooling = 3, tree_density = 2, tree_size = 2, tree_diversity = 2, age = 1, soil = 1, past_land_use = 0))) %>%\n    tidy_dagitty() %>%\n    mutate(status = case_when(name == \"cooling\" ~ 'outcome',\n                              name == \"past_land_use\" ~ 'exposure',\n                              .default = 'NA'))\n\nggplot(dagified, aes(x = x, y = y, xend = xend, yend = yend)) +\n    theme_dag() + \n    geom_dag_point(aes(color = status)) +\n    geom_dag_label_repel(aes(label = label, fill = status),\n                         color = \"white\", fontface = \"bold\") +\n    geom_dag_edges() + \n    scale_fill_manual(values = c('darkseagreen', 'grey', 'lightskyblue')) + \n    scale_colour_manual(values = c('darkseagreen', 'grey', 'lightskyblue')) + \n    theme(legend.position = 'none')\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n:::\n\n\n\n## data simulations\n\n\n## Full luxury\n\n\n## Posterior inference\n\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

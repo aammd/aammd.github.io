@@ -1,0 +1,95 @@
+---
+title: "causal DAGS and full-luxury shade trees"
+author: "Andrew MacDonald, Bella Richmond"
+description: |
+  Shady DAGs
+date: 8 Nov 2023
+editor: source
+categories: [QCBS, stan]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(brms)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+library(cmdstanr)
+library(ggdag)
+```
+
+##  The DAG
+
+```{r}
+#| classes: preview-image 
+
+ dagified <- dagify(
+    cooling ~ tree_size,
+    cooling ~ tree_diversity,
+    cooling ~ tree_density,
+    tree_size ~ soil + age,
+    tree_diversity ~ soil + age,
+    tree_density ~ past_land_use,
+    soil ~ past_land_use,
+    labels = c(
+      "cooling" = "Cooling\n Benefit",
+      "tree_size" = "Tree\n Size",
+      "tree_diversity" = "Tree\n Diversity",
+      "tree_density" = "Tree\n Density",
+      "soil" = "Soil",
+      "age" = "Age", 
+      "past_land_use" = "Past Land\n Use"
+    ),
+    exposure = 'past_land_use',
+    outcome = 'cooling',
+    coords = list(x = c(cooling = 0, tree_density = -1, tree_size = 0, tree_diversity = 1, age = 1, soil = 0, past_land_use = 0),
+                  y = c(cooling = 3, tree_density = 2, tree_size = 2, tree_diversity = 2, age = 1, soil = 1, past_land_use = 0))) %>%
+    tidy_dagitty() %>%
+    mutate(status = case_when(name == "cooling" ~ 'outcome',
+                              name == "past_land_use" ~ 'exposure',
+                              .default = 'NA'))
+
+ggplot(dagified, aes(x = x, y = y, xend = xend, yend = yend)) +
+    theme_dag() + 
+    geom_dag_point(aes(color = status)) +
+    geom_dag_label_repel(aes(label = label, fill = status),
+                         color = "white", fontface = "bold") +
+    geom_dag_edges() + 
+    scale_fill_manual(values = c('darkseagreen', 'grey', 'lightskyblue')) + 
+    scale_colour_manual(values = c('darkseagreen', 'grey', 'lightskyblue')) + 
+    theme(legend.position = 'none')
+
+```
+
+Tree density is normally related to age (in a forest) but in parks it is a managed number. 
+
+* forests -- you probably don't do much
+* industrial -- you build the park by planting, costs $$
+* farming -- you leave some old trees
+
+## data simulations
+
+```{r}
+# we have 11 of each landuse type
+land_use <- rep(1:3, each = 11)
+
+## tree density -- determined by management and past land use
+LU_avg_dens <- c(2000, 1200, 800)
+sigma_dens <- 150
+
+## simulate tree density
+tree_dens <- rnorm(n = length(land_use),
+                   LU_avg_dens[land_use], 
+                   sd = sigma_dens)
+
+tibble(land_use, tree_dens) |> 
+  ggplot(aes(x = land_use, y = tree_dens)) + 
+  geom_point()
+```
+
+
+
+## Full luxury
+
+
+## Posterior inference
+
