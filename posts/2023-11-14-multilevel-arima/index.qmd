@@ -1,0 +1,144 @@
+---
+title: "Multilevel Arima model"
+author: "Andrew MacDonald"
+description: |
+  Vectorizing with multiple species
+date: 14 Nov 2023
+editor: source
+categories: [UdeS, stan]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(cmdstanr)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+We can vectorize an AR-1 Model for one species very easily. This is also the right way to work with missing data.
+
+But how can we do it with multiple species? This is pretty key when working with long-format datasets, often with different species. I want it to be flexible -- after all, not all species have datasets of equal length - some are only monitored in certain years. 
+
+## Math notation
+
+## A Stan model 
+
+```{r}
+#| class-output: stan
+library(cmdstanr)
+single_spp_ar1 <- cmdstan_model(
+  here::here("posts/2023-11-14-multilevel-arima/single_spp_ar1.stan"),
+  pedantic = TRUE)
+single_spp_ar1
+```
+
+
+```{r}
+sample_single_spp_ar1 <- single_spp_ar1$sample(data = list(
+  nyear = 25, 
+  n = 25,
+  pop = rep(0, times = 25), 
+  fit = 0))
+```
+
+
+```{r}
+some_draws <- sample_single_spp_ar1 |> 
+  tidybayes::spread_draws(pred_pop_avg[i], pred_pop_obs[i], ndraws = 12)
+
+some_draws |> 
+  ggplot(aes(x = i, y = pred_pop_avg)) + 
+  geom_line() + 
+  geom_point(aes(y = pred_pop_obs))+ 
+  facet_wrap(~.draw, ncol = 4) + 
+  coord_cartesian(ylim = c(0, 100))
+```
+
+This is the prior predictive distribution of an AR-1 model, for a single species model. Each panel in the discussion refers to a single posterior sample for all parameters
+
+## multi-species vectorization
+
+```{r}
+#| class-output: stan
+library(cmdstanr)
+multiple_spp_ar1 <- cmdstan_model(
+  here::here(
+    "posts/2023-11-14-multilevel-arima/multiple_spp_ar1.stan"),
+                                pedantic = TRUE)
+multiple_spp_ar1
+```
+
+
+```{r}
+sample_multiple_spp_ar1 <- multiple_spp_ar1$sample(
+  data = list(
+    n = 5*7,
+    S = 5,
+    pop = rep(0, times = 5*7), 
+    Sp = rep(1:5, each = 7),
+    fit = 0,
+    nyear = 7
+  )
+)
+```
+
+```{r}
+some_draws <- sample_multiple_spp_ar1 |> 
+  tidybayes::spread_draws(pred_pop_avg[sp, year], pred_pop_obs[sp, year], ndraws = 8)
+
+some_draws |> 
+  ggplot(aes(x = year, y = pred_pop_avg, group = sp)) + 
+  geom_line() + 
+  geom_point(aes(y = pred_pop_obs))+ 
+  facet_wrap(~.draw, ncol = 4) + 
+  coord_cartesian(ylim = c(0, 50))
+```
+
+## Multilevel
+
+We make it multilevel by learning the priors on log_rho from the data:
+
+
+```{r}
+#| class-output: stan
+library(cmdstanr)
+multilevel_ar1 <- cmdstan_model(
+  here::here(
+    "posts/2023-11-14-multilevel-arima/multilevel_ar1.stan"),
+                                pedantic = TRUE)
+multilevel_ar1
+```
+
+
+```{r}
+sample_multilevel_ar1 <- multilevel_ar1$sample(
+  data = list(
+    n = 5*7,
+    S = 5,
+    pop = rep(0, times = 5*7), 
+    Sp = rep(1:5, each = 7),
+    fit = 0,
+    nyear = 7
+  )
+)
+```
+
+```{r}
+some_draws <- sample_multilevel_ar1 |> 
+  tidybayes::spread_draws(pred_pop_avg[sp, year], pred_pop_obs[sp, year], ndraws = 8)
+
+some_draws |> 
+  ggplot(aes(x = year, y = pred_pop_avg, group = sp)) + 
+  geom_line() + 
+  geom_point(aes(y = pred_pop_obs))+ 
+  facet_wrap(~.draw, ncol = 4) + 
+  coord_cartesian(ylim = c(0, 50))
+```
+
+
+## multiple years
+
+
+
+
+
