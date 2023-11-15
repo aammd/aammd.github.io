@@ -2,6 +2,8 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/2023-11-14-multilevel-arima/index.html",
+      "/posts/2023-11-08-tree-cooling/index.html",
       "/posts/2023-10-23-discrete-vb-brms-stan/index.html",
       "/posts/2023-11-03-power-law/index.html",
       "/posts/2023-11-01-standalone-gq/index.html",

@@ -5,7 +5,7 @@ description: |
   Sometimes we have slightly-known knowns.
 date: 11 Nov 2022
 editor: source
-categories: [UdeS, stan]
+categories: [QCBS, stan]
 draft: true
 ---
 
@@ -16,6 +16,11 @@ library(tidyverse)
 library(tidybayes)
 library(cmdstanr)
 ```
+
+## Site history effects on growth afterwards
+
+Humans cut down forests and use that ground for something else. 
+
 
 I want to imaine a scenario where you know tht total duration of the land use at a site but tnot
 
