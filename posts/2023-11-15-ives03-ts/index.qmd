@@ -3,9 +3,10 @@ title: "Reproduction of Ives 2003"
 author: "Andrew MacDonald"
 description: |
   Autoregressive models.
-date: 11 Nov 2022
+date: 17 Nov 2023
 editor: source
-categories: [UdeS, stan]
+categories: [UdeS, stan, reproduction, MAR]
+bibliography: references.bib
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
@@ -15,19 +16,75 @@ library(tidyverse)
 library(tidybayes)
 ```
 
-## History
+## Background
 
-20 years ago a very influential paper was written by Ives, Dennis, Cottingham and Carpenter. I want to reproduce at least some of the figures here and understand this method.
+How do species populations change over time?
 
+How much of that change is caused by interactions with their community?
+
+20 years ago a very influential paper was written by Ives, Dennis, Cottingham and Carpenter [@ives2003].
+Ives et al. present a method called a first-order Multivariate AutoRegressive model, also known as MAR(1). The core idea is that species are growing in a density-dependent way, but at a rate that is influenced by the per-capita effects of every other interacting population.
+A transition matrix captures the effects of each species on every other, and lets us predict how the vector species abundances changes over time. 
+
+
+Ives et al. advance this argument by beginning with univariate (single-species) approach, and that is what this post is about. Perhaps a future post will cover all the models.
+
+$$
+\begin{align}
+n_t &= n_{t - 1}e^{a + (b - 1)ln(n_{t-1})} \\
+ln(n_t) = x_t &= a + bx_{t - 1} 
+\end{align}
+$$
+We can predict the curve at any time $t$ with this expression, from finite series:
+
+$$
+x_t = x_\infty + b^t(x_0 - x_\infty)
+$$
 
 ```{r}
+#| fig-cap: Curve of a Gompertz growth model. 
 curve(200 + (.9)^x * (4 - 200), xlim = c(0, 100))
 ```
 
+However there might be variation every time step because growth rate differences are caused by lots of unmeasured things.
 
-AR1 simulations
+$$
+\begin{align}
+X_t &= a + bX_{t-1} + \epsilon_t \\
+\epsilon &\sim \text{Normal}(0, \sigma)
+\end{align}
+$$
+
+This leads to a mean and variance at time $t = \infty$
+
+$$
+\begin{align}
+\mu_\infty &= \frac{a}{1 - b} \\
+v_\infty &= \frac{\sigma^2}{1 - b^2}
+\end{align}
+$$
+
+
+and the mean and variance at time $t$
+
+$$
+\begin{align}
+\mu_t &= \mu_\infty + b^t(x_0 - \mu_\infty) \\
+v_t &= \sigma^2\frac{1 - (b^2)^t}{1 - b^2} = v_\infty(1 - b^{2t})
+\end{align}
+$$
+Everything here is on the log scale. 
+The result is something that we can work with in a model for the likelihood -- the mean and variance of a normal distribution.
+
+## Simulations
+
+Here are simulations from a one-species AR-1 model that imitate Ives et al. figure 1.
 
 ```{r}
+#| layout-ncol: 2
+#| fig-cap:
+#|  - "Growth with a = 0, b = .6, sigma = 1"
+#|  - "Growth with a = 0, b = .95, sigma = 1"
 simulate_pop_growth <- function(
     a = 0, 
     b, 
@@ -49,39 +106,40 @@ simulate_pop_growth <- function(
   return(xvec)
 }
 
-map_dfr(1:10, ~ tibble(pop = simulate_pop_growth(b = 0.6, tmax = 100),
+map_dfr(1:10, ~ tibble(pop = simulate_pop_growth(b = 0.6, tmax = 50),
                        time = 1:length(pop)), .id = "sim") |> 
   ggplot(aes(x = time, y = pop, group = sim)) + 
   geom_line() + 
-  geom_hline(yintercept = 0)
+  geom_hline(yintercept = 0) + 
+  theme_bw()
 
-map_dfr(1:10, ~ tibble(pop = simulate_pop_growth(b = 0.9, tmax = 30),
+map_dfr(1:10, ~ tibble(pop = simulate_pop_growth(b = 0.95, tmax = 50),
                        time = 1:length(pop)), .id = "sim") |> 
   ggplot(aes(x = time, y = pop, group = sim)) + 
   geom_line() + 
-  geom_hline(yintercept = 0)
+  geom_hline(yintercept = 0)+ 
+  theme_bw()
+```
 
 
+It's fun to take a look at this curve after exponentiating it, so as to see the real population sizes.
+
+```{r}
 map_dfr(1:10, 
-        +~ tibble(pop = simulate_pop_growth(a = .3, b = 0.3, tmax = 10, sigma = 0.01),
-                       time = 1:length(pop)), .id = "sim") |> 
+        ~ tibble(pop = simulate_pop_growth(
+          a = 3, b = 0.4, tmax = 10, sigma = 0.03),
+          time = 1:length(pop)), .id = "sim") |> 
   ggplot(aes(x = time, y = exp(pop), group = sim)) + 
   geom_line() + 
   geom_hline(yintercept = 0, lty = 2)
 
-
-
 ```
 
 
-```{r}
-plot(0.7^(1:12), type = "l")
-plot(1 - 0.87^(1:12), type = "l", ylim = c(0, 1))
+### Functions for the mean and variance
 
-```
+We can also get a plot of the changing mean and variance over time. Just from playing with these, we can see what the simulations earlier showed: that variance depends on both the process error $\sigma$ and on the parameter that controls the amount of density dependence, $b$.
 
-
-mean and variance
 
 ```{r}
 calc_mean <- function(a, b, time, n_start){
@@ -102,14 +160,17 @@ curve(calc_mean(0, .8, n_start = -8, time = x), xlim = c(0, 50))
 
 curve(calc_var(.9, time = x, sigma = 1),
       xlim = c(0,50), ylim = c(0, 10))
-```
 
+curve(calc_var(.8, time = x, sigma = 1), add = TRUE)
+```
 
 Do these numbers reflect the distribution we see in the simulations?
 
 ```{r}
-## get a distribution from sampling the things
+#| fig-cap: Simulations match the theoretical predictions very closely.  Math works! 
+#| layout-ncol: 2
 
+set.seed(5002)
 some_sims <- map_dfr(1:300, ~ tibble(pop = simulate_pop_growth(b = 0.9, tmax = 30),
                        time = 0:(length(pop)-1)), .id = "sim")
 
@@ -121,18 +182,12 @@ sim_meanvar <- some_sims |>
 some_sims |> 
   filter(time == 22) |> 
   pluck("pop") |> 
-  hist(probability = TRUE, breaks = 20)
+  hist(probability = TRUE, breaks = 30, xlab = "population size (log)", main = "Simulated and predicted population size distribution")
 
 curve(dnorm(x, 
             mean = calc_mean(a = 0, b = .9, time = 22, n_start = -8),
             sd = sqrt(calc_var(b = .9, time = 22, sigma = 1))), 
       add = TRUE)
-
-```
-
-Ribbon calculations on projections
-
-```{r}
 
 a_fig <- 0
 b_fig <- 0.8
@@ -173,93 +228,26 @@ tibble(
   labs(x = "Time", y = "log population size")
 ```
 
+## Aphids
 
-## A specific experiment
+Below I explore this model and try to fit some examples in Stan.
+I'm building this example to match work being done at UdeS by students of [Matt Barbour](https://www.mattbarbour.com/research). In these experiments, a single aphid is placed on a radish plant. Aphids are clonal, and give birth to live (!) young. 
 
-I want to describe a particular experiment conducted by Katerie from  [Matt Barbour's Lab](www) at Sherbrooke. 
-In this experiment, 10 genotypes of aphid were grown on plants, the colonies start with a single aphid on a single radish plant. 
-The entire experiment fits on a single tray in a growth chamber, and Katerie replicated the experiment 3 times.
-
-Each colony, incredibly, starts with a single aphid
-
-This simplifies the expressions for the average and the variance:
+Each colony, incredibly, starts with a single aphid. This simplifies the expressions for the average and the variance because the starting population size is $ln(1) = 0$
 
 $$
-\mu_t = a\frac{1-b^t}{1-b}
+\begin{align}
+\mu_t &= a\frac{1 - b^t}{1 - b} &= \mu_\infty(1 - b^t) \\
+v_t &= \sigma^2\frac{1 - (b^2)^t}{1 - b^2} &= v_\infty(1 - b^{2t})
+\end{align}
 $$
 
-
-$$
-\sigma^2_t  = \sigma^2 \frac{1 - (b^2)^t}{1 - b^2}
-$$
+The entire experiment fits on a single tray in a growth chamber, and Katerie replicated the experiment 6 times.
 
 
-## make fake data
+## Make fake data
 
-```{r}
-
-sim_one_noisy_pop <- function(K = 1000, 
-         log_r = log(.8), 
-         log_s = .5,
-         ntime = 14){
-  
-  r <- exp(log_r + rnorm(n = ntime, mean = 0, sd = log_s))
-  # s <- log(1 + r)
-  # curve(K * exp(s*x)/(K + exp(s*x) - 1), xlim = c(0, 42))
-  # browser()
-  nt <- numeric(ntime)
-  nt[1] <- 1
-  for (i in 2:ntime){
-    nt[i] = (1 + r[i] * (1 - nt[i-1]/K))*nt[i-1]
-  }
-  
-  return(tibble(N = nt, time = 1:ntime))
-}
-
-map_df(1:6, ~ list(sim_one_noisy_pop()), .id = "sim_id") |> 
-  ggplot(aes(x = time, y = N, group = sim_id)) + 
-  geom_line()
-```
-
-I'm a bit confused, because this doesn't bounce around like I was expecting it to.
-I suspect this is just a result of a different process in the model -- we can imagine that 
-
-go with it for now, I might go back and change to the data-generating model.
-Really using it not as a version of reality, because relaity is not well reflected in this phenomenological model -- or at least it isn't really. 
-
-What does a scale-dependent variance imply. ecological processes happening at greater impact or number as they affect more of the population. 
-
-```{r}
-#| class-output: stan
-
-
-# load the model in stan
-ar_1 <- cmdstan_model(here::here("posts/2023-11-15-ives03-ts/ar1.stan"))
-
-ar_1
-```
-
-```{r, warning=FALSE, message=FALSE}
-one_pop_df <- map_df(1:6, ~ list(sim_one_noisy_pop()), .id = "sim_id")
-
-ar_1_sample <- ar_1$sample(data = list(n = nrow(one_pop_df),
-                        x = one_pop_df$N,
-                        time = one_pop_df$time),
-                        parallel_chains = 4, refresh = 0)
-```
-
-```{r, warning=FALSE, message=FALSE}
-ar_1_sample |> 
-  spread_rvars(x_pred[time]) |> 
-  ggplot(aes(x = time, ydist = x_pred)) + 
-  stat_lineribbon() + 
-  scale_fill_brewer(palette = "Greens", direction = -1) + 
-  theme_bw() + 
-  geom_line(aes(x = time, y = log(N), group = sim_id),
-            inherit.aes = FALSE, data = one_pop_df)
-```
-
-## Simulating from the data-generating model
+Simulating from the data-generating model
 
 ```{r}
 
@@ -285,8 +273,19 @@ map_df(1:6, ~ list(sim_one_gompertz()), .id = "sim_id") |>
   geom_line()
 ```
 
+
+```{r}
+#| class-output: stan
+
+# load the model in stan
+ar_1 <- cmdstan_model(here::here("posts/2023-11-15-ives03-ts/ar1.stan"))
+
+ar_1
+```
+
+
 ```{r, warning=FALSE, message=FALSE}
-gomp_one_pop_df <- map_df(1:20, ~ list(
+gomp_one_pop_df <- map_df(1:6, ~ list(
   sim_one_gompertz()), .id = "sim_id")
   
   
@@ -300,6 +299,7 @@ gomp_ar_1_sample <- ar_1$sample(data = list(n = nrow(gomp_nozero),
 ```
 
 ```{r}
+#| classes: preview-image 
 gomp_ar_1_sample |> 
   spread_rvars(x_pred[time]) |> 
   ggplot(aes(x = time-1, ydist = x_pred)) + 
@@ -307,17 +307,19 @@ gomp_ar_1_sample |>
   scale_fill_brewer(palette = "Greens", direction = -1) + 
   theme_bw() + 
   geom_line(aes(x = time, y = N, group = sim_id),
-            inherit.aes = FALSE, data = gomp_one_pop_df)
+            inherit.aes = FALSE, data = gomp_one_pop_df) + 
+  labs(x = "Time", y = "log population size")
 ```
-
 
 ```{r}
-  ggplot(aes(x = time, y = log(N), group = sim_id),
-            inherit.aes = FALSE, data = gomp_one_pop_df)  +
-  geom_line()
+gomp_ar_1_sample$summary(variables = c("a", "b", "sigma",
+                                       "mu_max", "sigma_max")) |> 
+  knitr::kable()
 ```
 
-## reparam
+
+
+## Say it again but different: parameterizing based on $\mu$ and $\sigma$
 
 ```{r}
 #| class-output: stan
@@ -336,7 +338,6 @@ gomp_ar1_mu_sigma_sample <- ar1_mu_sigma$sample(data = list(n = nrow(gomp_nozero
                         parallel_chains = 4, refresh = 0)
 ```
 
-
 ```{r}
 gomp_ar1_mu_sigma_sample |> 
   spread_rvars(x_pred[time]) |> 
@@ -348,4 +349,8 @@ gomp_ar1_mu_sigma_sample |>
             inherit.aes = FALSE, data = gomp_one_pop_df)
 ```
 
+```{r}
+gomp_ar1_mu_sigma_sample$summary(variables = c("mu_max", "b", "sigma_max")) |> 
+  knitr::kable()
+```
 

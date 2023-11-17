@@ -9,14 +9,2036 @@
 <link>https://aammd.github.io/blog.html</link>
 <atom:link href="https://aammd.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Demonstrating ecological concepts and statistical models using simulation</description>
-<generator>quarto-99.9.9</generator>
-<lastBuildDate>Tue, 14 Nov 2023 05:00:00 GMT</lastBuildDate>
+<generator>quarto-1.3.353</generator>
+<lastBuildDate>Fri, 17 Nov 2023 05:00:00 GMT</lastBuildDate>
+<item>
+  <title>Reproduction of Ives 2003</title>
+  <dc:creator>Andrew MacDonald</dc:creator>
+  <link>https://aammd.github.io/posts/2023-11-15-ives03-ts/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(cmdstanr)</span>
+<span id="cb1-2"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(ggplot2)</span>
+<span id="cb1-3"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse)</span>
+<span id="cb1-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidybayes)</span></code></pre></div>
+</div>
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>How do species populations change over time?</p>
+<p>How much of that change is caused by interactions with their community?</p>
+<p>20 years ago a very influential paper was written by Ives, Dennis, Cottingham and Carpenter <span class="citation" data-cites="ives2003">(Ives et al. 2003)</span>. Ives et al.&nbsp;present a method called a first-order Multivariate AutoRegressive model, also known as MAR(1). The core idea is that species are growing in a density-dependent way, but at a rate that is influenced by the per-capita effects of every other interacting population. A transition matrix captures the effects of each species on every other, and lets us predict how the vector species abundances changes over time.</p>
+<p>Ives et al.&nbsp;advance this argument by beginning with univariate (single-species) approach, and that is what this post is about. Perhaps a future post will cover all the models.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0An_t%20&amp;=%20n_%7Bt%20-%201%7De%5E%7Ba%20+%20(b%20-%201)ln(n_%7Bt-1%7D)%7D%20%5C%5C%0Aln(n_t)%20=%20x_t%20&amp;=%20a%20+%20bx_%7Bt%20-%201%7D%0A%5Cend%7Balign%7D%0A"> We can predict the curve at any time <img src="https://latex.codecogs.com/png.latex?t"> with this expression, from finite series:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0Ax_t%20=%20x_%5Cinfty%20+%20b%5Et(x_0%20-%20x_%5Cinfty)%0A"></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">curve</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> (.<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span>x <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xlim =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">100</span>))</span></code></pre></div>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Curve of a Gompertz growth model.</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>However there might be variation every time step because growth rate differences are caused by lots of unmeasured things.</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0AX_t%20&amp;=%20a%20+%20bX_%7Bt-1%7D%20+%20%5Cepsilon_t%20%5C%5C%0A%5Cepsilon%20&amp;%5Csim%20%5Ctext%7BNormal%7D(0,%20%5Csigma)%0A%5Cend%7Balign%7D%0A"></p>
+<p>This leads to a mean and variance at time <img src="https://latex.codecogs.com/png.latex?t%20=%20%5Cinfty"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0A%5Cmu_%5Cinfty%20&amp;=%20%5Cfrac%7Ba%7D%7B1%20-%20b%7D%20%5C%5C%0Av_%5Cinfty%20&amp;=%20%5Cfrac%7B%5Csigma%5E2%7D%7B1%20-%20b%5E2%7D%0A%5Cend%7Balign%7D%0A"></p>
+<p>and the mean and variance at time <img src="https://latex.codecogs.com/png.latex?t"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0A%5Cmu_t%20&amp;=%20%5Cmu_%5Cinfty%20+%20b%5Et(x_0%20-%20%5Cmu_%5Cinfty)%20%5C%5C%0Av_t%20&amp;=%20%5Csigma%5E2%5Cfrac%7B1%20-%20(b%5E2)%5Et%7D%7B1%20-%20b%5E2%7D%20=%20v_%5Cinfty(1%20-%20b%5E%7B2t%7D)%0A%5Cend%7Balign%7D%0A"> Everything here is on the log scale. The result is something that we can work with in a model for the likelihood – the mean and variance of a normal distribution.</p>
+</section>
+<section id="simulations" class="level2">
+<h2 class="anchored" data-anchor-id="simulations">Simulations</h2>
+<p>Here are simulations from a one-species AR-1 model that imitate Ives et al.&nbsp;figure 1.</p>
+<div>
+<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">simulate_pop_growth <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">function</span>(</span>
+<span id="cb3-2">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">a =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, </span>
+<span id="cb3-3">    b, </span>
+<span id="cb3-4">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sigma =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, </span>
+<span id="cb3-5">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">tmax =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, </span>
+<span id="cb3-6">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x0 =</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>) {</span>
+<span id="cb3-7">  </span>
+<span id="cb3-8">  xvec <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">numeric</span>(tmax)</span>
+<span id="cb3-9">  </span>
+<span id="cb3-10">  xvec[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> x0</span>
+<span id="cb3-11">  </span>
+<span id="cb3-12">  <span class="do" style="color: #5E5E5E;
+background-color: null;
+font-style: italic;">## process error</span></span>
+<span id="cb3-13">  eta <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rnorm</span>(tmax, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">mean =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sd =</span> sigma)</span>
+<span id="cb3-14">  </span>
+<span id="cb3-15">  <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span>(time <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>tmax){</span>
+<span id="cb3-16">    xvec[time] <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> a <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> b<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span>xvec[time<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">-1</span>] <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> eta[time]</span>
+<span id="cb3-17">  }</span>
+<span id="cb3-18">  </span>
+<span id="cb3-19">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">return</span>(xvec)</span>
+<span id="cb3-20">}</span>
+<span id="cb3-21"></span>
+<span id="cb3-22"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">map_dfr</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">pop =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">simulate_pop_growth</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">b =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.6</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">tmax =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>),</span>
+<span id="cb3-23">                       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">length</span>(pop)), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">.id =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sim"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb3-24">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> time, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> pop, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">group =</span> sim)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb3-25">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb3-26">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_hline</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">yintercept =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb3-27">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_bw</span>()</span>
+<span id="cb3-28"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">map_dfr</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">pop =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">simulate_pop_growth</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">b =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.95</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">tmax =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>),</span>
+<span id="cb3-29">                       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">length</span>(pop)), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">.id =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sim"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb3-30">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> time, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> pop, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">group =</span> sim)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb3-31">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb3-32">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_hline</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">yintercept =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb3-33">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_bw</span>()</span></code></pre></div>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Growth with a = 0, b = .6, sigma = 1</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Growth with a = 0, b = .95, sigma = 1</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+<p>It’s fun to take a look at this curve after exponentiating it, so as to see the real population sizes.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">map_dfr</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, </span>
+<span id="cb4-2">        <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">pop =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">simulate_pop_growth</span>(</span>
+<span id="cb4-3">          <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">a =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">b =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.4</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">tmax =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sigma =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.03</span>),</span>
+<span id="cb4-4">          <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">length</span>(pop)), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">.id =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sim"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb4-5">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> time, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">exp</span>(pop), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">group =</span> sim)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb4-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb4-7">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_hline</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">yintercept =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">lty =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-3-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<section id="functions-for-the-mean-and-variance" class="level3">
+<h3 class="anchored" data-anchor-id="functions-for-the-mean-and-variance">Functions for the mean and variance</h3>
+<p>We can also get a plot of the changing mean and variance over time. Just from playing with these, we can see what the simulations earlier showed: that variance depends on both the process error <img src="https://latex.codecogs.com/png.latex?%5Csigma"> and on the parameter that controls the amount of density dependence, <img src="https://latex.codecogs.com/png.latex?b">.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">calc_mean <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">function</span>(a, b, time, n_start){</span>
+<span id="cb5-2">  mu_max <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> a <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> b)</span>
+<span id="cb5-3">  </span>
+<span id="cb5-4">  mu_max <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> b<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span>time <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (n_start <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> mu_max)</span>
+<span id="cb5-5">}</span>
+<span id="cb5-6"></span>
+<span id="cb5-7">calc_var <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">function</span>(b, time, sigma){</span>
+<span id="cb5-8">  bsq <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> b<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span></span>
+<span id="cb5-9">  </span>
+<span id="cb5-10">  var_max <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> sigma<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> bsq)</span>
+<span id="cb5-11">  </span>
+<span id="cb5-12">  var_max <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> bsq<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span>time)</span>
+<span id="cb5-13">}</span>
+<span id="cb5-14"></span>
+<span id="cb5-15"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">curve</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">calc_mean</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, .<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n_start =</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> x), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xlim =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>))</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">curve</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">calc_var</span>(.<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> x, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sigma =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>),</span>
+<span id="cb6-2">      <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xlim =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ylim =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>))</span>
+<span id="cb6-3"></span>
+<span id="cb6-4"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">curve</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">calc_var</span>(.<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> x, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sigma =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">add =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-4-2.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Do these numbers reflect the distribution we see in the simulations?</p>
+<div>
+<div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">set.seed</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5002</span>)</span>
+<span id="cb7-2">some_sims <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">map_dfr</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">300</span>, <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">pop =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">simulate_pop_growth</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">b =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.9</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">tmax =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">30</span>),</span>
+<span id="cb7-3">                       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">length</span>(pop)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">.id =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sim"</span>)</span>
+<span id="cb7-4"></span>
+<span id="cb7-5">sim_meanvar <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> some_sims <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb7-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">group_by</span>(time) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb7-7">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summarize</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sim_mean =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">mean</span>(pop),</span>
+<span id="cb7-8">            <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sim_var =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">var</span>(pop))</span>
+<span id="cb7-9"></span>
+<span id="cb7-10">some_sims <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb7-11">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(time <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">22</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb7-12">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">pluck</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"pop"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb7-13">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">hist</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">probability =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">breaks =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">30</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">xlab =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"population size (log)"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">main =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Simulated and predicted population size distribution"</span>)</span>
+<span id="cb7-14"></span>
+<span id="cb7-15"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">curve</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">dnorm</span>(x, </span>
+<span id="cb7-16">            <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">mean =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">calc_mean</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">a =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">b =</span> .<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">22</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n_start =</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span>),</span>
+<span id="cb7-17">            <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sd =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sqrt</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">calc_var</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">b =</span> .<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">9</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">22</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sigma =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>))), </span>
+<span id="cb7-18">      <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">add =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">TRUE</span>)</span>
+<span id="cb7-19">a_fig <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span></span>
+<span id="cb7-20">b_fig <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.8</span></span>
+<span id="cb7-21">nstart_fig <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">8</span></span>
+<span id="cb7-22">sigma_fig <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span></span>
+<span id="cb7-23"></span>
+<span id="cb7-24"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(</span>
+<span id="cb7-25">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">25</span>,</span>
+<span id="cb7-26">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">mean =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">calc_mean</span>(</span>
+<span id="cb7-27">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">a =</span> a_fig, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">b =</span> b_fig, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> time,</span>
+<span id="cb7-28">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n_start =</span> nstart_fig),</span>
+<span id="cb7-29">  <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sd =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sqrt</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">calc_var</span>(</span>
+<span id="cb7-30">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">b =</span> b_fig, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> time, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sigma =</span> sigma_fig))) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb7-31">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> time,</span>
+<span id="cb7-32">             <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ymin =</span> mean <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> sd<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>,</span>
+<span id="cb7-33">             <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ymax =</span> mean <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> sd<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, </span>
+<span id="cb7-34">             <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> mean)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb7-35">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_ribbon</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">fill =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"lightblue"</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb7-36">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">col =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"darkblue"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">lwd =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb7-37">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>(</span>
+<span id="cb7-38">    <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> time,</span>
+<span id="cb7-39">        <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> pop, </span>
+<span id="cb7-40">        <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">group =</span> sim),</span>
+<span id="cb7-41">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">inherit.aes =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">FALSE</span>,</span>
+<span id="cb7-42">    <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">map_dfr</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>, </span>
+<span id="cb7-43">                   <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(</span>
+<span id="cb7-44">                     <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">pop =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">simulate_pop_growth</span>(</span>
+<span id="cb7-45">                       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">a =</span> a_fig, </span>
+<span id="cb7-46">                       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">b =</span> b_fig,</span>
+<span id="cb7-47">                       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">tmax =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">25</span>, </span>
+<span id="cb7-48">                       <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sigma =</span> sigma_fig),</span>
+<span id="cb7-49">                     <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">length</span>(pop)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb7-50">                     ),</span>
+<span id="cb7-51">                   <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">.id =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sim"</span></span>
+<span id="cb7-52">                   )</span>
+<span id="cb7-53">  ) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb7-54">  <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">NULL</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb7-55">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Time"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"log population size"</span>)</span></code></pre></div>
+<div class="cell quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Simulations match the theoretical predictions very closely. Math works!</figcaption>
+</figure>
+</div>
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Simulations match the theoretical predictions very closely. Math works!</figcaption>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="aphids" class="level2">
+<h2 class="anchored" data-anchor-id="aphids">Aphids</h2>
+<p>Below I explore this model and try to fit some examples in Stan. I’m building this example to match work being done at UdeS by students of <a href="https://www.mattbarbour.com/research">Matt Barbour</a>. In these experiments, a single aphid is placed on a radish plant. Aphids are clonal, and give birth to live (!) young.</p>
+<p>Each colony, incredibly, starts with a single aphid. This simplifies the expressions for the average and the variance because the starting population size is <img src="https://latex.codecogs.com/png.latex?ln(1)%20=%200"></p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0A%5Cmu_t%20&amp;=%20a%5Cfrac%7B1%20-%20b%5Et%7D%7B1%20-%20b%7D%20&amp;=%20%5Cmu_%5Cinfty(1%20-%20b%5Et)%20%5C%5C%0Av_t%20&amp;=%20%5Csigma%5E2%5Cfrac%7B1%20-%20(b%5E2)%5Et%7D%7B1%20-%20b%5E2%7D%20&amp;=%20v_%5Cinfty(1%20-%20b%5E%7B2t%7D)%0A%5Cend%7Balign%7D%0A"></p>
+<p>The entire experiment fits on a single tray in a growth chamber, and Katerie replicated the experiment 6 times.</p>
+</section>
+<section id="make-fake-data" class="level2">
+<h2 class="anchored" data-anchor-id="make-fake-data">Make fake data</h2>
+<p>Simulating from the data-generating model</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">sim_one_gompertz <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">function</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">K =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1000</span>, </span>
+<span id="cb8-2">         <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">a =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, </span>
+<span id="cb8-3">         <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">b =</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.86</span>,</span>
+<span id="cb8-4">         <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">s =</span> .<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>,</span>
+<span id="cb8-5">         <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ntime =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">15</span>){</span>
+<span id="cb8-6">  </span>
+<span id="cb8-7">  N <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">=</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, </span>
+<span id="cb8-8">        <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rnorm</span>(ntime <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, </span>
+<span id="cb8-9">              <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">mean =</span> a <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> b<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>(ntime<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">-1</span>))) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> b),</span>
+<span id="cb8-10">              <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sd =</span> s <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> (b<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>(ntime<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">-1</span>))) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> b<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)</span>
+<span id="cb8-11">        )</span>
+<span id="cb8-12">  )</span>
+<span id="cb8-13">        </span>
+<span id="cb8-14">        </span>
+<span id="cb8-15">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">return</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">tibble</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">N =</span> N, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span>(ntime<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">-1</span>)))</span>
+<span id="cb8-16">}</span>
+<span id="cb8-17"></span>
+<span id="cb8-18"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">map_df</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>, <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">list</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sim_one_gompertz</span>()), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">.id =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sim_id"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb8-19">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> time, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> N, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">group =</span> sim_id)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb8-20">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>()</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># load the model in stan</span></span>
+<span id="cb9-2">ar_1 <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cmdstan_model</span>(here<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">here</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"posts/2023-11-15-ives03-ts/ar1.stan"</span>))</span>
+<span id="cb9-3"></span>
+<span id="cb9-4">ar_1</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb10-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">data</span>{</span>
+<span id="cb10-2">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span> n;</span>
+<span id="cb10-3">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[n] time;</span>
+<span id="cb10-4">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[n] x;</span>
+<span id="cb10-5">}</span>
+<span id="cb10-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// transformed data {</span></span>
+<span id="cb10-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//   vector[n] x = log(pop);</span></span>
+<span id="cb10-8"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// }</span></span>
+<span id="cb10-9"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">parameters</span> {</span>
+<span id="cb10-10">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> a;</span>
+<span id="cb10-11">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span>&lt;<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">lower</span>=<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">upper</span>=<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>&gt; b;</span>
+<span id="cb10-12">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span>&lt;<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">lower</span>=<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>&gt; sigma;</span>
+<span id="cb10-13">}</span>
+<span id="cb10-14"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">transformed parameters</span> {</span>
+<span id="cb10-15">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> mu_max = a / (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - b);</span>
+<span id="cb10-16">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> sigma_max = sigma /sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - b^<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>);</span>
+<span id="cb10-17">}</span>
+<span id="cb10-18"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">model</span> {</span>
+<span id="cb10-19">  a ~ normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, .<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>);</span>
+<span id="cb10-20">  b ~ beta(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>);</span>
+<span id="cb10-21">  sigma ~ exponential(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>);</span>
+<span id="cb10-22">  x ~ normal(</span>
+<span id="cb10-23">    mu_max .* (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - pow(b, time)),</span>
+<span id="cb10-24">    sigma_max .* sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - pow(b^<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, time))</span>
+<span id="cb10-25">    );</span>
+<span id="cb10-26">}</span>
+<span id="cb10-27"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">generated quantities</span> {</span>
+<span id="cb10-28">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">15</span>] x_pred;</span>
+<span id="cb10-29">  x_pred[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] = <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>;</span>
+<span id="cb10-30">  <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> (j <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">14</span>) {</span>
+<span id="cb10-31">    x_pred[j+<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] = normal_rng(</span>
+<span id="cb10-32">      mu_max * (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - pow(b, j)),</span>
+<span id="cb10-33">      sigma_max * sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - pow(b^<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, j))</span>
+<span id="cb10-34">      );</span>
+<span id="cb10-35">  }</span>
+<span id="cb10-36">}</span></code></pre></div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1">gomp_one_pop_df <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">map_df</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>, <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">~</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">list</span>(</span>
+<span id="cb11-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sim_one_gompertz</span>()), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">.id =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sim_id"</span>)</span>
+<span id="cb11-3">  </span>
+<span id="cb11-4">  </span>
+<span id="cb11-5">gomp_nozero <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> gomp_one_pop_df  <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb11-6">    <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">filter</span>(time <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb11-7"></span>
+<span id="cb11-8">gomp_ar_1_sample <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> ar_1<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sample</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">list</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">nrow</span>(gomp_nozero),</span>
+<span id="cb11-9">                        <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> gomp_nozero<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>N,</span>
+<span id="cb11-10">                        <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> gomp_nozero<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>time),</span>
+<span id="cb11-11">                        <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">parallel_chains =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...
+
+Chain 1 finished in 0.6 seconds.
+Chain 2 finished in 0.5 seconds.
+Chain 3 finished in 0.5 seconds.
+Chain 4 finished in 0.6 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.6 seconds.
+Total execution time: 0.8 seconds.</code></pre>
+</div>
+</div>
+<div class="cell preview-image">
+<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">gomp_ar_1_sample <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb13-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">spread_rvars</span>(x_pred[time]) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb13-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> time<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">-1</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ydist =</span> x_pred)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb13-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">stat_lineribbon</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb13-5">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_fill_brewer</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">palette =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Greens"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">direction =</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb13-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_bw</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb13-7">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> time, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> N, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">group =</span> sim_id),</span>
+<span id="cb13-8">            <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">inherit.aes =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">FALSE</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> gomp_one_pop_df) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb13-9">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">labs</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Time"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"log population size"</span>)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1">gomp_ar_1_sample<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summary</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">variables =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"a"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"b"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sigma"</span>,</span>
+<span id="cb14-2">                                       <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"mu_max"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sigma_max"</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb14-3">  knitr<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">kable</span>()</span></code></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">variable</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">median</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">mad</th>
+<th style="text-align: right;">q5</th>
+<th style="text-align: right;">q95</th>
+<th style="text-align: right;">rhat</th>
+<th style="text-align: right;">ess_bulk</th>
+<th style="text-align: right;">ess_tail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">a</td>
+<td style="text-align: right;">0.9098355</td>
+<td style="text-align: right;">0.9063220</td>
+<td style="text-align: right;">0.0686223</td>
+<td style="text-align: right;">0.0670780</td>
+<td style="text-align: right;">0.8005618</td>
+<td style="text-align: right;">1.0257205</td>
+<td style="text-align: right;">1.003307</td>
+<td style="text-align: right;">1030.106</td>
+<td style="text-align: right;">1314.908</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">b</td>
+<td style="text-align: right;">0.8789703</td>
+<td style="text-align: right;">0.8794605</td>
+<td style="text-align: right;">0.0195818</td>
+<td style="text-align: right;">0.0192753</td>
+<td style="text-align: right;">0.8459716</td>
+<td style="text-align: right;">0.9102432</td>
+<td style="text-align: right;">1.003239</td>
+<td style="text-align: right;">1013.561</td>
+<td style="text-align: right;">1250.140</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sigma</td>
+<td style="text-align: right;">0.5482239</td>
+<td style="text-align: right;">0.5452855</td>
+<td style="text-align: right;">0.0489006</td>
+<td style="text-align: right;">0.0485707</td>
+<td style="text-align: right;">0.4737331</td>
+<td style="text-align: right;">0.6320994</td>
+<td style="text-align: right;">1.005132</td>
+<td style="text-align: right;">1197.362</td>
+<td style="text-align: right;">1523.607</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">mu_max</td>
+<td style="text-align: right;">7.6344214</td>
+<td style="text-align: right;">7.5211700</td>
+<td style="text-align: right;">0.7723139</td>
+<td style="text-align: right;">0.6918331</td>
+<td style="text-align: right;">6.5748975</td>
+<td style="text-align: right;">9.0189875</td>
+<td style="text-align: right;">1.001850</td>
+<td style="text-align: right;">1176.005</td>
+<td style="text-align: right;">1381.095</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sigma_max</td>
+<td style="text-align: right;">1.1568230</td>
+<td style="text-align: right;">1.1484850</td>
+<td style="text-align: right;">0.0972406</td>
+<td style="text-align: right;">0.0928182</td>
+<td style="text-align: right;">1.0142685</td>
+<td style="text-align: right;">1.3257135</td>
+<td style="text-align: right;">1.002568</td>
+<td style="text-align: right;">1713.400</td>
+<td style="text-align: right;">1761.835</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="say-it-again-but-different-parameterizing-based-on-mu-and-sigma" class="level2">
+<h2 class="anchored" data-anchor-id="say-it-again-but-different-parameterizing-based-on-mu-and-sigma">Say it again but different: parameterizing based on <img src="https://latex.codecogs.com/png.latex?%5Cmu"> and <img src="https://latex.codecogs.com/png.latex?%5Csigma"></h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># load the model in stan</span></span>
+<span id="cb15-2">ar1_mu_sigma <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">cmdstan_model</span>(here<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">here</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"posts/2023-11-15-ives03-ts/ar1_mu_sigma.stan"</span>))</span>
+<span id="cb15-3"></span>
+<span id="cb15-4">ar1_mu_sigma</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb16-1"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">data</span>{</span>
+<span id="cb16-2">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">int</span> n;</span>
+<span id="cb16-3">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[n] time;</span>
+<span id="cb16-4">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[n] x;</span>
+<span id="cb16-5">}</span>
+<span id="cb16-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// transformed data {</span></span>
+<span id="cb16-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">//   vector[n] x = log(pop);</span></span>
+<span id="cb16-8"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// }</span></span>
+<span id="cb16-9"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">parameters</span> {</span>
+<span id="cb16-10">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span> mu_max;</span>
+<span id="cb16-11">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span>&lt;<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">lower</span>=<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">upper</span>=<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>&gt; b;</span>
+<span id="cb16-12">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">real</span>&lt;<span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">lower</span>=<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>&gt; sigma_max;</span>
+<span id="cb16-13">}</span>
+<span id="cb16-14"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">transformed parameters</span> {</span>
+<span id="cb16-15">  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// real mu_max = a / (1 - b);</span></span>
+<span id="cb16-16">  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">// real sigma_max = sigma /sqrt(1 - b^2);</span></span>
+<span id="cb16-17">}</span>
+<span id="cb16-18"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">model</span> {</span>
+<span id="cb16-19">  mu_max ~ normal(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">7</span>, .<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>);</span>
+<span id="cb16-20">  b ~ beta(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>);</span>
+<span id="cb16-21">  sigma_max ~ exponential(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>);</span>
+<span id="cb16-22">  x ~ normal(</span>
+<span id="cb16-23">    mu_max .* (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - pow(b, time)),</span>
+<span id="cb16-24">    sigma_max .* sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - pow(b^<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, time))</span>
+<span id="cb16-25">    );</span>
+<span id="cb16-26">}</span>
+<span id="cb16-27"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">generated quantities</span> {</span>
+<span id="cb16-28">  <span class="dt" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">vector</span>[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">15</span>] x_pred;</span>
+<span id="cb16-29">  x_pred[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] = <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>;</span>
+<span id="cb16-30">  <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">for</span> (j <span class="cf" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">in</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">14</span>) {</span>
+<span id="cb16-31">    x_pred[j+<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>] = normal_rng(</span>
+<span id="cb16-32">      mu_max * (<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - pow(b, j)),</span>
+<span id="cb16-33">      sigma_max * sqrt(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span> - pow(b^<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, j))</span>
+<span id="cb16-34">      );</span>
+<span id="cb16-35">  }</span>
+<span id="cb16-36">}</span></code></pre></div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1">gomp_ar1_mu_sigma_sample <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> ar1_mu_sigma<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sample</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">list</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">n =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">nrow</span>(gomp_nozero),</span>
+<span id="cb17-2">                        <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> gomp_nozero<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>N,</span>
+<span id="cb17-3">                        <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">time =</span> gomp_nozero<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span>time),</span>
+<span id="cb17-4">                        <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">parallel_chains =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span></code></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: normal_lpdf: Scale parameter[1] is nan, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: normal_lpdf: Scale parameter[1] is 0, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Exception: normal_lpdf: Scale parameter[1] is nan, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: normal_lpdf: Scale parameter[1] is nan, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: normal_lpdf: Scale parameter[1] is nan, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: normal_lpdf: Scale parameter[1] is nan, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 1 finished in 0.5 seconds.
+Chain 2 finished in 0.4 seconds.
+Chain 3 finished in 0.4 seconds.
+Chain 4 finished in 0.5 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.5 seconds.
+Total execution time: 0.7 seconds.</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1">gomp_ar1_mu_sigma_sample <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb50-2">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">spread_rvars</span>(x_pred[time]) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb50-3">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> time<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">-1</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">ydist =</span> x_pred)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb50-4">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">stat_lineribbon</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb50-5">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">scale_fill_brewer</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">palette =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Greens"</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">direction =</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb50-6">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">theme_bw</span>() <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb50-7">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_line</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> time, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> N, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">group =</span> sim_id),</span>
+<span id="cb50-8">            <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">inherit.aes =</span> <span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">FALSE</span>, <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">data =</span> gomp_one_pop_df)</span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1">gomp_ar1_mu_sigma_sample<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">$</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">summary</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">variables =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">c</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"mu_max"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"b"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"sigma_max"</span>)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb51-2">  knitr<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">kable</span>()</span></code></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 10%">
+<col style="width: 9%">
+<col style="width: 9%">
+<col style="width: 9%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">variable</th>
+<th style="text-align: right;">mean</th>
+<th style="text-align: right;">median</th>
+<th style="text-align: right;">sd</th>
+<th style="text-align: right;">mad</th>
+<th style="text-align: right;">q5</th>
+<th style="text-align: right;">q95</th>
+<th style="text-align: right;">rhat</th>
+<th style="text-align: right;">ess_bulk</th>
+<th style="text-align: right;">ess_tail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">mu_max</td>
+<td style="text-align: right;">7.2318447</td>
+<td style="text-align: right;">7.2250250</td>
+<td style="text-align: right;">0.3901113</td>
+<td style="text-align: right;">0.3912878</td>
+<td style="text-align: right;">6.6053570</td>
+<td style="text-align: right;">7.8963640</td>
+<td style="text-align: right;">1.000893</td>
+<td style="text-align: right;">1365.238</td>
+<td style="text-align: right;">1827.017</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">b</td>
+<td style="text-align: right;">0.8707319</td>
+<td style="text-align: right;">0.8713065</td>
+<td style="text-align: right;">0.0133228</td>
+<td style="text-align: right;">0.0127037</td>
+<td style="text-align: right;">0.8470958</td>
+<td style="text-align: right;">0.8912064</td>
+<td style="text-align: right;">1.000917</td>
+<td style="text-align: right;">1332.414</td>
+<td style="text-align: right;">1584.640</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sigma_max</td>
+<td style="text-align: right;">1.1448564</td>
+<td style="text-align: right;">1.1377700</td>
+<td style="text-align: right;">0.0936798</td>
+<td style="text-align: right;">0.0882369</td>
+<td style="text-align: right;">1.0013000</td>
+<td style="text-align: right;">1.3126500</td>
+<td style="text-align: right;">1.000677</td>
+<td style="text-align: right;">2085.846</td>
+<td style="text-align: right;">2003.006</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-ives2003" class="csl-entry">
+Ives, A. R., B. Dennis, K. L. Cottingham, and S. R. Carpenter. 2003. <span>“ESTIMATING COMMUNITY STABILITY AND ECOLOGICAL INTERACTIONS FROM TIME-SERIES DATA.”</span> <em>Ecological Monographs</em> 73 (2): 301–30. <a href="https://doi.org/10.1890/0012-9615(2003)073[0301:ECSAEI]2.0.CO;2">https://doi.org/10.1890/0012-9615(2003)073[0301:ECSAEI]2.0.CO;2</a>.
+</div>
+</div></section></div> ]]></description>
+  <category>UdeS</category>
+  <category>stan</category>
+  <category>reproduction</category>
+  <category>MAR</category>
+  <guid>https://aammd.github.io/posts/2023-11-15-ives03-ts/index.html</guid>
+  <pubDate>Fri, 17 Nov 2023 05:00:00 GMT</pubDate>
+</item>
 <item>
   <title>Multilevel Arima model</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-14-multilevel-arima/</link>
+  <link>https://aammd.github.io/posts/2023-11-14-multilevel-arima/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -860,15 +2882,14 @@ font-style: inherit;">50</span>))</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-11-14-multilevel-arima/</guid>
+  <guid>https://aammd.github.io/posts/2023-11-14-multilevel-arima/index.html</guid>
   <pubDate>Tue, 14 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>causal DAGS and full-luxury shade trees</title>
   <dc:creator>Andrew MacDonald, Bella Richmond</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-08-tree-cooling/</link>
+  <link>https://aammd.github.io/posts/2023-11-08-tree-cooling/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -1231,15 +3252,14 @@ font-style: inherit;">'none'</span>)</span></code></pre></div>
  ]]></description>
   <category>QCBS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-11-08-tree-cooling/</guid>
+  <guid>https://aammd.github.io/posts/2023-11-08-tree-cooling/index.html</guid>
   <pubDate>Wed, 08 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Modelling discrete growth</title>
   <dc:creator>Andrew MacDonald, Kelly Forester</dc:creator>
-  <link>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/</link>
+  <link>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -2466,15 +4486,14 @@ font-style: inherit;">4</span>)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/</guid>
+  <guid>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/index.html</guid>
   <pubDate>Tue, 07 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Power laws on log-linear plots</title>
   <dc:creator>Andrew MacDonald, Amélie Morin</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-03-power-law/</link>
+  <link>https://aammd.github.io/posts/2023-11-03-power-law/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -2792,15 +4811,14 @@ font-style: inherit;">"red"</span>)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-11-03-power-law/</guid>
+  <guid>https://aammd.github.io/posts/2023-11-03-power-law/index.html</guid>
   <pubDate>Fri, 03 Nov 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Stan-dalone generated quantites</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-01-standalone-gq/</link>
+  <link>https://aammd.github.io/posts/2023-11-01-standalone-gq/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -3256,7 +5274,7 @@ font-style: inherit;">"predicted herbivory"</span>)</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-11-01-standalone-gq/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Visualizing an interaction. The effect of soil quality on herbivory varies with herbivore biomass (in a very pretend, make-believe example).</figcaption>
+<figcaption class="figure-caption">Visualizing an interaction. The effect of soil quality on herbivory varies with herbivore biomass (in a very pretend, make-believe example).</figcaption>
 </figure>
 </div>
 </div>
@@ -3269,15 +5287,14 @@ font-style: inherit;">"predicted herbivory"</span>)</span></code></pre></div>
   <category>UdeS</category>
   <category>stan</category>
   <category>generated quantities</category>
-  <guid>https://aammd.github.io/posts/2023-11-01-standalone-gq/</guid>
+  <guid>https://aammd.github.io/posts/2023-11-01-standalone-gq/index.html</guid>
   <pubDate>Wed, 01 Nov 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Transformed regression in Stan</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-08-22-transformed-regression/</link>
+  <link>https://aammd.github.io/posts/2023-08-22-transformed-regression/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -3339,7 +5356,7 @@ font-style: inherit;">4</span>))</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-22-transformed-regression/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Log-transformed responses are like fitting an exponential curve</figcaption>
+<figcaption class="figure-caption">Log-transformed responses are like fitting an exponential curve</figcaption>
 </figure>
 </div>
 </div>
@@ -3368,7 +5385,7 @@ font-style: inherit;">8</span>))</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-22-transformed-regression/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Square root transformed models are like fitting a quadratic curve</figcaption>
+<figcaption class="figure-caption">Square root transformed models are like fitting a quadratic curve</figcaption>
 </figure>
 </div>
 </div>
@@ -3617,7 +5634,7 @@ font-style: inherit;">~</span>.draw)</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-22-transformed-regression/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>some prior predictive simulations from a square-root transformed model.</figcaption>
+<figcaption class="figure-caption">some prior predictive simulations from a square-root transformed model.</figcaption>
 </figure>
 </div>
 </div>
@@ -4013,7 +6030,7 @@ font-style: inherit;">stat_lineribbon</span>()</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-22-transformed-regression/index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>square-root transformed model fit to data from a log-transformed model. Just to prove you can</figcaption>
+<figcaption class="figure-caption">square-root transformed model fit to data from a log-transformed model. Just to prove you can</figcaption>
 </figure>
 </div>
 </div>
@@ -4053,15 +6070,14 @@ font-style: inherit;">4</span>)</span></code></pre></div>
   <category>UdeS</category>
   <category>stan</category>
   <category>QCBS</category>
-  <guid>https://aammd.github.io/posts/2023-08-22-transformed-regression/</guid>
+  <guid>https://aammd.github.io/posts/2023-08-22-transformed-regression/index.html</guid>
   <pubDate>Tue, 22 Aug 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Missing data in non-normal distributions</title>
   <dc:creator>Andrew MacDonald, Flavio Affinito</dc:creator>
-  <link>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/</link>
+  <link>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -4758,6 +6774,7 @@ Mean chain execution time: 0.7 seconds.
 Total execution time: 0.9 seconds.</code></pre>
 </div>
 </div>
+<div>
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1">posterior_and_original <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> regression_missing<span class="sc" style="color: #5E5E5E;
@@ -4883,19 +6900,24 @@ font-style: inherit;">!</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">is.na</span>(xx2))]</span>
 <span id="cb14-21">               ))</span></code></pre></div>
-<div class="cell quarto-layout-panel" data-layout-ncol="2">
+<div class="cell quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>imputed values (y axis) vs the real values (x axis), and the 1:1 line for comparison. The posterior distributions are close to the truth, because the regression equation lets information flow in both directions.</figcaption>
+<figcaption class="figure-caption">imputed values (y axis) vs the real values (x axis), and the 1:1 line for comparison. The posterior distributions are close to the truth, because the regression equation lets information flow in both directions.</figcaption>
 </figure>
 </div>
-<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>The original relationship, with posterior distributions for missing x variables.</figcaption>
+<figcaption class="figure-caption">The original relationship, with posterior distributions for missing x variables.</figcaption>
 </figure>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -4914,15 +6936,14 @@ font-style: inherit;">is.na</span>(xx2))]</span>
   <category>UdeS</category>
   <category>stan</category>
   <category>QCBS</category>
-  <guid>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/</guid>
+  <guid>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index.html</guid>
   <pubDate>Tue, 22 Aug 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Breakpoint regression in Stan</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-07-05-breakpoint/</link>
+  <link>https://aammd.github.io/posts/2023-07-05-breakpoint/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -5132,7 +7153,7 @@ font-style: inherit;">"Car speed"</span>)</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-07-05-breakpoint/bk_intro-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Car speed equals the speed limit, right up to the car’s maximum velocity. Then, it doesn’t matter how high the limit is, the car has to stay at maximum speed.</figcaption>
+<figcaption class="figure-caption">Car speed equals the speed limit, right up to the car’s maximum velocity. Then, it doesn’t matter how high the limit is, the car has to stay at maximum speed.</figcaption>
 </figure>
 </div>
 </div>
@@ -5309,7 +7330,7 @@ font-style: inherit;">"Car speed"</span>)</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-07-05-breakpoint/breakpoint-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Car speed equals the speed limit, right up to the car’s maximum velocity – decreased a little bit by particularities of this specific car.</figcaption>
+<figcaption class="figure-caption">Car speed equals the speed limit, right up to the car’s maximum velocity – decreased a little bit by particularities of this specific car.</figcaption>
 </figure>
 </div>
 </div>
@@ -5706,9 +7727,7 @@ font-style: inherit;">B =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">33</span>), <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>L)</span></code></pre></div>
+font-style: inherit;">refresh =</span> 0L)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 1 chain...
 
@@ -5904,9 +7923,7 @@ font-style: inherit;">max_sd =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>), <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>L)</span></code></pre></div>
+font-style: inherit;">refresh =</span> 0L)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 sequential chains...
 
@@ -6079,9 +8096,7 @@ font-style: inherit;">max_sd =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>), <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>L)</span></code></pre></div>
+font-style: inherit;">refresh =</span> 0L)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 sequential chains...
 
@@ -6260,9 +8275,7 @@ font-style: inherit;">B =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">33</span>), <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>L)</span></code></pre></div>
+font-style: inherit;">refresh =</span> 1000L)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 1 chain...
 
@@ -6483,25 +8496,24 @@ font-style: inherit;">~</span>.draw)</span></code></pre></div>
 </section>
 
 
-<div id="quarto-appendix" class="default"><aside id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>see Leibig’s Law of the Minimum, and also Dune↩︎</p></li>
 </ol>
-</aside></div> ]]></description>
+</section></div> ]]></description>
   <category>UdeS</category>
   <category>stan</category>
   <category>QCBS</category>
-  <guid>https://aammd.github.io/posts/2023-07-05-breakpoint/</guid>
+  <guid>https://aammd.github.io/posts/2023-07-05-breakpoint/index.html</guid>
   <pubDate>Sat, 05 Aug 2023 04:00:00 GMT</pubDate>
   <media:content url="https://aammd.github.io/posts/2023-07-05-breakpoint/breakpoint-1.png" medium="image" type="image/png" height="103" width="144"/>
 </item>
 <item>
   <title>Latent continuous variables</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-03-20-latent-continuous/</link>
+  <link>https://aammd.github.io/posts/2023-03-20-latent-continuous/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -6527,7 +8539,7 @@ font-style: inherit;">library</span>(cmdstanr)</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-03-20-latent-continuous/dag.png" class="img-fluid figure-img"></p>
-<figcaption>Five different observable variables (in squares), all caused by one latent variable (round).</figcaption>
+<figcaption class="figure-caption">Five different observable variables (in squares), all caused by one latent variable (round).</figcaption>
 </figure>
 </div>
 <p>In mathematics, this model is the following:</p>
@@ -6615,9 +8627,7 @@ font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">matrix</span>(<span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">rep</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>L, <span class="at" style="color: #657422;
+font-style: inherit;">rep</span>(0L, <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">times =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
@@ -7531,15 +9541,14 @@ font-style: inherit;">"red"</span>)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-03-20-latent-continuous/</guid>
+  <guid>https://aammd.github.io/posts/2023-03-20-latent-continuous/index.html</guid>
   <pubDate>Mon, 20 Mar 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Validating a model of selection on plasticity</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/</link>
+  <link>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -9389,15 +11398,14 @@ Total execution time: 5.6 seconds.</code></pre>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/</guid>
+  <guid>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/index.html</guid>
   <pubDate>Thu, 02 Feb 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>The evolution of plasticity</title>
   <dc:creator>Andrew MacDonald and Audrey Tremblay</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/</link>
+  <link>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -10105,6 +12113,7 @@ font-style: inherit;">round</span>()</span>
 <span id="cb9-18">)</span></code></pre></div>
 </div>
 <p>Some of these values are unreasonable! we can adjust later</p>
+<div>
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1">quality_effects <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|&gt;</span> </span>
@@ -10139,8 +12148,9 @@ background-color: null;
 font-style: inherit;">+</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">geom_point</span>()</span></code></pre></div>
-<div class="cell quarto-layout-panel" data-layout-ncol="2">
+<div class="cell quarto-layout-panel">
 
+</div>
 </div>
 </section>
 <section id="multiple-females" class="level2">
@@ -10155,6 +12165,7 @@ background-color: null;
 font-style: inherit;">simulate_many_moms</span>()</span></code></pre></div>
 </div>
 <p>let’s plot it!</p>
+<div>
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1">many_moms_temperature <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|&gt;</span> </span>
@@ -10200,8 +12211,9 @@ background-color: null;
 font-style: inherit;">se =</span> <span class="cn" style="color: #8f5902;
 background-color: null;
 font-style: inherit;">FALSE</span>)</span></code></pre></div>
-<div class="cell quarto-layout-panel" data-layout-ncol="2">
+<div class="cell quarto-layout-panel">
 
+</div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">many_moms_temperature <span class="sc" style="color: #5E5E5E;
@@ -10272,15 +12284,14 @@ font-style: inherit;">FALSE</span>)</span></code></pre></div>
   <category>stan</category>
   <category>brms</category>
   <category>simulation</category>
-  <guid>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/index.html</guid>
   <pubDate>Wed, 23 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Simple nonlinear growth</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/</link>
+  <link>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -10450,7 +12461,7 @@ font-style: inherit;">"Size"</span>) </span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/index_files/figure-html/one_animal_plot-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Growth curve for a single individual. The curved line is the true size, and the dots are observations around it. The observations are taken in the field while the semi-tranquilized animal is struggling, so they show some slight variation.</figcaption>
+<figcaption class="figure-caption">Growth curve for a single individual. The curved line is the true size, and the dots are observations around it. The observations are taken in the field while the semi-tranquilized animal is struggling, so they show some slight variation.</figcaption>
 </figure>
 </div>
 </div>
@@ -10743,15 +12754,14 @@ scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/index.html</guid>
   <pubDate>Mon, 21 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Fitting a multispecies functional response in Stan</title>
   <dc:creator>Andrew MacDonald &amp; Ben Mercier</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/</link>
+  <link>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -11283,7 +13293,7 @@ font-style: inherit;">tar_make</span>()</span></code></pre></div>
 </section>
 
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-holling1966" class="csl-entry">
 Holling, C. S. 1966. <span>“The Functional Response of Invertebrate Predators to Prey Density.”</span> <em>Memoirs of the Entomological Society of Canada</em> 98 (S48): 5–86. <a href="https://doi.org/10.4039/entm9848fv">https://doi.org/10.4039/entm9848fv</a>.
 </div>
@@ -11293,23 +13303,22 @@ Smith, Brian E., and Laurel A. Smith. 2020. <span>“Multispecies Functional Res
 <div id="ref-smout2010a" class="csl-entry">
 Smout, Sophie, Christian Asseburg, Jason Matthiopoulos, Carmen Fernández, Stephen Redpath, Simon Thirgood, and John Harwood. 2010. <span>“The Functional Response of a Generalist Predator.”</span> <em>PLOS ONE</em> 5 (5): e10761. <a href="https://doi.org/10.1371/journal.pone.0010761">https://doi.org/10.1371/journal.pone.0010761</a>.
 </div>
-</div></section><aside id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>Things that eat plants have to do the same; replace “kill” with “peel” etc.↩︎</p></li>
 </ol>
-</aside></div> ]]></description>
+</section></div> ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/index.html</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Updating R and your R packages</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/</link>
+  <link>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -11325,15 +13334,14 @@ Smout, Sophie, Christian Asseburg, Jason Matthiopoulos, Carmen Fernández, Steph
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/index.html</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Andrew tries Quarto</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-29-group-centering/</link>
+  <link>https://aammd.github.io/posts/2022-11-29-group-centering/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -11399,15 +13407,14 @@ font-style: inherit;">library</span>(tidybayes)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-29-group-centering/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-29-group-centering/index.html</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Selection on plasticity</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/</link>
+  <link>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -11825,15 +13832,14 @@ font-style: inherit;">mean</span>()</span></code></pre></div>
   <category>UdeS</category>
   <category>stan</category>
   <category>plasticity</category>
-  <guid>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/index.html</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>The Cholesky decomposition</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-12-01-cholesky-correlation/</link>
+  <link>https://aammd.github.io/posts/2022-12-01-cholesky-correlation/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -12307,15 +14313,14 @@ font-style: inherit;">cor</span>(yy)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-12-01-cholesky-correlation/</guid>
+  <guid>https://aammd.github.io/posts/2022-12-01-cholesky-correlation/index.html</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Uncertainty in growth increments</title>
   <dc:creator>Will Vieira, Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-12-05-growth-increment/</link>
+  <link>https://aammd.github.io/posts/2022-12-05-growth-increment/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -13112,15 +15117,14 @@ font-style: inherit;">"orange"</span>)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-12-05-growth-increment/</guid>
+  <guid>https://aammd.github.io/posts/2022-12-05-growth-increment/index.html</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Setting priors on hierarchical multivariate models</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-12-15-setting-priors/</link>
+  <link>https://aammd.github.io/posts/2022-12-15-setting-priors/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -13530,9 +15534,7 @@ font-style: inherit;">c</span>(<span class="cn" style="color: #8f5902;
 background-color: null;
 font-style: inherit;">NA</span>, <span class="sc" style="color: #5E5E5E;
 background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>L), <span class="at" style="color: #657422;
+font-style: inherit;">-</span>3L), <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">class =</span> <span class="fu" style="color: #4758AB;
 background-color: null;
@@ -14355,97 +16357,7 @@ font-style: inherit;">~</span>general_mean_dponte)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-12-15-setting-priors/</guid>
-  <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>Should we model growth as continuous or discrete</title>
-  <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/30-03-2023-growth-continuous-discrete/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(targets)</span>
-<span id="cb1-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(ggplot2)</span>
-<span id="cb1-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(tidyverse)</span>
-<span id="cb1-4"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(tidybayes)</span></code></pre></div>
-</div>
-<section id="how-do-things-grow-or-decay" class="level2">
-<h2 class="anchored" data-anchor-id="how-do-things-grow-or-decay">How do things grow (or: decay)</h2>
-<p>Let’s start with a simple simulation:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1">start_size <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">45</span></span>
-<span id="cb2-2">decay_rate <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> .<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span></span>
-<span id="cb2-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">tibble</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">time =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span><span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">:</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">20</span>, </span>
-<span id="cb2-4">       <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">mass =</span> start_size <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">exp</span>(<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>decay_rate <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span> time)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> </span>
-<span id="cb2-5">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">x =</span> time, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">y =</span> mass)) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">+</span> </span>
-<span id="cb2-6">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">geom_point</span>()</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/30-03-2023-growth-continuous-discrete/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
-</div>
-</div>
-
-
-</section>
-
- ]]></description>
-  <category>UdeS</category>
-  <category>stan</category>
-  <guid>https://aammd.github.io/posts/30-03-2023-growth-continuous-discrete/</guid>
+  <guid>https://aammd.github.io/posts/2022-12-15-setting-priors/index.html</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 </channel>
