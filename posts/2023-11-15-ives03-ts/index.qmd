@@ -55,11 +55,20 @@ map_dfr(1:10, ~ tibble(pop = simulate_pop_growth(b = 0.6, tmax = 100),
   geom_line() + 
   geom_hline(yintercept = 0)
 
-map_dfr(1:10, ~ tibble(pop = simulate_pop_growth(b = 0.9, tmax = 100),
+map_dfr(1:10, ~ tibble(pop = simulate_pop_growth(b = 0.9, tmax = 30),
                        time = 1:length(pop)), .id = "sim") |> 
   ggplot(aes(x = time, y = pop, group = sim)) + 
   geom_line() + 
   geom_hline(yintercept = 0)
+
+
+map_dfr(1:10, 
+        +~ tibble(pop = simulate_pop_growth(a = .3, b = 0.3, tmax = 10, sigma = 0.01),
+                       time = 1:length(pop)), .id = "sim") |> 
+  ggplot(aes(x = time, y = exp(pop), group = sim)) + 
+  geom_line() + 
+  geom_hline(yintercept = 0, lty = 2)
+
 
 
 ```
@@ -75,9 +84,268 @@ plot(1 - 0.87^(1:12), type = "l", ylim = c(0, 1))
 mean and variance
 
 ```{r}
-mu_inf = 
+calc_mean <- function(a, b, time, n_start){
+  mu_max <- a / (1 - b)
+  
+  mu_max + b^time * (n_start - mu_max)
+}
+
+calc_var <- function(b, time, sigma){
+  bsq <- b^2
+  
+  var_max = sigma^2/(1 - bsq)
+  
+  var_max * (1 - bsq^time)
+}
+
+curve(calc_mean(0, .8, n_start = -8, time = x), xlim = c(0, 50))
+
+curve(calc_var(.9, time = x, sigma = 1),
+      xlim = c(0,50), ylim = c(0, 10))
 ```
 
 
+Do these numbers reflect the distribution we see in the simulations?
+
+```{r}
+## get a distribution from sampling the things
+
+some_sims <- map_dfr(1:300, ~ tibble(pop = simulate_pop_growth(b = 0.9, tmax = 30),
+                       time = 0:(length(pop)-1)), .id = "sim")
+
+sim_meanvar <- some_sims |> 
+  group_by(time) |> 
+  summarize(sim_mean = mean(pop),
+            sim_var = var(pop))
+
+some_sims |> 
+  filter(time == 22) |> 
+  pluck("pop") |> 
+  hist(probability = TRUE, breaks = 20)
+
+curve(dnorm(x, 
+            mean = calc_mean(a = 0, b = .9, time = 22, n_start = -8),
+            sd = sqrt(calc_var(b = .9, time = 22, sigma = 1))), 
+      add = TRUE)
+
+```
+
+Ribbon calculations on projections
+
+```{r}
+
+a_fig <- 0
+b_fig <- 0.8
+nstart_fig <- -8
+sigma_fig <- 1
+
+tibble(
+  time = 0:25,
+  mean = calc_mean(
+    a = a_fig, b = b_fig, time = time,
+    n_start = nstart_fig),
+  sd = sqrt(calc_var(
+    b = b_fig, time = time, sigma = sigma_fig))) |> 
+  ggplot(aes(x = time,
+             ymin = mean - sd*2,
+             ymax = mean + sd*2, 
+             y = mean)) + 
+  geom_ribbon(fill = "lightblue")+
+  geom_line(col = "darkblue", lwd = 2) + 
+  geom_line(
+    aes(x = time,
+        y = pop, 
+        group = sim),
+    inherit.aes = FALSE,
+    data = map_dfr(1:10, 
+                   ~ tibble(
+                     pop = simulate_pop_growth(
+                       a = a_fig, 
+                       b = b_fig,
+                       tmax = 25, 
+                       sigma = sigma_fig),
+                     time = 0:(length(pop)-1)
+                     ),
+                   .id = "sim"
+                   )
+  ) + 
+  NULL + 
+  labs(x = "Time", y = "log population size")
+```
+
+
+## A specific experiment
+
+I want to describe a particular experiment conducted by Katerie from  [Matt Barbour's Lab](www) at Sherbrooke. 
+In this experiment, 10 genotypes of aphid were grown on plants, the colonies start with a single aphid on a single radish plant. 
+The entire experiment fits on a single tray in a growth chamber, and Katerie replicated the experiment 3 times.
+
+Each colony, incredibly, starts with a single aphid
+
+This simplifies the expressions for the average and the variance:
+
+$$
+\mu_t = a\frac{1-b^t}{1-b}
+$$
+
+
+$$
+\sigma^2_t  = \sigma^2 \frac{1 - (b^2)^t}{1 - b^2}
+$$
+
+
+## make fake data
+
+```{r}
+
+sim_one_noisy_pop <- function(K = 1000, 
+         log_r = log(.8), 
+         log_s = .5,
+         ntime = 14){
+  
+  r <- exp(log_r + rnorm(n = ntime, mean = 0, sd = log_s))
+  # s <- log(1 + r)
+  # curve(K * exp(s*x)/(K + exp(s*x) - 1), xlim = c(0, 42))
+  # browser()
+  nt <- numeric(ntime)
+  nt[1] <- 1
+  for (i in 2:ntime){
+    nt[i] = (1 + r[i] * (1 - nt[i-1]/K))*nt[i-1]
+  }
+  
+  return(tibble(N = nt, time = 1:ntime))
+}
+
+map_df(1:6, ~ list(sim_one_noisy_pop()), .id = "sim_id") |> 
+  ggplot(aes(x = time, y = N, group = sim_id)) + 
+  geom_line()
+```
+
+I'm a bit confused, because this doesn't bounce around like I was expecting it to.
+I suspect this is just a result of a different process in the model -- we can imagine that 
+
+go with it for now, I might go back and change to the data-generating model.
+Really using it not as a version of reality, because relaity is not well reflected in this phenomenological model -- or at least it isn't really. 
+
+What does a scale-dependent variance imply. ecological processes happening at greater impact or number as they affect more of the population. 
+
+```{r}
+#| class-output: stan
+
+
+# load the model in stan
+ar_1 <- cmdstan_model(here::here("posts/2023-11-15-ives03-ts/ar1.stan"))
+
+ar_1
+```
+
+```{r, warning=FALSE, message=FALSE}
+one_pop_df <- map_df(1:6, ~ list(sim_one_noisy_pop()), .id = "sim_id")
+
+ar_1_sample <- ar_1$sample(data = list(n = nrow(one_pop_df),
+                        x = one_pop_df$N,
+                        time = one_pop_df$time),
+                        parallel_chains = 4, refresh = 0)
+```
+
+```{r, warning=FALSE, message=FALSE}
+ar_1_sample |> 
+  spread_rvars(x_pred[time]) |> 
+  ggplot(aes(x = time, ydist = x_pred)) + 
+  stat_lineribbon() + 
+  scale_fill_brewer(palette = "Greens", direction = -1) + 
+  theme_bw() + 
+  geom_line(aes(x = time, y = log(N), group = sim_id),
+            inherit.aes = FALSE, data = one_pop_df)
+```
+
+## Simulating from the data-generating model
+
+```{r}
+
+sim_one_gompertz <- function(K = 1000, 
+         a = 1, 
+         b = 0.86,
+         s = .3,
+         ntime = 15){
+  
+  N = c(0, 
+        rnorm(ntime - 1, 
+              mean = a * (1 - b^(1:(ntime-1))) / (1 - b),
+              sd = s * (1 - (b^2)^(1:(ntime-1))) / (1 - b^2)
+        )
+  )
+        
+        
+  return(tibble(N = N, time = 0:(ntime-1)))
+}
+
+map_df(1:6, ~ list(sim_one_gompertz()), .id = "sim_id") |> 
+  ggplot(aes(x = time, y = N, group = sim_id)) + 
+  geom_line()
+```
+
+```{r, warning=FALSE, message=FALSE}
+gomp_one_pop_df <- map_df(1:20, ~ list(
+  sim_one_gompertz()), .id = "sim_id")
+  
+  
+gomp_nozero <- gomp_one_pop_df  |> 
+    filter(time != 0)
+
+gomp_ar_1_sample <- ar_1$sample(data = list(n = nrow(gomp_nozero),
+                        x = gomp_nozero$N,
+                        time = gomp_nozero$time),
+                        parallel_chains = 4, refresh = 0)
+```
+
+```{r}
+gomp_ar_1_sample |> 
+  spread_rvars(x_pred[time]) |> 
+  ggplot(aes(x = time-1, ydist = x_pred)) + 
+  stat_lineribbon() + 
+  scale_fill_brewer(palette = "Greens", direction = -1) + 
+  theme_bw() + 
+  geom_line(aes(x = time, y = N, group = sim_id),
+            inherit.aes = FALSE, data = gomp_one_pop_df)
+```
+
+
+```{r}
+  ggplot(aes(x = time, y = log(N), group = sim_id),
+            inherit.aes = FALSE, data = gomp_one_pop_df)  +
+  geom_line()
+```
+
+## reparam
+
+```{r}
+#| class-output: stan
+
+
+# load the model in stan
+ar1_mu_sigma <- cmdstan_model(here::here("posts/2023-11-15-ives03-ts/ar1_mu_sigma.stan"))
+
+ar1_mu_sigma
+```
+
+```{r}
+gomp_ar1_mu_sigma_sample <- ar1_mu_sigma$sample(data = list(n = nrow(gomp_nozero),
+                        x = gomp_nozero$N,
+                        time = gomp_nozero$time),
+                        parallel_chains = 4, refresh = 0)
+```
+
+
+```{r}
+gomp_ar1_mu_sigma_sample |> 
+  spread_rvars(x_pred[time]) |> 
+  ggplot(aes(x = time-1, ydist = x_pred)) + 
+  stat_lineribbon() + 
+  scale_fill_brewer(palette = "Greens", direction = -1) + 
+  theme_bw() + 
+  geom_line(aes(x = time, y = N, group = sim_id),
+            inherit.aes = FALSE, data = gomp_one_pop_df)
+```
 
 
