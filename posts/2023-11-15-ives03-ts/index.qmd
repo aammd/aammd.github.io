@@ -1,5 +1,5 @@
 ---
-title: ""
+title: "Discrete-time population growth in Stan"
 author: "Andrew MacDonald"
 description: |
   Inspired by Ives 2003.
