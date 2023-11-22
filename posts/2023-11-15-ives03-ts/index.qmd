@@ -1,12 +1,16 @@
 ---
-title: "Reproduction of Ives 2003"
+title: ""
 author: "Andrew MacDonald"
 description: |
-  Autoregressive models.
+  Inspired by Ives 2003.
 date: 17 Nov 2023
 editor: source
 categories: [UdeS, stan, reproduction, MAR]
 bibliography: references.bib
+knitr:
+  opts_chunk: 
+    warning: false
+    message: false
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
@@ -14,6 +18,7 @@ library(cmdstanr)
 library(ggplot2)
 library(tidyverse)
 library(tidybayes)
+
 ```
 
 ## Background
@@ -244,8 +249,28 @@ $$
 
 The entire experiment fits on a single tray in a growth chamber, and Katerie replicated the experiment 6 times.
 
+## Math: a model for one clone
+
+When we are making replicates observations of a single clone, we only need to know four quantites to predict both the average and the variation around that average: $a$, $b$, $\sigma$ and the time that passed since the start, $t$
+
+Here is the full Bayesian model with priors. I used prior simulations to come up with these numbers (that's the next section below!)
+
+$$
+\begin{align}
+x_{i} &\sim \text{Normal}(\mu_t, \sqrt{v_t})\\
+\mu_t &= \mu_\infty(1 - b^t) \\
+v_t &= v_\infty(1 - b^{2t}) \\
+\mu_\infty &= \frac{a}{1 - b} \\
+v_\infty &= \frac{\sigma^2}{1 - b^2} \\
+a &\sim \text{Normal}(2, .5) \\
+b &\sim \text{Beta}(5, 2) \\
+\sigma &\sim \text{Exponential}(1) \\
+\end{align}
+$$
+
 
 ## Make fake data
+
 
 Simulating from the data-generating model
 
@@ -321,6 +346,8 @@ gomp_ar_1_sample$summary(variables = c("a", "b", "sigma",
 
 ## Say it again but different: parameterizing based on $\mu$ and $\sigma$
 
+It might be easier to set priors directly on equilibrium population size ($\mu_\infty$) and variance at equilibrium ($v_\infty$) so I experimented with parameterizing the model directly that way. It works just as well!
+
 ```{r}
 #| class-output: stan
 
@@ -331,11 +358,12 @@ ar1_mu_sigma <- cmdstan_model(here::here("posts/2023-11-15-ives03-ts/ar1_mu_sigm
 ar1_mu_sigma
 ```
 
-```{r}
-gomp_ar1_mu_sigma_sample <- ar1_mu_sigma$sample(data = list(n = nrow(gomp_nozero),
-                        x = gomp_nozero$N,
-                        time = gomp_nozero$time),
-                        parallel_chains = 4, refresh = 0)
+```{r, message= FALSE, warning=FALSE}
+gomp_ar1_mu_sigma_sample <- ar1_mu_sigma$sample(
+  data = list(n = nrow(gomp_nozero),
+              x = gomp_nozero$N,
+              time = gomp_nozero$time),
+  parallel_chains = 4, refresh = 0)
 ```
 
 ```{r}
@@ -353,4 +381,207 @@ gomp_ar1_mu_sigma_sample |>
 gomp_ar1_mu_sigma_sample$summary(variables = c("mu_max", "b", "sigma_max")) |> 
   knitr::kable()
 ```
+
+
+## More than one model at once
+
+Here is a no-pooling approach to modelling different clones.
+
+```{r}
+#| class-output: stan
+ar1_multispp <- cmdstan_model(here::here("posts/2023-11-15-ives03-ts/ar1_multispp.stan"))
+ar1_multispp
+```
+
+A few things are different in this model compared to the previous one:
+
+* I'm passing in ID numbers for each clone, and an integer number for maximum number of clones
+* the model parameters are now vectors, not scalars
+* I've also put the parameters on different scale. This will come in handy later when the model becomes hierarchical. Whenever I personally do this, I also change the names (see Note below).
+* The predictions are now a matrix. This is because we need two different pieces of information for each observation: what time it is, and which clone we're talking about.
+
+:::{.callout-note}
+### Call me by your name
+
+This code shows off a habit I've developed over the last few months of working on Bayesian models. When I put a parameter on a link scale, I change the parameter name to add the name of that link scale. 
+
+For example, you might have a strictly positive parameter and model it like this:
+
+```stan
+parameters {
+  real<lower=0> alpha;
+}
+model {
+  alpha ~ normal(1, .5);
+  ....
+}
+```
+
+But then you might decide to model that on a log scale, either to reparameterize or to prepare for making it hierarchical later. Using link functions like the log and logit is standard in hiearchical models because it allows us to calculate a different value for every group, above and below the overall average, while respecting any constraints
+
+```stan
+parameters {
+  real alpha_log;
+}
+model {
+  alpha_log ~ normal(0, .2);
+}
+```
+
+I don't usually try to make sure the prior is EXACTLY equivalent, but its usually pretty straightforward to get kind of close. 
+:::
+
+To validate this model, I'm going to generate 6 aphid clones by choosing parameters for a and b from different 
+
+```{r}
+as <- runif(n = 6, min = 1.5, max = 2.5)
+bs <- runif(n = 6, min = .4, max = .9)
+gomp_many_df <- expand_grid(clone_id = 1:6, rep_id = 1:10) |> 
+  mutate(a = as[clone_id],
+         b = bs[clone_id]) |> 
+  rowwise() |> 
+  mutate(x = list(sim_one_gompertz(a = a, b = b)))
+
+gomp_nozero_many_df <- gomp_many_df  |> 
+  unnest(x) |> 
+    filter(time != 0)
+
+gomp_nozero_many_df |> 
+  ggplot(aes(x = time, y = N, group = rep_id)) + 
+  geom_line() + 
+  facet_wrap(~clone_id)
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+ar1_multispp_samp <- ar1_multispp$sample(
+  data = list(n = nrow(gomp_nozero_many_df),
+              nclone = max(gomp_nozero_many_df$clone_id),
+              time = gomp_nozero_many_df$time,
+              x = gomp_nozero_many_df$N,
+              clone_id = gomp_nozero_many_df$clone_id), 
+  parallel_chains = 4,
+  refresh = 0
+)
+
+ar1_multispp_samp
+```
+
+```{r}
+ar1_multispp_samp |> 
+  gather_rvars(x_pred[time,clone_id]) |> 
+  ggplot(aes(x = time-1, ydist = .value)) + stat_lineribbon() + 
+  facet_wrap(~clone_id) + 
+  scale_fill_brewer(palette = "Greens") + 
+  ## add data
+  geom_line(aes(x = time, y = N, group = rep_id), 
+            data = gomp_nozero_many_df,
+            inherit.aes = FALSE) 
+```
+
+::: {.callout-note}
+### Time equals 🫖 - 1
+
+One of the trickiest parts of working with these models has been adding and subtracting $1$. Here's some notes for the next time I get confused:
+
+* *take out the first value* We can't use data including `time=0` in a stan model because that implies 0 variance, which just causes lots of errors with the normal likelihood. Taking this point out is no loss, because it doesn't give us any real information -- there's no variance at all.
+* *using position in the matrix as data for predictions* I generate predictions for new clonal lines, in order to generate the posterior predictive distribution and plot the figures. I store these predictions in a matrix. However, the first observation (`time = 0`) is actually stored in the first position of the matrix (i.e., row 1). I just evaluate time as all the integers between 0 and 14, which gives two weeks of experiment in this case.  You can see in the `generated quantities` block that I actually use the index value in the for-loop (I called it `j`) as the value of time. This requires a weird trick: the value of `j` gets used, but then it is placed in the `j+1` position in the vector. This is because there is no "row 0" to go with the observation at _time_ 0, so everything is pushed up by 1.
+* *subtract 1 to get the correct time* This means that to get the right time, we need to subtract 1 from the value used in `generated quantities`. When I use `tidybayes` to extract the predictive distribution, I use `gather_rvars(x_pred[time,clone_id])` to specify that I want to call the first dimension of the matrix "time", and the second "clone_id". But then when I plot these data, I need to subtract 1 from the row position of a prediction to get the actual time value. This is because time = 0 is in row 1, time = 1 is in row 2, etc.  Doing this gives a figure where model predictions match 
+:::
+
+
+### Hierarchical model
+
+
+```{r}
+#| class-output: stan
+ar1_multilevel <- cmdstan_model(here::here("posts/2023-11-15-ives03-ts/ar1_multilevel.stan"))
+ar1_multilevel
+```
+
+
+```{r, eval=FALSE}
+ar1_multilevel_samp <- ar1_multilevel$sample(
+  data = list(n = nrow(gomp_nozero_many_df),
+              nclone = max(gomp_nozero_many_df$clone_id),
+              time = gomp_nozero_many_df$time,
+              x = gomp_nozero_many_df$N,
+              clone_id = gomp_nozero_many_df$clone_id), 
+  parallel_chains = 4,
+  refresh = 500
+)
+
+ar1_multilevel_samp
+```
+
+We can fit to previous simulations no problem, but we can also simulate data directly from the model. Because this has gotten kind of big, I'm going to make a Stan program just for simulating data
+
+```{r}
+#| class-output: stan
+ar1_multilevel_prior <- cmdstan_model(here::here("posts/2023-11-15-ives03-ts/ar1_multilevel_prior.stan"))
+ar1_multilevel_prior
+```
+
+This model code lacks the likelihood, but uses the same configuration as the previous non-centered model. 
+It also has a bit more going on the Generated Quantities block. 
+Here, we are simulating multiple replicates using each clone, which simulates the actual experiment.
+
+We can sample from this prior distribution and visualize it to see what it says. This is really the only way to get a good idea of what priors really mean in a nonlinear model like this one!
+
+```{r}
+multilevel_prior <- ar1_multilevel_prior$sample(
+  data = list(nclone = 12, nrep = 10), 
+  chains = 1,
+  refresh = 0)
+
+prior_pred_multilevel <- multilevel_prior |> 
+  gather_draws(x_pred[clone_id, rep, time], ndraws = 1) |> 
+  mutate(time = time -1)
+
+prior_pred_multilevel |> 
+  ggplot(aes(x = time, y = .value, group = rep)) + 
+  geom_line() + 
+  facet_wrap(~clone_id)
+```
+
+Finally we can put this model through a very similar process of fitting and plotting as previous. 
+Here I'm doing data prep, sampling and plotting all in one plot.
+
+```{r}
+
+prior_df <- prior_pred_multilevel |> 
+  filter(time != 0)
+
+ar1_multilevel_samp <- ar1_multilevel$sample(
+  data = list(n = nrow(prior_df),
+              nclone = max(prior_df$clone_id),
+              time = prior_df$time,
+              x = prior_df$.value,
+              clone_id = prior_df$clone_id), 
+  parallel_chains = 4,
+  refresh = 0
+)
+
+# ar1_multilevel_samp
+
+ar1_multilevel_samp |> 
+  gather_rvars(x_pred[time,clone_id]) |> 
+  ggplot(aes(x = time-1, ydist = .value)) + stat_lineribbon() + 
+  facet_wrap(~clone_id) + 
+  scale_fill_brewer(palette = "Greens") + 
+  ## add data
+  geom_line(aes(x = time, y = .value, group = rep), 
+            data = prior_pred_multilevel,
+            inherit.aes = FALSE, col = "darkorange", alpha = .3)  + 
+  labs(y = "Population size (log)", 
+       x = "Time")
+```
+
+Note that this did not work perfectly, even though we are fitting to the prior predictive distribution. There are divergent iterations!
+
+```{r}
+ar1_multilevel_samp$diagnostic_summary()
+```
+
+
 

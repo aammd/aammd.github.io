@@ -7,7 +7,7 @@ data{
 //   vector[n] x = log(pop);
 // }
 parameters {
-  real a;
+  real<lower=0> a;
   real<lower=0,upper=1> b;
   real<lower=0> sigma;
 }

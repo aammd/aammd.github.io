@@ -2,15 +2,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.353">
+<meta name="generator" content="quarto-99.9.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Andrew MacDonald">
 <meta name="dcterms.date" content="2023-11-17">
-<meta name="description" content="Autoregressive models.">
+<meta name="description" content="Inspired by Ives 2003.">
 
-<title>Andrew MacDonald - Reproduction of Ives 2003</title>
+<title>Andrew MacDonald -</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -25,7 +25,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -61,6 +61,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -101,7 +102,13 @@ div.csl-indent {
   "collapse-after": 3,
   "panel-placement": "end",
   "type": "overlay",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -111,7 +118,8 @@ div.csl-indent {
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
     "search-detached-cancel-button-title": "Cancel",
-    "search-submit-button-title": "Submit"
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
   }
 }</script>
 
@@ -127,7 +135,7 @@ div.csl-indent {
   <header id="quarto-header" class="headroom fixed-top">
     <nav class="navbar navbar-expand-lg navbar-dark ">
       <div class="navbar-container container-fluid">
-      <div class="navbar-brand-container">
+      <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="../../index.html">
     <span class="navbar-title">Andrew MacDonald</span>
     </a>
@@ -139,23 +147,23 @@ div.csl-indent {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
-    <a class="nav-link" href="../../blog.html" rel="" target="">
- <span class="menu-text">The Study of the Household</span></a>
+    <a class="nav-link" href="../../blog.html"> 
+<span class="menu-text">The Study of the Household</span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://github.com/aammd" rel="" target=""><i class="bi bi-github" role="img">
+    <a class="nav-link" href="https://github.com/aammd"> <i class="bi bi-github" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
   <li class="nav-item compact">
-    <a class="nav-link" href="https://twitter.com/polesasunder" rel="" target=""><i class="bi bi-twitter" role="img">
+    <a class="nav-link" href="https://twitter.com/polesasunder"> <i class="bi bi-twitter" role="img">
 </i> 
- <span class="menu-text"></span></a>
+<span class="menu-text"></span></a>
   </li>  
 </ul>
-            <div class="quarto-navbar-tools">
-</div>
           </div> <!-- /navcollapse -->
+          <div class="quarto-navbar-tools">
+</div>
       </div> <!-- /container-fluid -->
     </nav>
 </header>
@@ -163,10 +171,10 @@ div.csl-indent {
 <header id="title-block-header" class="quarto-title-block default page-columns page-full">
   <div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
-      <h1 class="title">Reproduction of Ives 2003</h1>
+      
                   <div>
         <div class="description">
-          <p>Autoregressive models.</p>
+          <p>Inspired by Ives 2003.</p>
         </div>
       </div>
                           <div class="quarto-categories">
@@ -213,13 +221,19 @@ div.csl-indent {
   <li><a href="#functions-for-the-mean-and-variance" id="toc-functions-for-the-mean-and-variance" class="nav-link" data-scroll-target="#functions-for-the-mean-and-variance">Functions for the mean and variance</a></li>
   </ul></li>
   <li><a href="#aphids" id="toc-aphids" class="nav-link" data-scroll-target="#aphids">Aphids</a></li>
+  <li><a href="#math-a-model-for-one-clone" id="toc-math-a-model-for-one-clone" class="nav-link" data-scroll-target="#math-a-model-for-one-clone">Math: a model for one clone</a></li>
   <li><a href="#make-fake-data" id="toc-make-fake-data" class="nav-link" data-scroll-target="#make-fake-data">Make fake data</a></li>
   <li><a href="#say-it-again-but-different-parameterizing-based-on-mu-and-sigma" id="toc-say-it-again-but-different-parameterizing-based-on-mu-and-sigma" class="nav-link" data-scroll-target="#say-it-again-but-different-parameterizing-based-on-mu-and-sigma">Say it again but different: parameterizing based on <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span></a></li>
+  <li><a href="#more-than-one-model-at-once" id="toc-more-than-one-model-at-once" class="nav-link" data-scroll-target="#more-than-one-model-at-once">More than one model at once</a>
+  <ul class="collapse">
+  <li><a href="#hierarchical-model" id="toc-hierarchical-model" class="nav-link" data-scroll-target="#hierarchical-model">Hierarchical model</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
+
 
 
 
@@ -251,7 +265,7 @@ x_t = x_\infty + b^t(x_0 - x_\infty)
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Curve of a Gompertz growth model.</figcaption>
+<figcaption>Curve of a Gompertz growth model.</figcaption>
 </figure>
 </div>
 </div>
@@ -281,7 +295,6 @@ v_t &amp;= \sigma^2\frac{1 - (b^2)^t}{1 - b^2} = v_\infty(1 - b^{2t})
 <section id="simulations" class="level2">
 <h2 class="anchored" data-anchor-id="simulations">Simulations</h2>
 <p>Here are simulations from a one-species AR-1 model that imitate Ives et al.&nbsp;figure 1.</p>
-<div>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>simulate_pop_growth <span class="ot">&lt;-</span> <span class="cf">function</span>(</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="at">a =</span> <span class="dv">0</span>, </span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    b, </span>
@@ -315,24 +328,19 @@ v_t &amp;= \sigma^2\frac{1 - (b^2)^t}{1 - b^2} = v_\infty(1 - b^{2t})
 <span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
 <span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="dv">0</span>)<span class="sc">+</span> </span>
 <span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell quarto-layout-panel">
+<div class="cell quarto-layout-panel" data-layout-ncol="2">
 <div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div class="quarto-figure quarto-figure-center">
+<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
 <figure class="figure">
 <p><img src="index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Growth with a = 0, b = .6, sigma = 1</figcaption>
+<figcaption>Growth with a = 0, b = .6, sigma = 1</figcaption>
 </figure>
 </div>
-</div>
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div class="quarto-figure quarto-figure-center">
+<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
 <figure class="figure">
 <p><img src="index_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Growth with a = 0, b = .95, sigma = 1</figcaption>
+<figcaption>Growth with a = 0, b = .95, sigma = 1</figcaption>
 </figure>
-</div>
-</div>
 </div>
 </div>
 </div>
@@ -380,7 +388,6 @@ v_t &amp;= \sigma^2\frac{1 - (b^2)^t}{1 - b^2} = v_\infty(1 - b^{2t})
 </div>
 </div>
 <p>Do these numbers reflect the distribution we see in the simulations?</p>
-<div>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">5002</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>some_sims <span class="ot">&lt;-</span> <span class="fu">map_dfr</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">300</span>, <span class="sc">~</span> <span class="fu">tibble</span>(<span class="at">pop =</span> <span class="fu">simulate_pop_growth</span>(<span class="at">b =</span> <span class="fl">0.9</span>, <span class="at">tmax =</span> <span class="dv">30</span>),</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">time =</span> <span class="dv">0</span><span class="sc">:</span>(<span class="fu">length</span>(pop)<span class="sc">-</span><span class="dv">1</span>)), <span class="at">.id =</span> <span class="st">"sim"</span>)</span>
@@ -436,24 +443,19 @@ v_t &amp;= \sigma^2\frac{1 - (b^2)^t}{1 - b^2} = v_\infty(1 - b^{2t})
 <span id="cb7-53"><a href="#cb7-53" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span> </span>
 <span id="cb7-54"><a href="#cb7-54" aria-hidden="true" tabindex="-1"></a>  <span class="cn">NULL</span> <span class="sc">+</span> </span>
 <span id="cb7-55"><a href="#cb7-55" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Time"</span>, <span class="at">y =</span> <span class="st">"log population size"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell quarto-layout-panel">
+<div class="cell quarto-layout-panel" data-layout-ncol="2">
 <div class="quarto-layout-row quarto-layout-valign-top">
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div class="quarto-figure quarto-figure-center">
+<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
 <figure class="figure">
 <p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Simulations match the theoretical predictions very closely. Math works!</figcaption>
+<figcaption>Simulations match the theoretical predictions very closely. Math works!</figcaption>
 </figure>
 </div>
-</div>
-<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
-<div class="quarto-figure quarto-figure-center">
+<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
 <figure class="figure">
 <p><img src="index_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Simulations match the theoretical predictions very closely. Math works!</figcaption>
+<figcaption>Simulations match the theoretical predictions very closely. Math works!</figcaption>
 </figure>
-</div>
-</div>
 </div>
 </div>
 </div>
@@ -470,6 +472,23 @@ v_t &amp;= \sigma^2\frac{1 - (b^2)^t}{1 - b^2} &amp;= v_\infty(1 - b^{2t})
 \end{align}
 \]</span></p>
 <p>The entire experiment fits on a single tray in a growth chamber, and Katerie replicated the experiment 6 times.</p>
+</section>
+<section id="math-a-model-for-one-clone" class="level2">
+<h2 class="anchored" data-anchor-id="math-a-model-for-one-clone">Math: a model for one clone</h2>
+<p>When we are making replicates observations of a single clone, we only need to know four quantites to predict both the average and the variation around that average: <span class="math inline">\(a\)</span>, <span class="math inline">\(b\)</span>, <span class="math inline">\(\sigma\)</span> and the time that passed since the start, <span class="math inline">\(t\)</span></p>
+<p>Here is the full Bayesian model with priors. I used prior simulations to come up with these numbers (that’s the next section below!)</p>
+<p><span class="math display">\[
+\begin{align}
+x_{i} &amp;\sim \text{Normal}(\mu_t, \sqrt{v_t})\\
+\mu_t &amp;= \mu_\infty(1 - b^t) \\
+v_t &amp;= v_\infty(1 - b^{2t}) \\
+\mu_\infty &amp;= \frac{a}{1 - b} \\
+v_\infty &amp;= \frac{\sigma^2}{1 - b^2} \\
+a &amp;\sim \text{Normal}(2, .5) \\
+b &amp;\sim \text{Beta}(5, 2) \\
+\sigma &amp;\sim \text{Exponential}(1) \\
+\end{align}
+\]</span></p>
 </section>
 <section id="make-fake-data" class="level2">
 <h2 class="anchored" data-anchor-id="make-fake-data">Make fake data</h2>
@@ -514,7 +533,7 @@ v_t &amp;= \sigma^2\frac{1 - (b^2)^t}{1 - b^2} &amp;= v_\infty(1 - b^{2t})
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co">//   vector[n] x = log(pop);</span></span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="co">// }</span></span>
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> a;</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; a;</span>
 <span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>,<span class="kw">upper</span>=<span class="dv">1</span>&gt; b;</span>
 <span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma;</span>
 <span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>}</span>
@@ -558,14 +577,14 @@ v_t &amp;= \sigma^2\frac{1 - (b^2)^t}{1 - b^2} &amp;= v_\infty(1 - b^{2t})
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...
 
-Chain 1 finished in 0.6 seconds.
-Chain 2 finished in 0.5 seconds.
-Chain 3 finished in 0.5 seconds.
-Chain 4 finished in 0.6 seconds.
+Chain 2 finished in 0.9 seconds.
+Chain 1 finished in 1.1 seconds.
+Chain 3 finished in 0.9 seconds.
+Chain 4 finished in 0.8 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.6 seconds.
-Total execution time: 0.8 seconds.</code></pre>
+Mean chain execution time: 0.9 seconds.
+Total execution time: 1.5 seconds.</code></pre>
 </div>
 </div>
 <div class="cell preview-image">
@@ -595,7 +614,7 @@ Total execution time: 0.8 seconds.</code></pre>
 <col style="width: 10%">
 <col style="width: 10%">
 <col style="width: 10%">
-<col style="width: 10%">
+<col style="width: 11%">
 <col style="width: 9%">
 <col style="width: 9%">
 <col style="width: 9%">
@@ -617,63 +636,63 @@ Total execution time: 0.8 seconds.</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">a</td>
-<td style="text-align: right;">0.9098355</td>
-<td style="text-align: right;">0.9063220</td>
-<td style="text-align: right;">0.0686223</td>
-<td style="text-align: right;">0.0670780</td>
-<td style="text-align: right;">0.8005618</td>
-<td style="text-align: right;">1.0257205</td>
-<td style="text-align: right;">1.003307</td>
-<td style="text-align: right;">1030.106</td>
-<td style="text-align: right;">1314.908</td>
+<td style="text-align: right;">0.8755229</td>
+<td style="text-align: right;">0.8715515</td>
+<td style="text-align: right;">0.0653034</td>
+<td style="text-align: right;">0.0640476</td>
+<td style="text-align: right;">0.7744877</td>
+<td style="text-align: right;">0.9901877</td>
+<td style="text-align: right;">1.002237</td>
+<td style="text-align: right;">1274.784</td>
+<td style="text-align: right;">1329.060</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">b</td>
-<td style="text-align: right;">0.8789703</td>
-<td style="text-align: right;">0.8794605</td>
-<td style="text-align: right;">0.0195818</td>
-<td style="text-align: right;">0.0192753</td>
-<td style="text-align: right;">0.8459716</td>
-<td style="text-align: right;">0.9102432</td>
-<td style="text-align: right;">1.003239</td>
-<td style="text-align: right;">1013.561</td>
-<td style="text-align: right;">1250.140</td>
+<td style="text-align: right;">0.8919885</td>
+<td style="text-align: right;">0.8926680</td>
+<td style="text-align: right;">0.0188091</td>
+<td style="text-align: right;">0.0186207</td>
+<td style="text-align: right;">0.8595486</td>
+<td style="text-align: right;">0.9219138</td>
+<td style="text-align: right;">1.002168</td>
+<td style="text-align: right;">1276.568</td>
+<td style="text-align: right;">1300.837</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">sigma</td>
-<td style="text-align: right;">0.5482239</td>
-<td style="text-align: right;">0.5452855</td>
-<td style="text-align: right;">0.0489006</td>
-<td style="text-align: right;">0.0485707</td>
-<td style="text-align: right;">0.4737331</td>
-<td style="text-align: right;">0.6320994</td>
-<td style="text-align: right;">1.005132</td>
-<td style="text-align: right;">1197.362</td>
-<td style="text-align: right;">1523.607</td>
+<td style="text-align: right;">0.5386121</td>
+<td style="text-align: right;">0.5334915</td>
+<td style="text-align: right;">0.0482727</td>
+<td style="text-align: right;">0.0461511</td>
+<td style="text-align: right;">0.4668362</td>
+<td style="text-align: right;">0.6243722</td>
+<td style="text-align: right;">1.004019</td>
+<td style="text-align: right;">1438.492</td>
+<td style="text-align: right;">1641.133</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">mu_max</td>
-<td style="text-align: right;">7.6344214</td>
-<td style="text-align: right;">7.5211700</td>
-<td style="text-align: right;">0.7723139</td>
-<td style="text-align: right;">0.6918331</td>
-<td style="text-align: right;">6.5748975</td>
-<td style="text-align: right;">9.0189875</td>
-<td style="text-align: right;">1.001850</td>
-<td style="text-align: right;">1176.005</td>
-<td style="text-align: right;">1381.095</td>
+<td style="text-align: right;">8.2620125</td>
+<td style="text-align: right;">8.1184950</td>
+<td style="text-align: right;">0.9562658</td>
+<td style="text-align: right;">0.8650823</td>
+<td style="text-align: right;">6.9728300</td>
+<td style="text-align: right;">10.0094000</td>
+<td style="text-align: right;">1.002092</td>
+<td style="text-align: right;">1446.378</td>
+<td style="text-align: right;">1782.139</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">sigma_max</td>
-<td style="text-align: right;">1.1568230</td>
-<td style="text-align: right;">1.1484850</td>
-<td style="text-align: right;">0.0972406</td>
-<td style="text-align: right;">0.0928182</td>
-<td style="text-align: right;">1.0142685</td>
-<td style="text-align: right;">1.3257135</td>
-<td style="text-align: right;">1.002568</td>
-<td style="text-align: right;">1713.400</td>
-<td style="text-align: right;">1761.835</td>
+<td style="text-align: right;">1.2005219</td>
+<td style="text-align: right;">1.1903850</td>
+<td style="text-align: right;">0.1052177</td>
+<td style="text-align: right;">0.1015655</td>
+<td style="text-align: right;">1.0467550</td>
+<td style="text-align: right;">1.3880110</td>
+<td style="text-align: right;">1.002135</td>
+<td style="text-align: right;">1844.450</td>
+<td style="text-align: right;">1556.341</td>
 </tr>
 </tbody>
 </table>
@@ -682,6 +701,7 @@ Total execution time: 0.8 seconds.</code></pre>
 </section>
 <section id="say-it-again-but-different-parameterizing-based-on-mu-and-sigma" class="level2">
 <h2 class="anchored" data-anchor-id="say-it-again-but-different-parameterizing-based-on-mu-and-sigma">Say it again but different: parameterizing based on <span class="math inline">\(\mu\)</span> and <span class="math inline">\(\sigma\)</span></h2>
+<p>It might be easier to set priors directly on equilibrium population size (<span class="math inline">\(\mu_\infty\)</span>) and variance at equilibrium (<span class="math inline">\(v_\infty\)</span>) so I experimented with parameterizing the model directly that way. It works just as well!</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># load the model in stan</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>ar1_mu_sigma <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-11-15-ives03-ts/ar1_mu_sigma.stan"</span>))</span>
@@ -727,136 +747,46 @@ Total execution time: 0.8 seconds.</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>gomp_ar1_mu_sigma_sample <span class="ot">&lt;-</span> ar1_mu_sigma<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(<span class="at">n =</span> <span class="fu">nrow</span>(gomp_nozero),</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">x =</span> gomp_nozero<span class="sc">$</span>N,</span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">time =</span> gomp_nozero<span class="sc">$</span>time),</span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>                        <span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>gomp_ar1_mu_sigma_sample <span class="ot">&lt;-</span> ar1_mu_sigma<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">n =</span> <span class="fu">nrow</span>(gomp_nozero),</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> gomp_nozero<span class="sc">$</span>N,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">time =</span> gomp_nozero<span class="sc">$</span>time),</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Running MCMC with 4 parallel chains...</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: normal_lpdf: Scale parameter[1] is nan, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: normal_lpdf: Scale parameter[1] is 0, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Exception: normal_lpdf: Scale parameter[1] is nan, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: normal_lpdf: Scale parameter[1] is nan, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: normal_lpdf: Scale parameter[1] is nan, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: normal_lpdf: Scale parameter[1] is nan, but must be positive! (in 'C:/Users/UTILIS~1/AppData/Local/Temp/RtmpsPJFNU/model-1ec42fb87ed4.stan', line 22, column 2 to line 25, column 6)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 1 finished in 0.5 seconds.
-Chain 2 finished in 0.4 seconds.
-Chain 3 finished in 0.4 seconds.
-Chain 4 finished in 0.5 seconds.
+<pre><code>Running MCMC with 4 parallel chains...
+
+Chain 1 finished in 0.6 seconds.
+Chain 2 finished in 0.7 seconds.
+Chain 3 finished in 0.6 seconds.
+Chain 4 finished in 0.6 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.5 seconds.
-Total execution time: 0.7 seconds.</code></pre>
+Mean chain execution time: 0.6 seconds.
+Total execution time: 0.8 seconds.</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>gomp_ar1_mu_sigma_sample <span class="sc">|&gt;</span> </span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread_rvars</span>(x_pred[time]) <span class="sc">|&gt;</span> </span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time<span class="dv">-1</span>, <span class="at">ydist =</span> x_pred)) <span class="sc">+</span> </span>
-<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_lineribbon</span>() <span class="sc">+</span> </span>
-<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Greens"</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> </span>
-<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
-<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> N, <span class="at">group =</span> sim_id),</span>
-<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">data =</span> gomp_one_pop_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>gomp_ar1_mu_sigma_sample <span class="sc">|&gt;</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread_rvars</span>(x_pred[time]) <span class="sc">|&gt;</span> </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time<span class="dv">-1</span>, <span class="at">ydist =</span> x_pred)) <span class="sc">+</span> </span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">stat_lineribbon</span>() <span class="sc">+</span> </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Greens"</span>, <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>) <span class="sc">+</span> </span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> N, <span class="at">group =</span> sim_id),</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">data =</span> gomp_one_pop_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>gomp_ar1_mu_sigma_sample<span class="sc">$</span><span class="fu">summary</span>(<span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"mu_max"</span>, <span class="st">"b"</span>, <span class="st">"sigma_max"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>gomp_ar1_mu_sigma_sample<span class="sc">$</span><span class="fu">summary</span>(<span class="at">variables =</span> <span class="fu">c</span>(<span class="st">"mu_max"</span>, <span class="st">"b"</span>, <span class="st">"sigma_max"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  knitr<span class="sc">::</span><span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <colgroup>
 <col style="width: 10%">
 <col style="width: 10%">
-<col style="width: 10%">
+<col style="width: 9%">
 <col style="width: 10%">
 <col style="width: 10%">
 <col style="width: 10%">
@@ -882,50 +812,466 @@ Total execution time: 0.7 seconds.</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">mu_max</td>
-<td style="text-align: right;">7.2318447</td>
-<td style="text-align: right;">7.2250250</td>
-<td style="text-align: right;">0.3901113</td>
-<td style="text-align: right;">0.3912878</td>
-<td style="text-align: right;">6.6053570</td>
-<td style="text-align: right;">7.8963640</td>
-<td style="text-align: right;">1.000893</td>
-<td style="text-align: right;">1365.238</td>
-<td style="text-align: right;">1827.017</td>
+<td style="text-align: right;">7.4195465</td>
+<td style="text-align: right;">7.408785</td>
+<td style="text-align: right;">0.3897996</td>
+<td style="text-align: right;">0.3887970</td>
+<td style="text-align: right;">6.8015800</td>
+<td style="text-align: right;">8.0852720</td>
+<td style="text-align: right;">1.003136</td>
+<td style="text-align: right;">1324.390</td>
+<td style="text-align: right;">1827.973</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">b</td>
-<td style="text-align: right;">0.8707319</td>
-<td style="text-align: right;">0.8713065</td>
-<td style="text-align: right;">0.0133228</td>
-<td style="text-align: right;">0.0127037</td>
-<td style="text-align: right;">0.8470958</td>
-<td style="text-align: right;">0.8912064</td>
-<td style="text-align: right;">1.000917</td>
-<td style="text-align: right;">1332.414</td>
-<td style="text-align: right;">1584.640</td>
+<td style="text-align: right;">0.8758691</td>
+<td style="text-align: right;">0.876516</td>
+<td style="text-align: right;">0.0121230</td>
+<td style="text-align: right;">0.0118971</td>
+<td style="text-align: right;">0.8543245</td>
+<td style="text-align: right;">0.8948875</td>
+<td style="text-align: right;">1.002905</td>
+<td style="text-align: right;">1356.657</td>
+<td style="text-align: right;">1740.710</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">sigma_max</td>
-<td style="text-align: right;">1.1448564</td>
-<td style="text-align: right;">1.1377700</td>
-<td style="text-align: right;">0.0936798</td>
-<td style="text-align: right;">0.0882369</td>
-<td style="text-align: right;">1.0013000</td>
-<td style="text-align: right;">1.3126500</td>
-<td style="text-align: right;">1.000677</td>
-<td style="text-align: right;">2085.846</td>
-<td style="text-align: right;">2003.006</td>
+<td style="text-align: right;">1.1726875</td>
+<td style="text-align: right;">1.167125</td>
+<td style="text-align: right;">0.0945322</td>
+<td style="text-align: right;">0.0938486</td>
+<td style="text-align: right;">1.0264060</td>
+<td style="text-align: right;">1.3328110</td>
+<td style="text-align: right;">1.000760</td>
+<td style="text-align: right;">2029.433</td>
+<td style="text-align: right;">1859.360</td>
 </tr>
 </tbody>
 </table>
+</div>
+</div>
+</section>
+<section id="more-than-one-model-at-once" class="level2">
+<h2 class="anchored" data-anchor-id="more-than-one-model-at-once">More than one model at once</h2>
+<p>Here is a no-pooling approach to modelling different clones.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ar1_multispp <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-11-15-ives03-ts/ar1_multispp.stan"</span>))</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>ar1_multispp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb22"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span>{</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> n;</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> nclone;</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] time;</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x;</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=nclone&gt; clone_id;</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="co">// transformed data {</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a><span class="co">//   vector[n] x = log(pop);</span></span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a><span class="co">// }</span></span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] log_a;</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] logit_b;</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] log_sigma;</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] b = inv_logit(logit_b);</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] mu_max = exp(log_a) ./ (<span class="dv">1</span> - b);</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] sigma_max = exp(log_sigma) ./ sqrt(<span class="dv">1</span> - b^<span class="dv">2</span>);</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>  log_a ~ normal(.<span class="dv">7</span>, .<span class="dv">2</span>);</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  logit_b ~ normal(<span class="dv">1</span>, .<span class="dv">2</span>);</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>  log_sigma ~ normal(-<span class="fl">1.5</span>, .<span class="dv">5</span>);</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>  x ~ normal(</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a>    mu_max[clone_id] .* (<span class="dv">1</span> - pow(b[clone_id], time)),</span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>    sigma_max[clone_id] .* sqrt(<span class="dv">1</span> - pow(b[clone_id]^<span class="dv">2</span>, time))</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>    );</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[<span class="dv">15</span>, nclone] x_pred;</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>  x_pred[<span class="dv">1</span>,] = rep_row_vector(<span class="dv">0</span>, nclone);</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span>:nclone){</span>
+<span id="cb22-34"><a href="#cb22-34" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:<span class="dv">14</span>) {</span>
+<span id="cb22-35"><a href="#cb22-35" aria-hidden="true" tabindex="-1"></a>      x_pred[j+<span class="dv">1</span>,s] = normal_rng(</span>
+<span id="cb22-36"><a href="#cb22-36" aria-hidden="true" tabindex="-1"></a>        mu_max[s] .* (<span class="dv">1</span> - pow(b[s], j)),</span>
+<span id="cb22-37"><a href="#cb22-37" aria-hidden="true" tabindex="-1"></a>        sigma_max[s] .* sqrt(<span class="dv">1</span> - pow(b[s]^<span class="dv">2</span>, j))</span>
+<span id="cb22-38"><a href="#cb22-38" aria-hidden="true" tabindex="-1"></a>        );</span>
+<span id="cb22-39"><a href="#cb22-39" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb22-40"><a href="#cb22-40" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb22-41"><a href="#cb22-41" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>A few things are different in this model compared to the previous one:</p>
+<ul>
+<li>I’m passing in ID numbers for each clone, and an integer number for maximum number of clones</li>
+<li>the model parameters are now vectors, not scalars</li>
+<li>I’ve also put the parameters on different scale. This will come in handy later when the model becomes hierarchical. Whenever I personally do this, I also change the names (see Note below).</li>
+<li>The predictions are now a matrix. This is because we need two different pieces of information for each observation: what time it is, and which clone we’re talking about.</li>
+</ul>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Call me by your name
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This code shows off a habit I’ve developed over the last few months of working on Bayesian models. When I put a parameter on a link scale, I change the parameter name to add the name of that link scale.</p>
+<p>For example, you might have a strictly positive parameter and model it like this:</p>
+<div class="sourceCode" id="cb23"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; alpha;</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  alpha ~ normal(<span class="dv">1</span>, .<span class="dv">5</span>);</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  ....</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>But then you might decide to model that on a log scale, either to reparameterize or to prepare for making it hierarchical later. Using link functions like the log and logit is standard in hiearchical models because it allows us to calculate a different value for every group, above and below the overall average, while respecting any constraints</p>
+<div class="sourceCode" id="cb24"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> alpha_log;</span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  alpha_log ~ normal(<span class="dv">0</span>, .<span class="dv">2</span>);</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>I don’t usually try to make sure the prior is EXACTLY equivalent, but its usually pretty straightforward to get kind of close.</p>
+</div>
+</div>
+<p>To validate this model, I’m going to generate 6 aphid clones by choosing parameters for a and b from different</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>as <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="at">n =</span> <span class="dv">6</span>, <span class="at">min =</span> <span class="fl">1.5</span>, <span class="at">max =</span> <span class="fl">2.5</span>)</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>bs <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="at">n =</span> <span class="dv">6</span>, <span class="at">min =</span> .<span class="dv">4</span>, <span class="at">max =</span> .<span class="dv">9</span>)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>gomp_many_df <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">clone_id =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>, <span class="at">rep_id =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">a =</span> as[clone_id],</span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">b =</span> bs[clone_id]) <span class="sc">|&gt;</span> </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">x =</span> <span class="fu">list</span>(<span class="fu">sim_one_gompertz</span>(<span class="at">a =</span> a, <span class="at">b =</span> b)))</span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>gomp_nozero_many_df <span class="ot">&lt;-</span> gomp_many_df  <span class="sc">|&gt;</span> </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(x) <span class="sc">|&gt;</span> </span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(time <span class="sc">!=</span> <span class="dv">0</span>)</span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>gomp_nozero_many_df <span class="sc">|&gt;</span> </span>
+<span id="cb25-14"><a href="#cb25-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> N, <span class="at">group =</span> rep_id)) <span class="sc">+</span> </span>
+<span id="cb25-15"><a href="#cb25-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
+<span id="cb25-16"><a href="#cb25-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>clone_id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>ar1_multispp_samp <span class="ot">&lt;-</span> ar1_multispp<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">n =</span> <span class="fu">nrow</span>(gomp_nozero_many_df),</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">nclone =</span> <span class="fu">max</span>(gomp_nozero_many_df<span class="sc">$</span>clone_id),</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">time =</span> gomp_nozero_many_df<span class="sc">$</span>time,</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> gomp_nozero_many_df<span class="sc">$</span>N,</span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">clone_id =</span> gomp_nozero_many_df<span class="sc">$</span>clone_id), </span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">0</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...
+
+Chain 2 finished in 34.5 seconds.
+Chain 3 finished in 34.9 seconds.
+Chain 1 finished in 35.1 seconds.
+Chain 4 finished in 35.2 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 35.0 seconds.
+Total execution time: 35.4 seconds.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>ar1_multispp_samp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>   variable  mean median   sd  mad    q5   q95 rhat ess_bulk ess_tail
+ lp__       79.64  79.98 3.07 3.01 74.05 84.00 1.00     1728     2506
+ log_a[1]    0.86   0.86 0.02 0.02  0.83  0.90 1.00     4228     2969
+ log_a[2]    0.58   0.58 0.03 0.03  0.52  0.63 1.00     4768     2881
+ log_a[3]    0.79   0.79 0.03 0.03  0.75  0.83 1.00     4648     2895
+ log_a[4]    0.56   0.56 0.03 0.03  0.50  0.61 1.00     4467     2727
+ log_a[5]    0.52   0.51 0.03 0.03  0.47  0.57 1.00     4103     3076
+ log_a[6]    0.85   0.85 0.03 0.02  0.81  0.90 1.00     4921     2812
+ logit_b[1]  1.17   1.17 0.04 0.04  1.10  1.24 1.00     4148     2972
+ logit_b[2]  0.59   0.59 0.06 0.06  0.48  0.69 1.00     4790     2715
+ logit_b[3]  0.59   0.59 0.05 0.05  0.51  0.67 1.00     4720     2849
+
+ # showing 10 of 127 rows (change via 'max_rows' argument or 'cmdstanr_max_rows' option)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>ar1_multispp_samp <span class="sc">|&gt;</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather_rvars</span>(x_pred[time,clone_id]) <span class="sc">|&gt;</span> </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time<span class="dv">-1</span>, <span class="at">ydist =</span> .value)) <span class="sc">+</span> <span class="fu">stat_lineribbon</span>() <span class="sc">+</span> </span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>clone_id) <span class="sc">+</span> </span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Greens"</span>) <span class="sc">+</span> </span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a>  <span class="do">## add data</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> N, <span class="at">group =</span> rep_id), </span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> gomp_nozero_many_df,</span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-18-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Time equals 🫖 - 1
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>One of the trickiest parts of working with these models has been adding and subtracting <span class="math inline">\(1\)</span>. Here’s some notes for the next time I get confused:</p>
+<ul>
+<li><em>take out the first value</em> We can’t use data including <code>time=0</code> in a stan model because that implies 0 variance, which just causes lots of errors with the normal likelihood. Taking this point out is no loss, because it doesn’t give us any real information – there’s no variance at all.</li>
+<li><em>using position in the matrix as data for predictions</em> I generate predictions for new clonal lines, in order to generate the posterior predictive distribution and plot the figures. I store these predictions in a matrix. However, the first observation (<code>time = 0</code>) is actually stored in the first position of the matrix (i.e., row 1). I just evaluate time as all the integers between 0 and 14, which gives two weeks of experiment in this case. You can see in the <code>generated quantities</code> block that I actually use the index value in the for-loop (I called it <code>j</code>) as the value of time. This requires a weird trick: the value of <code>j</code> gets used, but then it is placed in the <code>j+1</code> position in the vector. This is because there is no “row 0” to go with the observation at <em>time</em> 0, so everything is pushed up by 1.</li>
+<li><em>subtract 1 to get the correct time</em> This means that to get the right time, we need to subtract 1 from the value used in <code>generated quantities</code>. When I use <code>tidybayes</code> to extract the predictive distribution, I use <code>gather_rvars(x_pred[time,clone_id])</code> to specify that I want to call the first dimension of the matrix “time”, and the second “clone_id”. But then when I plot these data, I need to subtract 1 from the row position of a prediction to get the actual time value. This is because time = 0 is in row 1, time = 1 is in row 2, etc. Doing this gives a figure where model predictions match</li>
+</ul>
+</div>
+</div>
+<section id="hierarchical-model" class="level3">
+<h3 class="anchored" data-anchor-id="hierarchical-model">Hierarchical model</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>ar1_multilevel <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-11-15-ives03-ts/ar1_multilevel.stan"</span>))</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>ar1_multilevel</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb32"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co">// modified from previous models with help from ChatGPT!</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> n;</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> nclone;</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] time;</span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x;</span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>, <span class="kw">upper</span>=nclone&gt; clone_id;</span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed data</span>{</span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] twotime = <span class="dv">2</span> * time;</span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] mu_log_a;</span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] mu_logit_b;</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] mu_log_sigma;</span>
+<span id="cb32-16"><a href="#cb32-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-17"><a href="#cb32-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">cholesky_factor_corr</span>[<span class="dv">3</span>] L_corr;  <span class="co">// Cholesky factorization of the correlation matrix</span></span>
+<span id="cb32-18"><a href="#cb32-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt;[<span class="dv">3</span>] sigma_params;  <span class="co">// Standard deviations for log_a, logit_b, log_sigma</span></span>
+<span id="cb32-19"><a href="#cb32-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-20"><a href="#cb32-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[nclone, <span class="dv">3</span>] z_params_raw;  <span class="co">// Unconstrained parameters</span></span>
+<span id="cb32-21"><a href="#cb32-21" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-22"><a href="#cb32-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-23"><a href="#cb32-23" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb32-24"><a href="#cb32-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[nclone, <span class="dv">3</span>] z_params = z_params_raw * diag_pre_multiply(sigma_params, L_corr);</span>
+<span id="cb32-25"><a href="#cb32-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-26"><a href="#cb32-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] log_a = mu_log_a + z_params[,<span class="dv">1</span>];</span>
+<span id="cb32-27"><a href="#cb32-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] logit_b = mu_logit_b + z_params[,<span class="dv">2</span>];</span>
+<span id="cb32-28"><a href="#cb32-28" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] log_sigma = mu_log_sigma + z_params[,<span class="dv">3</span>];</span>
+<span id="cb32-29"><a href="#cb32-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-30"><a href="#cb32-30" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] b = inv_logit(logit_b);</span>
+<span id="cb32-31"><a href="#cb32-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] mu_max = exp(log_a - log1m_inv_logit(b));</span>
+<span id="cb32-32"><a href="#cb32-32" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] sigma_max = exp(log_sigma) ./ sqrt(<span class="dv">1</span> - square(b));</span>
+<span id="cb32-33"><a href="#cb32-33" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-34"><a href="#cb32-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-35"><a href="#cb32-35" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb32-36"><a href="#cb32-36" aria-hidden="true" tabindex="-1"></a>  mu_log_a ~ normal(<span class="fl">0.7</span>, <span class="fl">0.2</span>);</span>
+<span id="cb32-37"><a href="#cb32-37" aria-hidden="true" tabindex="-1"></a>  mu_logit_b ~ normal(<span class="fl">1.7</span>, <span class="fl">0.2</span>);</span>
+<span id="cb32-38"><a href="#cb32-38" aria-hidden="true" tabindex="-1"></a>  mu_log_sigma ~ normal(-.<span class="dv">7</span>, <span class="fl">0.25</span>);</span>
+<span id="cb32-39"><a href="#cb32-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-40"><a href="#cb32-40" aria-hidden="true" tabindex="-1"></a>  L_corr ~ lkj_corr_cholesky(<span class="dv">4</span>);  <span class="co">// Prior on the Cholesky factor for the correlation matrix</span></span>
+<span id="cb32-41"><a href="#cb32-41" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-42"><a href="#cb32-42" aria-hidden="true" tabindex="-1"></a>  sigma_params[<span class="dv">1</span>] ~ exponential(<span class="dv">4</span>);</span>
+<span id="cb32-43"><a href="#cb32-43" aria-hidden="true" tabindex="-1"></a>  sigma_params[<span class="dv">2</span>] ~ exponential(<span class="dv">4</span>);</span>
+<span id="cb32-44"><a href="#cb32-44" aria-hidden="true" tabindex="-1"></a>  sigma_params[<span class="dv">3</span>] ~ exponential(<span class="fl">3.5</span>);</span>
+<span id="cb32-45"><a href="#cb32-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-46"><a href="#cb32-46" aria-hidden="true" tabindex="-1"></a>  to_vector(z_params_raw) ~ std_normal();</span>
+<span id="cb32-47"><a href="#cb32-47" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-48"><a href="#cb32-48" aria-hidden="true" tabindex="-1"></a>  x ~ normal(</span>
+<span id="cb32-49"><a href="#cb32-49" aria-hidden="true" tabindex="-1"></a>    mu_max[clone_id] .* (<span class="dv">1</span> - pow(b[clone_id], time)),</span>
+<span id="cb32-50"><a href="#cb32-50" aria-hidden="true" tabindex="-1"></a>    sigma_max[clone_id] .* sqrt(<span class="dv">1</span> - pow(b[clone_id], twotime))</span>
+<span id="cb32-51"><a href="#cb32-51" aria-hidden="true" tabindex="-1"></a>  );</span>
+<span id="cb32-52"><a href="#cb32-52" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb32-53"><a href="#cb32-53" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-54"><a href="#cb32-54" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb32-55"><a href="#cb32-55" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[<span class="dv">15</span>, nclone] x_pred;</span>
+<span id="cb32-56"><a href="#cb32-56" aria-hidden="true" tabindex="-1"></a>  x_pred[<span class="dv">1</span>,] = rep_row_vector(<span class="dv">0</span>, nclone);</span>
+<span id="cb32-57"><a href="#cb32-57" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span>:nclone){</span>
+<span id="cb32-58"><a href="#cb32-58" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:<span class="dv">14</span>) {</span>
+<span id="cb32-59"><a href="#cb32-59" aria-hidden="true" tabindex="-1"></a>      x_pred[j+<span class="dv">1</span>,s] = normal_rng(</span>
+<span id="cb32-60"><a href="#cb32-60" aria-hidden="true" tabindex="-1"></a>        mu_max[s] .* (<span class="dv">1</span> - pow(b[s], j)),</span>
+<span id="cb32-61"><a href="#cb32-61" aria-hidden="true" tabindex="-1"></a>        sigma_max[s] .* sqrt(<span class="dv">1</span> - pow(b[s]^<span class="dv">2</span>, j))</span>
+<span id="cb32-62"><a href="#cb32-62" aria-hidden="true" tabindex="-1"></a>      );</span>
+<span id="cb32-63"><a href="#cb32-63" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb32-64"><a href="#cb32-64" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb32-65"><a href="#cb32-65" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>ar1_multilevel_samp <span class="ot">&lt;-</span> ar1_multilevel<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">n =</span> <span class="fu">nrow</span>(gomp_nozero_many_df),</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">nclone =</span> <span class="fu">max</span>(gomp_nozero_many_df<span class="sc">$</span>clone_id),</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">time =</span> gomp_nozero_many_df<span class="sc">$</span>time,</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> gomp_nozero_many_df<span class="sc">$</span>N,</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">clone_id =</span> gomp_nozero_many_df<span class="sc">$</span>clone_id), </span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">500</span></span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>ar1_multilevel_samp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can fit to previous simulations no problem, but we can also simulate data directly from the model. Because this has gotten kind of big, I’m going to make a Stan program just for simulating data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>ar1_multilevel_prior <span class="ot">&lt;-</span> <span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2023-11-15-ives03-ts/ar1_multilevel_prior.stan"</span>))</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>ar1_multilevel_prior</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb35"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co">// modified from previous models with help from ChatGPT!</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> nclone;</span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> nrep;</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] mu_log_a;</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] mu_logit_b;</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] mu_log_sigma;</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">cholesky_factor_corr</span>[<span class="dv">3</span>] L_corr;  <span class="co">// Cholesky factorization of the correlation matrix</span></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt;[<span class="dv">3</span>] sigma_params;  <span class="co">// Standard deviations for log_a, logit_b, log_sigma</span></span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[nclone, <span class="dv">3</span>] z_params_raw;  <span class="co">// Unconstrained parameters</span></span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-18"><a href="#cb35-18" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb35-19"><a href="#cb35-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[nclone, <span class="dv">3</span>] z_params = z_params_raw * diag_pre_multiply(sigma_params, L_corr);</span>
+<span id="cb35-20"><a href="#cb35-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-21"><a href="#cb35-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] log_a = mu_log_a + z_params[,<span class="dv">1</span>];</span>
+<span id="cb35-22"><a href="#cb35-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] logit_b = mu_logit_b + z_params[,<span class="dv">2</span>];</span>
+<span id="cb35-23"><a href="#cb35-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] log_sigma = mu_log_sigma + z_params[,<span class="dv">3</span>];</span>
+<span id="cb35-24"><a href="#cb35-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-25"><a href="#cb35-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] b = inv_logit(logit_b);</span>
+<span id="cb35-26"><a href="#cb35-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] mu_max = exp(log_a - log1m_inv_logit(b));</span>
+<span id="cb35-27"><a href="#cb35-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[nclone] sigma_max = exp(log_sigma) ./ sqrt(<span class="dv">1</span> - square(b));</span>
+<span id="cb35-28"><a href="#cb35-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-29"><a href="#cb35-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-30"><a href="#cb35-30" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb35-31"><a href="#cb35-31" aria-hidden="true" tabindex="-1"></a>  mu_log_a ~ normal(<span class="fl">0.7</span>, <span class="fl">0.2</span>);</span>
+<span id="cb35-32"><a href="#cb35-32" aria-hidden="true" tabindex="-1"></a>  mu_logit_b ~ normal(<span class="fl">1.7</span>, <span class="fl">0.2</span>);</span>
+<span id="cb35-33"><a href="#cb35-33" aria-hidden="true" tabindex="-1"></a>  mu_log_sigma ~ normal(-.<span class="dv">7</span>, <span class="fl">0.25</span>);</span>
+<span id="cb35-34"><a href="#cb35-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-35"><a href="#cb35-35" aria-hidden="true" tabindex="-1"></a>  L_corr ~ lkj_corr_cholesky(<span class="dv">4</span>);  <span class="co">// Prior on the Cholesky factor for the correlation matrix</span></span>
+<span id="cb35-36"><a href="#cb35-36" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-37"><a href="#cb35-37" aria-hidden="true" tabindex="-1"></a>  sigma_params[<span class="dv">1</span>] ~ exponential(<span class="dv">4</span>);</span>
+<span id="cb35-38"><a href="#cb35-38" aria-hidden="true" tabindex="-1"></a>  sigma_params[<span class="dv">2</span>] ~ exponential(<span class="dv">4</span>);</span>
+<span id="cb35-39"><a href="#cb35-39" aria-hidden="true" tabindex="-1"></a>  sigma_params[<span class="dv">3</span>] ~ exponential(<span class="fl">3.5</span>);</span>
+<span id="cb35-40"><a href="#cb35-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-41"><a href="#cb35-41" aria-hidden="true" tabindex="-1"></a>  to_vector(z_params_raw) ~ std_normal();</span>
+<span id="cb35-42"><a href="#cb35-42" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb35-43"><a href="#cb35-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-44"><a href="#cb35-44" aria-hidden="true" tabindex="-1"></a><span class="kw">generated quantities</span> {</span>
+<span id="cb35-45"><a href="#cb35-45" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[nclone, nrep, <span class="dv">15</span>] <span class="dt">real</span> x_pred;</span>
+<span id="cb35-46"><a href="#cb35-46" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span>:nclone){</span>
+<span id="cb35-47"><a href="#cb35-47" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (r <span class="cf">in</span> <span class="dv">1</span>:nrep){</span>
+<span id="cb35-48"><a href="#cb35-48" aria-hidden="true" tabindex="-1"></a>      x_pred[s, r, <span class="dv">1</span>] = <span class="dv">0</span>;</span>
+<span id="cb35-49"><a href="#cb35-49" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb35-50"><a href="#cb35-50" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb35-51"><a href="#cb35-51" aria-hidden="true" tabindex="-1"></a>  <span class="cf">for</span> (s <span class="cf">in</span> <span class="dv">1</span>:nclone){</span>
+<span id="cb35-52"><a href="#cb35-52" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> (r <span class="cf">in</span> <span class="dv">1</span>:nrep){</span>
+<span id="cb35-53"><a href="#cb35-53" aria-hidden="true" tabindex="-1"></a>      <span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">1</span>:<span class="dv">14</span>) {</span>
+<span id="cb35-54"><a href="#cb35-54" aria-hidden="true" tabindex="-1"></a>        x_pred[s, r, j+<span class="dv">1</span>] = normal_rng(</span>
+<span id="cb35-55"><a href="#cb35-55" aria-hidden="true" tabindex="-1"></a>          mu_max[s] .* (<span class="dv">1</span> - pow(b[s], j)),</span>
+<span id="cb35-56"><a href="#cb35-56" aria-hidden="true" tabindex="-1"></a>          sigma_max[s] .* sqrt(<span class="dv">1</span> - pow(b[s]^<span class="dv">2</span>, j))</span>
+<span id="cb35-57"><a href="#cb35-57" aria-hidden="true" tabindex="-1"></a>          );</span>
+<span id="cb35-58"><a href="#cb35-58" aria-hidden="true" tabindex="-1"></a>      }</span>
+<span id="cb35-59"><a href="#cb35-59" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb35-60"><a href="#cb35-60" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb35-61"><a href="#cb35-61" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>This model code lacks the likelihood, but uses the same configuration as the previous non-centered model. It also has a bit more going on the Generated Quantities block. Here, we are simulating multiple replicates using each clone, which simulates the actual experiment.</p>
+<p>We can sample from this prior distribution and visualize it to see what it says. This is really the only way to get a good idea of what priors really mean in a nonlinear model like this one!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>multilevel_prior <span class="ot">&lt;-</span> ar1_multilevel_prior<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">nclone =</span> <span class="dv">12</span>, <span class="at">nrep =</span> <span class="dv">10</span>), </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">chains =</span> <span class="dv">1</span>,</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 1 chain...
+
+Chain 1 finished in 1.5 seconds.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>prior_pred_multilevel <span class="ot">&lt;-</span> multilevel_prior <span class="sc">|&gt;</span> </span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather_draws</span>(x_pred[clone_id, rep, time], <span class="at">ndraws =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">time =</span> time <span class="sc">-</span><span class="dv">1</span>)</span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>prior_pred_multilevel <span class="sc">|&gt;</span> </span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> .value, <span class="at">group =</span> rep)) <span class="sc">+</span> </span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>() <span class="sc">+</span> </span>
+<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>clone_id)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-22-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Finally we can put this model through a very similar process of fitting and plotting as previous. Here I’m doing data prep, sampling and plotting all in one plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>prior_df <span class="ot">&lt;-</span> prior_pred_multilevel <span class="sc">|&gt;</span> </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(time <span class="sc">!=</span> <span class="dv">0</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>ar1_multilevel_samp <span class="ot">&lt;-</span> ar1_multilevel<span class="sc">$</span><span class="fu">sample</span>(</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> <span class="fu">list</span>(<span class="at">n =</span> <span class="fu">nrow</span>(prior_df),</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">nclone =</span> <span class="fu">max</span>(prior_df<span class="sc">$</span>clone_id),</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">time =</span> prior_df<span class="sc">$</span>time,</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">x =</span> prior_df<span class="sc">$</span>.value,</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">clone_id =</span> prior_df<span class="sc">$</span>clone_id), </span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">parallel_chains =</span> <span class="dv">4</span>,</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">refresh =</span> <span class="dv">0</span></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...
+
+Chain 2 finished in 394.3 seconds.
+Chain 3 finished in 398.0 seconds.
+Chain 4 finished in 399.1 seconds.
+Chain 1 finished in 402.4 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 398.5 seconds.
+Total execution time: 402.6 seconds.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ar1_multilevel_samp</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>ar1_multilevel_samp <span class="sc">|&gt;</span> </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">gather_rvars</span>(x_pred[time,clone_id]) <span class="sc">|&gt;</span> </span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> time<span class="dv">-1</span>, <span class="at">ydist =</span> .value)) <span class="sc">+</span> <span class="fu">stat_lineribbon</span>() <span class="sc">+</span> </span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span>clone_id) <span class="sc">+</span> </span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_brewer</span>(<span class="at">palette =</span> <span class="st">"Greens"</span>) <span class="sc">+</span> </span>
+<span id="cb41-8"><a href="#cb41-8" aria-hidden="true" tabindex="-1"></a>  <span class="do">## add data</span></span>
+<span id="cb41-9"><a href="#cb41-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> time, <span class="at">y =</span> .value, <span class="at">group =</span> rep), </span>
+<span id="cb41-10"><a href="#cb41-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">data =</span> prior_pred_multilevel,</span>
+<span id="cb41-11"><a href="#cb41-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">inherit.aes =</span> <span class="cn">FALSE</span>, <span class="at">col =</span> <span class="st">"darkorange"</span>, <span class="at">alpha =</span> .<span class="dv">3</span>)  <span class="sc">+</span> </span>
+<span id="cb41-12"><a href="#cb41-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Population size (log)"</span>, </span>
+<span id="cb41-13"><a href="#cb41-13" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Time"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-23-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Note that this did not work perfectly, even though we are fitting to the prior predictive distribution. There are divergent iterations!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>ar1_multilevel_samp<span class="sc">$</span><span class="fu">diagnostic_summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>$num_divergent
+[1] 2 2 6 1
+
+$num_max_treedepth
+[1] 0 0 0 0
+
+$ebfmi
+[1] 0.8415368 1.0193399 0.8426104 0.9076898</code></pre>
 </div>
 </div>
 
 
 
 </section>
+</section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-ives2003" class="csl-entry" role="listitem">
 Ives, A. R., B. Dennis, K. L. Cottingham, and S. R. Carpenter. 2003. <span>“ESTIMATING COMMUNITY STABILITY AND ECOLOGICAL INTERACTIONS FROM TIME-SERIES DATA.”</span> <em>Ecological Monographs</em> 73 (2): 301–30. <a href="https://doi.org/10.1890/0012-9615(2003)073[0301:ECSAEI]2.0.CO;2">https://doi.org/10.1890/0012-9615(2003)073[0301:ECSAEI]2.0.CO;2</a>.
 </div>
@@ -1009,10 +1355,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -1022,8 +1367,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -1036,6 +1390,128 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    const typesetMath = (el) => {
+      if (window.MathJax) {
+        // MathJax Typeset
+        window.MathJax.typeset([el]);
+      } else if (window.katex) {
+        // KaTeX Render
+        var mathElements = el.getElementsByClassName("math");
+        var macros = [];
+        for (var i = 0; i < mathElements.length; i++) {
+          var texText = mathElements[i].firstChild;
+          if (mathElements[i].tagName == "SPAN") {
+            window.katex.render(texText.data, mathElements[i], {
+              displayMode: mathElements[i].classList.contains('display'),
+              throwOnError: false,
+              macros: macros,
+              fleqn: false
+            });
+          }
+        }
+      }
+    }
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        for (let i = 0; i < 2; i++) {
+          container.appendChild(note.children[i].cloneNode(true));
+        }
+        typesetMath(container);
+        return container.innerHTML
+      } else {
+        typesetMath(note);
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      typesetMath(note);
+      return note.innerHTML;
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -1079,6 +1555,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -1104,6 +1581,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -1164,6 +1667,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 });
 </script>
 </div> <!-- /content -->
+
 
 
 
