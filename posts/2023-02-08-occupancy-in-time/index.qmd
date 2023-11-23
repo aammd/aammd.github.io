@@ -275,3 +275,81 @@ spread_rvars(hof_sample, s1, s2, d1, d2) |>
 ```
 
 
+## prior simulations
+
+```{r}
+#| class-output: 
+hof_prior <- cmdstan_model(
+                       here::here(
+                         "posts/2023-02-08-occupancy-in-time/hof_prior.stan"))
+hof_prior
+```
+
+
+```{r}
+jday <- seq(from = 1, to = 365, by = 7)
+hof_prior_sample <- hof_prior$sample(data = list (n = length(jday), jday= jday), chains = 1)
+
+hof_prior_sample |> 
+  gather_draws(p[j], ndraws = 12) |> 
+  mutate(jday = jday[j]) |> 
+  ggplot(aes(x = jday, y = exp(.value))) + 
+  geom_line() + 
+  facet_wrap(~.draw)
+```
+
+```{r}
+#| class-output: 
+hof_multiyear_prior <- cmdstan_model(
+  here::here(
+    "posts/2023-02-08-occupancy-in-time/hof_multiyear_prior.stan"))
+hof_multiyear_prior
+```
+
+```{r}
+jday <- seq(from = 1, to = 365, by = 7)
+hof_multiyear_prior_sample <- hof_multiyear_prior$sample(
+  data = list(n = length(jday),
+              jday= jday, 
+              nyear = 7), chains = 1)
+
+hof_multiyear_prior_sample |> 
+  gather_draws(p[j,year_id], ndraws = 12) |> 
+  mutate(jday = jday[j]) |> 
+  ggplot(aes(x = jday, y = .value, group = year_id)) + 
+  geom_line() + 
+  facet_wrap(~.draw)
+```
+
+grr this seems backwards! look at the parameters
+
+```{r}
+params_and_p <- hof_multiyear_prior_sample |> 
+  spread_draws(p[j,year_id],s_total[year_id],logit_asym[year_id], ndraws = 12) |> 
+  mutate(jday = jday[j]) |> 
+  arrange(.draw)
+
+
+params_and_p |> 
+  ggplot(aes(x = jday, y = p, group = year_id)) + 
+  geom_line() + 
+  facet_wrap(~.draw)
+
+# draw 92 is a culprit
+
+params_and_p |> 
+  filter(.draw == 240)
+
+
+hof <- function(avec, bvec){
+  force(avec)
+  force(bvec)
+  function(x) {
+    plogis(avec[1]*(x - bvec[1])) * plogis(-avec[2] * (x - bvec[2]))
+  }
+}
+
+hof(avec = c(exp(-1.56)*plogis(-1.73)))
+```
+
+
