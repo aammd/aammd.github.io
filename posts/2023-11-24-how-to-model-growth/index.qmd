@@ -1,0 +1,196 @@
+---
+title: "How to model discrete growth"
+author: "Andrew MacDonald"
+description: |
+  Comparing a lagged AR-1 model with the marginalized transition distribution.
+date: 24 Nov 2023
+editor: source
+categories: [UdeS, stan, reproduction, MAR]
+knitr:
+  opts_chunk: 
+    warning: false
+    message: false
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(cmdstanr)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+## Controversy! 
+
+## 
+
+
+```{r}
+#| class-output: stan
+
+# load the model in stan
+transition <- cmdstan_model(here::here("posts/2023-11-24-how-to-model-growth/ar1.stan"))
+
+transition
+```
+
+Here is another approach, using a lagged population growth model
+
+```{r}
+# load the model in stan
+lagged_growth <- cmdstan_model(here::here("posts/2023-11-24-how-to-model-growth/multiple_spp_ar1.stan"))
+
+lagged_growth
+```
+
+## Simulations
+
+Here are simulations from a one-species AR-1 model that imitate Ives et al. figure 1.
+
+```{r}
+simulate_pop_growth <- function(
+    a = 0, 
+    b, 
+    sigma = 1, 
+    tmax = 50, 
+    x0 = -8) {
+  
+  xvec <- numeric(tmax)
+  
+  xvec[1] <- x0
+  
+  ## process error
+  eta <- rnorm(tmax, mean = 0, sd = sigma)
+  
+  for(time in 2:tmax){
+    xvec[time] <- a + b*xvec[time-1] + eta[time]
+  }
+  
+  return(xvec)
+}
+```
+
+I'm going to simulate a modest number of time series, and choose parameters to make the time series slightly resemble the aphid experiment.
+
+```{r}
+a_fig = 1
+b_fig = .8
+sigma_fig = .7
+
+ts_data <- map_dfr(1:12, 
+        ~ tibble(
+          pop = simulate_pop_growth(
+            a = a_fig, 
+            b = b_fig,
+            tmax = 16, 
+            sigma = sigma_fig, 
+            x0 = 0
+            ),
+          time = 0:(length(pop)-1)
+        ),
+        .id = "sim"
+)
+
+ts_data |> 
+  ggplot(aes(x =time, y = pop, group = sim)) + 
+  geom_line()
+```
+
+```{r}
+knitr::kable(head(ts_data))
+```
+
+
+## Transition distribution
+
+```{r}
+ts_data_nozero <- filter(ts_data, time != 0)
+
+
+transition_sample <- transition$sample(
+  data = list(n = nrow(ts_data_nozero),
+              x = ts_data_nozero$pop,
+              time = ts_data_nozero$time),
+  parallel_chains = 4, refresh = 0)
+```
+
+
+```{r}
+transition_sample |> 
+  spread_rvars(x_pred[time]) |> 
+  ggplot(aes(x = time-1, ydist = x_pred)) + 
+  stat_lineribbon() + 
+  scale_fill_brewer(palette = "Greens", direction = -1) + 
+  theme_bw() + 
+  geom_line(aes(x = time, y = pop, group = sim),
+            inherit.aes = FALSE, data = ts_data) + 
+  labs(x = "Time", y = "log population size")
+```
+
+```{r}
+transition_sample |>
+  gather_rvars(a, b, sigma) |> 
+  ggplot(aes(y = .variable, dist = .value)) + 
+  stat_halfeye() + 
+  geom_point(
+    aes(y = .variable,  x = .value),
+    inherit.aes = FALSE,
+    data = tribble(
+      ~ .variable, ~.value,
+      "a", a_fig, 
+      "b", b_fig,
+      "sigma", sigma_fig), col = "red", size = 2) 
+
+```
+
+## Lagged model
+
+This time there is no need to drop 0s
+
+```{r}
+ts_data <- ts_data |> 
+  mutate(sim = readr::parse_number(sim))
+
+lagged_growth_sample <- lagged_growth$sample(
+  data = list(n = nrow(ts_data),
+              nclone = max(ts_data$sim),
+              x = ts_data$pop,
+              time = ts_data$time,
+              clone_id = ts_data$sim,
+              fit = 1,
+              nyear = 15),
+  parallel_chains = 4, refresh = 0)
+```
+
+
+### predictions 
+
+```{r}
+lagged_growth_sample |> 
+  spread_rvars(x_pred[time]) |> 
+  ggplot(aes(x = time-1, ydist = x_pred)) + 
+  stat_lineribbon() + 
+  scale_fill_brewer(palette = "Greens", direction = -1) + 
+  theme_bw() + 
+  geom_line(aes(x = time, y = pop, group = sim),
+            inherit.aes = FALSE, data = ts_data) + 
+  labs(x = "Time", y = "log population size")
+```
+
+
+### parameters
+
+```{r}
+lagged_growth_sample |>
+  gather_rvars(a, b, sigma) |> 
+  ggplot(aes(y = .variable, dist = .value)) + 
+  stat_halfeye() + 
+  geom_point(
+    aes(y = .variable,  x = .value),
+    inherit.aes = FALSE,
+    data = tribble(
+      ~ .variable, ~.value,
+      "a", a_fig, 
+      "b", b_fig,
+      "sigma", sigma_fig), col = "red", size = 2) 
+```
+

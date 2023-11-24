@@ -24,7 +24,6 @@ $$
 Here is Will's very clean and concise simulation code.
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
-library(targets)
 library(ggplot2)
 library(tidyverse)
 

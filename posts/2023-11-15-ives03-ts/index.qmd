@@ -285,7 +285,7 @@ sim_one_gompertz <- function(K = 1000,
   N = c(0, 
         rnorm(ntime - 1, 
               mean = a * (1 - b^(1:(ntime-1))) / (1 - b),
-              sd = s * (1 - (b^2)^(1:(ntime-1))) / (1 - b^2)
+              sd = s * sqrt((1 - (b^2)^(1:(ntime-1))) / (1 - b^2))
         )
   )
         
@@ -340,6 +340,83 @@ gomp_ar_1_sample |>
 gomp_ar_1_sample$summary(variables = c("a", "b", "sigma",
                                        "mu_max", "sigma_max")) |> 
   knitr::kable()
+```
+
+
+### Parameter intervals
+
+```{r}
+gomp_ar_1_sample |>
+  gather_rvars(a, b, sigma) |> 
+  ggplot(aes(y = .variable, dist = .value)) + 
+  stat_halfeye() + 
+  geom_point(
+    aes(x = val,  y = var),
+    inherit.aes = FALSE,
+    data = tribble(
+      ~ var, ~val,
+      "a", 1, 
+      "b", 0.86,
+      "sigma", .3), col = "red", size = 2)
+```
+
+
+## Challenge -- will this work for time-series built with for loops
+
+```{r}
+a_fig = 8
+b_fig = .8
+sigma_fig = 2
+
+ts_data <- map_dfr(1:4, 
+        ~ tibble(
+          pop = simulate_pop_growth(
+            a = a_fig, 
+            b = b_fig,
+            tmax = 16, 
+            sigma = sigma_fig, x0 = 0),
+          time = 0:(length(pop)-1)
+        ),
+        .id = "sim"
+)
+
+ts_data_nozero <- filter(ts_data, time != 0)
+
+
+ts_ar_1_sample <- ar_1$sample(
+  data = list(n = nrow(ts_data_nozero),
+              x = ts_data_nozero$pop,
+              time = ts_data_nozero$time),
+  parallel_chains = 4, refresh = 0)
+```
+
+
+```{r}
+ts_ar_1_sample |> 
+  spread_rvars(x_pred[time]) |> 
+  ggplot(aes(x = time-1, ydist = x_pred)) + 
+  stat_lineribbon() + 
+  scale_fill_brewer(palette = "Greens", direction = -1) + 
+  theme_bw() + 
+  geom_line(aes(x = time, y = pop, group = sim),
+            inherit.aes = FALSE, data = ts_data) + 
+  labs(x = "Time", y = "log population size")
+```
+
+```{r}
+ts_ar_1_sample |>
+  gather_rvars(a, b, sigma) |> 
+  ggplot(aes(y = .variable, dist = .value)) + 
+  stat_halfeye() + 
+  geom_point(
+    aes(y = .variable,  x = .value),
+    inherit.aes = FALSE,
+    data = tribble(
+      ~ .variable, ~.value,
+      "a", a_fig, 
+      "b", b_fig,
+      "sigma", sigma_fig), col = "red", size = 2) 
+
 ```
 
 

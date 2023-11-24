@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/2023-11-24-how-to-model-growth/index.html",
       "/posts/2023-11-15-ives03-ts/index.html",
       "/posts/2023-11-14-multilevel-arima/index.html",
       "/posts/2023-11-08-tree-cooling/index.html",
