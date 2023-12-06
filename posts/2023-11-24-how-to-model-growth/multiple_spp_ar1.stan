@@ -10,11 +10,15 @@ data {
 transformed data {
   array[n - nclone] int time;
   array[n - nclone] int time_m1;
+  array[n - nclone] int clone_id_m1;
   for (i in 2:n) {
     if (clone_id[i] == clone_id[i-1]) {
       time[i - clone_id[i]] = i;
-      time_m1[i - clone_id[i]] = i - 1;
     }
+  }
+  // subset the clone ID
+  for (j in 1:(n - nclone)){
+    clone_id_m1[j] = clone_id[time_m1[j]];
   }
 }
 parameters {

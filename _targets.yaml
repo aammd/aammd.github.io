@@ -1,0 +1,3 @@
+2023-11-24-how-to-model-growth:
+  script: posts/2023-11-24-how-to-model-growth/tar_script.R
+  store: posts/2023-11-24-how-to-model-growth/store

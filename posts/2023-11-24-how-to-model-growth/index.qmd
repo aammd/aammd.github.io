@@ -17,9 +17,19 @@ library(cmdstanr)
 library(ggplot2)
 library(tidyverse)
 library(tidybayes)
+library(targets)
 ```
 
+```{r}
+tar_load(one_time)
+plot(one_time, type = "l")
+```
+
+
 ## Controversy! 
+
+We would like to fit an AR(1) model to population growth rate data. 
+The goal here is to 
 
 ## 
 
@@ -28,9 +38,9 @@ library(tidybayes)
 #| class-output: stan
 
 # load the model in stan
-transition <- cmdstan_model(here::here("posts/2023-11-24-how-to-model-growth/ar1.stan"))
+multiple_spp_ar1 <- cmdstan_model(here::here("posts/2023-11-24-how-to-model-growth/multiple_spp_ar1.stan"))
 
-transition
+multiple_spp_ar1
 ```
 
 Here is another approach, using a lagged population growth model
