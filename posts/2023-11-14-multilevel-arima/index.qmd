@@ -15,11 +15,25 @@ library(tidyverse)
 library(tidybayes)
 ```
 
-We can vectorize an AR-1 Model for one species very easily. This is also the right way to work with missing data.
+We can vectorize an AR-1 Model for one species very easily.
+This is how it is done in the [Stan manual](https://mc-stan.org/docs/stan-users-guide/autoregressive.html).
+
+$$ 
+\begin{align}
+Y_i &\sim \text{normal}\left(\mu, \sigma \right) \\ 
+\mu &= e^\alpha + \frac{e^\beta}{1 + e^\beta} Y _{i-1} \\
+\end{align}
+$$
+
+This is also the right way to work with missing data.
 
 But how can we do it with multiple species? This is pretty key when working with long-format datasets, often with different species. I want it to be flexible -- after all, not all species have datasets of equal length - some are only monitored in certain years. 
 
 ## Math notation
+
+$$
+
+$$
 
 ## A Stan model 
 

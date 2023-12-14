@@ -1,0 +1,27 @@
+---
+title: "remarks"
+format: revealjs
+---
+
+## Tips I think you should know
+
+## What did you do?
+
+rite the damned equations for your models
+
+Look it up in one of several books! 
+
+$$
+y = \beta_0 + \beta_{\text{water}}\text{water} 
+$$
+
+
+some examples
+
+## what' is your 0
+
+## what are your units
+
+## Why does this work
+
+## 
