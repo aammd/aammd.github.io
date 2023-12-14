@@ -1,0 +1,243 @@
+---
+title: "Contrasts"
+author: "Andrew MacDonald"
+description: |
+  What's the (kind of) difference?
+date: 14 Dec 2023
+categories: [UdeS, stan]
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+
+```{r}
+means <- c(3,4,9)
+
+neach <-  25
+ys <- rnorm(n = neach*length(means), mean = rep(means, each = neach), sd = .3)
+xs <- rep(letters[1:length(means)], each = neach)
+
+mod <- lm(ys ~ xs)
+
+
+```
+
+```{r}
+xs <- as.factor(xs)
+
+contrasts(xs) <- contr.helmert(3)
+contrasts(xs) <- sweep(contr.helmert(3), MARGIN = 2, STATS = 2:3, FUN = `/`)
+
+sweep(matrix(1, nrow = 4, ncol = 3), MARGIN = 2,STATS = 1:3, FUN =  `/`)
+
+
+
+mod_helm <- lm(ys ~ xs)
+
+summary(mod_helm)
+
+mean(ys)
+
+means[2] - means[1]
+
+means[3] - mean(means[1:2])
+
+```
+
+## Helmert contrasts
+
+```{r}
+suppressPackageStartupMessages(library(tidyverse))
+
+# plot the means
+
+hh <- coef(mod_helm)
+
+cc <- RColorBrewer::brewer.pal(3, "Set2")
+
+
+helmert <- tibble(xs, ys) |> 
+  ggplot(aes(x = xs, y= ys)) + 
+  geom_point() + 
+  stat_summary(fun.data = mean_cl_normal, col = "red") + 
+  geom_segment(aes(x = 1.5,
+                   xend = 1.5,
+                   y = means[1],
+                   yend = means[1] + hh[2]),
+               lwd = 4, col = cc[2]) + 
+  geom_segment(x = .9, xend = 3.1, 
+               yend = hh[1], 
+               y = hh[1], lwd = 4, col = cc[1]) + 
+  geom_segment(aes(x = 1, xend = 3,
+                   y = mean(means[1:2]),
+                   yend =  mean(means[1:2])), lty = 2) + 
+  geom_segment(aes(x = 2.5, xend = 2.5,
+                   y = mean(means[1:2]), 
+                   yend = mean(means[1:2]) + hh[3]),
+               col = cc[3], lwd = 4)
+
+helmert
+
+```
+
+build a group of 3 this way:
+
+```{r}
+contr.helmert.unscaled <- function(n){
+   sweep(contr.helmert(n), MARGIN = 2, STATS = 2:n, FUN = `/`)
+}
+
+cmat <- contr.helmert.unscaled(3)
+
+
+grand_mean <- 7
+diff_parents <- .5
+nonadd_hybrid <- 3
+
+geno_simulation <- tibble(geno_name = c("H", "N", "HN"),
+       geno_id = 1:3,
+       n = 15) |>
+  uncount(n) |> 
+  mutate(b0 = 1, 
+         b1 = cmat[geno_id, 1], 
+         b2 = cmat[geno_id, 2],
+         avg = b0 * grand_mean + b1 * diff_parents + b2*nonadd_hybrid,
+         obs = rnorm(length(avg), mean = avg, sd = .3))
+  
+geno_simulation |> 
+  ggplot(aes(x = geno_name, y = obs)) + 
+  geom_point()
+
+
+
+```
+
+
+## default contrasts
+
+```{r}
+means <- c(3,4,9)
+
+neach <-  25
+ys <- rnorm(n = neach*length(means), mean = rep(means, each = neach), sd = .3)
+xs <- rep(letters[1:length(means)], each = neach)
+
+mod <- lm(ys ~ xs)
+
+coefs_trt <- coef(mod)
+
+treatment <- tibble(xs, ys) |> 
+  ggplot(aes(x = xs, y= ys)) + 
+  geom_point() + 
+  stat_summary(fun.data = mean_cl_normal, col = "red") + 
+  geom_segment(x = .9, xend = 3.1, 
+               yend = coefs_trt[1], 
+               y = coefs_trt[1], lwd = 4, col = cc[1]) + 
+  geom_segment(x = 2.1,
+               xend = 2.1,
+               y = coefs_trt[1],
+               yend = coefs_trt[1] + coefs_trt[2],
+               lwd = 4, col = cc[2]) + 
+  geom_segment(x = 3.1, 
+               xend = 3.1,
+               y = coefs_trt[1], 
+               yend = coefs_trt[1] + coefs_trt[3],
+               col = cc[3], lwd = 4)
+
+treatment
+```
+
+
+## Polynomial contrasts
+
+```{r}
+means <- c(3,4,9)
+
+neach <-  25
+ys <- rnorm(n = neach*length(means), mean = rep(means, each = neach), sd = .3)
+xs <- ordered(rep(letters[1:length(means)], each = neach))
+
+mod <- lm(ys ~ xs)
+
+contr_vals <- contrasts(xs)
+
+coefs_lin <- coef(mod)
+
+polyfig <- tibble(xs, ys) |> 
+  ggplot(aes(x = xs, y= ys)) + 
+  geom_point() + 
+  stat_summary(fun.data = mean_cl_normal, col = "red") + 
+  geom_segment(x = 1, y = coefs_lin[1], xend = 3, yend = coefs_lin[1], lwd = 4, col = cc[1]) + 
+  geom_line(aes(x = x, y = y), 
+            data = data.frame(x = 1:3,
+                              y = contr_vals[,1][]*coefs_lin[2] + coefs_lin[1]),
+            lwd = 4, col = cc[2]) + 
+  geom_line(aes(x = x, y = y), 
+            data = data.frame(x = 1:3,
+                              y = contr_vals[,2][]*coefs_lin[3] + coefs_lin[1]),
+            lwd = 4, col = cc[3])
+
+polyfig
+```
+
+### sum contrasts
+
+```{r}
+means <- c(3,4,9)
+
+neach <-  25
+ys <- rnorm(n = neach*length(means), mean = rep(means, each = neach), sd = .3)
+xs <- factor(rep(letters[1:length(means)], each = neach))
+contrasts(xs) <- contr.sum(3)
+mod <- lm(ys ~ xs)
+summary(mod)
+
+
+coefs_sum <- coef(mod)
+
+contrsum <- tibble(xs, ys) |> 
+  ggplot(aes(x = xs, y= ys)) + 
+  geom_point() + 
+  stat_summary(fun.data = mean_cl_normal, col = "red") + 
+  geom_segment(x = .9, xend = 3.1, y = coefs_sum[1], yend = coefs_sum[1],
+               lwd = 4, col = cc[1]) +  
+  geom_segment(x = 1.1,
+               xend = 1.1,
+               y = coefs_sum[1],
+               yend = coefs_sum[1] + coefs_sum[2],
+               lwd = 4, col = cc[2]) + 
+  geom_segment(x = 2.1, 
+               xend = 2.1,
+               y = coefs_sum[1], 
+               yend = coefs_sum[1] + coefs_sum[3],
+               col = cc[3], lwd = 4)
+contrsum
+```
+
+
+```{r final-figure, fig.height=10, fig.width=9}
+library(patchwork)
+
+
+(
+  (treatment + 
+     labs(title = "Treatment") + 
+     theme(axis.title = element_blank())
+   ) + contrsum +
+     labs(title = "Sum") + 
+    theme(axis.title = element_blank())
+) / (
+  (helmert +
+     labs(title = "Helmert") + 
+     theme(axis.title = element_blank())) +
+    (polyfig +
+     labs(title = "Polynomial") + 
+     theme(axis.title = element_blank()))
+)
+
+```
