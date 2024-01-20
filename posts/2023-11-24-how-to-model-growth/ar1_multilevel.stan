@@ -21,6 +21,7 @@ parameters {
 }
 
 transformed parameters {
+  // note from jan 2024, does this z_params_raw need to go on the OTHER side of diag_pre_multiply
   matrix[nclone, 3] z_params = z_params_raw * diag_pre_multiply(sigma_params, L_corr);
 
   vector[nclone] log_a = mu_log_a + z_params[,1];
