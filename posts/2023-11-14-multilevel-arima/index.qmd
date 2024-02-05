@@ -1,12 +1,15 @@
 ---
-title: "Multilevel Arima model"
+title: "Vectorizing a multilevel AR-1 model"
 author: "Andrew MacDonald"
 description: |
   Vectorizing with multiple species
 date: 14 Nov 2023
 editor: source
 categories: [UdeS, stan]
+editor_options: 
+  chunk_output_type: console
 ---
+
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
 library(cmdstanr)
@@ -15,8 +18,22 @@ library(tidyverse)
 library(tidybayes)
 ```
 
-We can vectorize an AR-1 Model for one species very easily.
-This is how it is done in the [Stan manual](https://mc-stan.org/docs/stan-users-guide/autoregressive.html).
+## What it is
+
+A really simple model of growth says that the amount of something at any time ($t$) depends on how much of it there was last time ($t-1$), in a kind of linear, straight-line way:
+
+$$
+Y_t = a + b Y_{t-1}
+$$
+
+This model gets a lot of use in ecology, especially for measuring population growth. 
+It also shows up in economics, and many other places where how much there is depends on how much there was.
+
+### Link functions
+
+In order for the parameters to make sense, there needs to be some constraints. 
+For example, if the population is growing, then we expect that the parameter $a$ (which represents intrinsic growth rate) is always positive.
+The parameter $b$ represents the amount of density dependence, and should be between 0 and 1 for a stable system. While its possible to imagine wanting to model populations that are either unstable or declining, I want to apply this model to exponential growth in the lab, and so I'm fitting it with link functions to make sure that it grows as I want:
 
 $$ 
 \begin{align}
@@ -25,7 +42,19 @@ Y_i &\sim \text{normal}\left(\mu, \sigma \right) \\
 \end{align}
 $$
 
-This is also the right way to work with missing data.
+
+
+
+## missing data
+
+
+
+
+## How to cook it
+
+We can vectorize an AR-1 Model for one species very easily. 
+In fact, it is literally the textbook example of how that is done in the [Stan manual](https://mc-stan.org/docs/stan-users-guide/autoregressive.html).  
+This also lets us work with missing data.
 
 But how can we do it with multiple species? This is pretty key when working with long-format datasets, often with different species. I want it to be flexible -- after all, not all species have datasets of equal length - some are only monitored in certain years. 
 
@@ -49,9 +78,9 @@ single_spp_ar1
 
 ```{r}
 sample_single_spp_ar1 <- single_spp_ar1$sample(data = list(
-  nyear = 25, 
-  n = 25,
-  pop = rep(0, times = 25), 
+  nyear = 60, 
+  n = 60,
+  pop = rep(0, times = 60), 
   fit = 0))
 ```
 
@@ -63,9 +92,8 @@ some_draws <- sample_single_spp_ar1 |>
 some_draws |> 
   ggplot(aes(x = i, y = pred_pop_avg)) + 
   geom_line() + 
-  geom_point(aes(y = pred_pop_obs))+ 
-  facet_wrap(~.draw, ncol = 4) + 
-  coord_cartesian(ylim = c(0, 100))
+  # geom_point(aes(y = exp(pred_pop_obs)))+ 
+  facet_wrap(~.draw, ncol = 4)
 ```
 
 This is the prior predictive distribution of an AR-1 model, for a single species model. Each panel in the discussion refers to a single posterior sample for all parameters

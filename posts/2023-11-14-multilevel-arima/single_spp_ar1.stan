@@ -11,17 +11,17 @@ transformed data {
 }
 parameters {
   real log_b0;
-  real log_rho;
+  real logit_rho;
   real<lower=0> sigma;
 }
 model {
-  log_b0 ~ normal(0, 0.1);
-  log_rho ~ normal(0, 0.1);
-  sigma ~ exponential(1);
+  log_b0 ~ normal(-1, 0.1);
+  logit_rho ~ normal(2, 0.1);
+  sigma ~ exponential(10);
   // likelihood
   if (fit == 1){
     log_pop[2:n] ~ normal(
-      exp(log_b0) + exp(log_rho) * log_pop[1:(n-1)],
+      exp(log_b0) + inv_logit(logit_rho) * log_pop[1:(n-1)],
       sigma);
   }
 }
@@ -32,11 +32,11 @@ generated quantities {
   pred_pop_avg[1] = 2.2;
 
   for (j in 2:nyear) {
-    pred_pop_avg[j] = exp(log_b0) + exp(log_rho) * pred_pop_avg[j-1];
+    pred_pop_avg[j] = normal_rng(exp(log_b0) + inv_logit(logit_rho) * pred_pop_avg[j-1], sigma);
 
   }
 
-  pred_pop_obs = normal_rng(pred_pop_avg, sigma);
+  // pred_pop_obs = normal_rng(pred_pop_avg, sigma);
 
 }
 
