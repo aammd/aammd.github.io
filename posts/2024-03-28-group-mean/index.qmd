@@ -1,0 +1,32 @@
+---
+title: "Andrew tries Quarto"
+author: "Andrew MacDonald"
+description: |
+  Quick notes on how to make a blog with Quarto and also targets.
+date: 11 Nov 2022
+editor: source
+categories: [UdeS, stan]
+draft: true
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+
+```{r}
+library(palmerpenguins)
+```
+
+```{r}
+glimpse(penguins)
+```
+
+```{r}
+penguins |> 
+  ggplot(aes(x = body_mass_g, y = flipper_length_mm, colour = species)) + geom_point()
+```
+

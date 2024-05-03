@@ -9,14 +9,13 @@
 <link>https://aammd.github.io/blog.html</link>
 <atom:link href="https://aammd.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Demonstrating ecological concepts and statistical models using simulation</description>
-<generator>quarto-99.9.9</generator>
+<generator>quarto-1.3.450</generator>
 <lastBuildDate>Thu, 14 Dec 2023 05:00:00 GMT</lastBuildDate>
 <item>
   <title>Contrasts</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-12-14-contrasts/</link>
+  <link>https://aammd.github.io/posts/2023-12-14-contrasts/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -1464,15 +1463,14 @@ Caused by error in `fun.data()`:
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-12-14-contrasts/</guid>
+  <guid>https://aammd.github.io/posts/2023-12-14-contrasts/index.html</guid>
   <pubDate>Thu, 14 Dec 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>How to model discrete growth</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-24-how-to-model-growth/</link>
+  <link>https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -2448,15 +2446,193 @@ font-style: inherit;">2</span>) </span></code></pre></div>
   <category>stan</category>
   <category>reproduction</category>
   <category>MAR</category>
-  <guid>https://aammd.github.io/posts/2023-11-24-how-to-model-growth/</guid>
+  <guid>https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index.html</guid>
+  <pubDate>Fri, 24 Nov 2023 05:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Difference of normals is normal</title>
+  <dc:creator>Andrew MacDonald</dc:creator>
+  <link>https://aammd.github.io/posts/2024-05-03-difference_of_two_normals/index.html</link>
+  <description><![CDATA[ 
+
+
+
+
+<section id="motivating-example" class="level3">
+<h3 class="anchored" data-anchor-id="motivating-example">Motivating example</h3>
+<p>Suppose you were calculating the growth rate of a fish! The true size of the fish increases from one year to the next. Each year is measured by a different person, such that measurement error is not the same number in each year.</p>
+<p>We might calculate growth rate using the traditional calculation for relative growth rate, as the log ratio of size at time <img src="https://latex.codecogs.com/png.latex?t"> and size at time <img src="https://latex.codecogs.com/png.latex?t-1">. that is:</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0A&amp;%5Clog%20%5Cleft(%5Cfrac%7B%5Ctext%7Bthis%20year%20size%7D%7D%7B%5Ctext%7Blast%20year%20size%7D%7D%5Cright)%20%5C%5C%0A&amp;%5Clog%20(%5Ctext%7Bthis%20year%20size%7D)-%20%5Clog(%5Ctext%7Blast%20year%20size%7D)%0A%5Cend%7Balign%7D%0A"></p>
+<p>The difference between two normal distributions is another normal distribution!</p>
+<p><img src="https://latex.codecogs.com/png.latex?%0A%5Cbegin%7Balign%7D%0A%5BX_1%5D%20&amp;%5Csim%20%5Ctext%7BN%7D(%5Cmu_1,%20%5Csigma_1)%20%5C%5C%0A%5BX_2%5D%20&amp;%5Csim%20%5Ctext%7BN%7D(%5Cmu_2,%20%5Csigma_2)%20%5C%5C%0AZ%20&amp;=%20X_1%20-%20X_2%20%5C%5C%0A%5C%5C%0A%5BZ%5D%20&amp;%5Csim%20%5Ctext%7BN%7D%5Cleft(%5Cmu_1%20-%20%5Cmu_2,%20%5Csqrt%7B%5Csigma_1%5E2%20-%20%5Csigma_2%5E2%7D%5Cright)%0A%5Cend%7Balign%7D%0A"></p>
+<p>The mean of the new distribution is the differences of the two means: not surprising!</p>
+<p>The standard deviation might look like a fancy formula, but it follows directly from what a variance is. A variance is a sum of squares, so when you add or subtract two normal distributions you add or subtract their sums of squares.</p>
+<p>Here’s a quick demonstration via simulation.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">suppressPackageStartupMessages</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">library</span>(tidyverse))</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 3.8 is about log(45), seems like a good fish size.</span></span>
+<span id="cb1-4">true_size_last_year <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3.8</span></span>
+<span id="cb1-5">true_size_this_year <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3.92</span></span>
+<span id="cb1-6"></span>
+<span id="cb1-7"><span class="do" style="color: #5E5E5E;
+background-color: null;
+font-style: italic;">## observation error</span></span>
+<span id="cb1-8">sigma_last_year <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span></span>
+<span id="cb1-9">sigma_this_year <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.01</span></span>
+<span id="cb1-10"></span>
+<span id="cb1-11">growth <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> purrr<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:::</span><span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">map_dbl</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">:</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5e3</span>,   </span>
+<span id="cb1-12">            \(x) {</span>
+<span id="cb1-13">              last_year_obs <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rnorm</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, true_size_last_year, sigma_last_year)</span>
+<span id="cb1-14">              this_year_obs <span class="ot" style="color: #003B4F;
+background-color: null;
+font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">rnorm</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, true_size_this_year, sigma_this_year)</span>
+<span id="cb1-15">              </span>
+<span id="cb1-16">              this_year_obs <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> last_year_obs}</span>
+<span id="cb1-17">) </span>
+<span id="cb1-18"></span>
+<span id="cb1-19"></span>
+<span id="cb1-20"></span>
+<span id="cb1-21">growth <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb1-22">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">enframe</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">value =</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"growth"</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">|&gt;</span> </span>
+<span id="cb1-23">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">ggplot</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">x =</span> growth)) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb1-24">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">geom_histogram</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">aes</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">y =</span> ..density..), <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">binwidth =</span> .<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">005</span>) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span></span>
+<span id="cb1-25">  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># stat_density() +</span></span>
+<span id="cb1-26">  <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">stat_function</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">fun =</span> dnorm, </span>
+<span id="cb1-27">                <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">args =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">list</span>(<span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">mean =</span> true_size_this_year <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> true_size_last_year,</span>
+<span id="cb1-28">                            <span class="at" style="color: #657422;
+background-color: null;
+font-style: inherit;">sd =</span> <span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">sqrt</span>(<span class="fu" style="color: #4758AB;
+background-color: null;
+font-style: inherit;">abs</span>(sigma_this_year<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span> <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span> sigma_last_year<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>)))) <span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> </span>
+<span id="cb1-29"><span class="cn" style="color: #8f5902;
+background-color: null;
+font-style: inherit;">NULL</span></span></code></pre></div>
+<div class="cell-output-display">
+<p><img src="https://aammd.github.io/posts/2024-05-03-difference_of_two_normals/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+
+</section>
+
+ ]]></description>
+  <category>UdeS</category>
+  <category>stan</category>
+  <category>reproduction</category>
+  <category>MAR</category>
+  <guid>https://aammd.github.io/posts/2024-05-03-difference_of_two_normals/index.html</guid>
   <pubDate>Fri, 24 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Discrete-time population growth in Stan</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-15-ives03-ts/</link>
+  <link>https://aammd.github.io/posts/2023-11-15-ives03-ts/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -2515,7 +2691,7 @@ font-style: inherit;">100</span>))</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Curve of a Gompertz growth model.</figcaption>
+<figcaption class="figure-caption">Curve of a Gompertz growth model.</figcaption>
 </figure>
 </div>
 </div>
@@ -2530,6 +2706,7 @@ font-style: inherit;">100</span>))</span></code></pre></div>
 <section id="simulations" class="level2">
 <h2 class="anchored" data-anchor-id="simulations">Simulations</h2>
 <p>Here are simulations from a one-species AR-1 model that imitate Ives et al.&nbsp;figure 1.</p>
+<div>
 <div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1">simulate_pop_growth <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> <span class="cf" style="color: #003B4F;
@@ -2753,19 +2930,24 @@ font-style: inherit;">+</span> </span>
 <span id="cb3-33">  <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">theme_bw</span>()</span></code></pre></div>
-<div class="cell quarto-layout-panel" data-layout-ncol="2">
+<div class="cell quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Growth with a = 0, b = .6, sigma = 1</figcaption>
+<figcaption class="figure-caption">Growth with a = 0, b = .6, sigma = 1</figcaption>
 </figure>
 </div>
-<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-2-2.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Growth with a = 0, b = .95, sigma = 1</figcaption>
+<figcaption class="figure-caption">Growth with a = 0, b = .95, sigma = 1</figcaption>
 </figure>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -3005,6 +3187,7 @@ font-style: inherit;">TRUE</span>)</span></code></pre></div>
 </div>
 </div>
 <p>Do these numbers reflect the distribution we see in the simulations?</p>
+<div>
 <div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">set.seed</span>(<span class="dv" style="color: #AD0000;
@@ -3380,19 +3563,24 @@ background-color: null;
 font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"log population size"</span>)</span></code></pre></div>
-<div class="cell quarto-layout-panel" data-layout-ncol="2">
+<div class="cell quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Simulations match the theoretical predictions very closely. Math works!</figcaption>
+<figcaption class="figure-caption">Simulations match the theoretical predictions very closely. Math works!</figcaption>
 </figure>
 </div>
-<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-11-15-ives03-ts/index_files/figure-html/unnamed-chunk-5-2.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Simulations match the theoretical predictions very closely. Math works!</figcaption>
+<figcaption class="figure-caption">Simulations match the theoretical predictions very closely. Math works!</figcaption>
 </figure>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -5684,7 +5872,7 @@ $ebfmi
 </section>
 </section>
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-ives2003" class="csl-entry">
 Ives, A. R., B. Dennis, K. L. Cottingham, and S. R. Carpenter. 2003. <span>“ESTIMATING COMMUNITY STABILITY AND ECOLOGICAL INTERACTIONS FROM TIME-SERIES DATA.”</span> <em>Ecological Monographs</em> 73 (2): 301–30. <a href="https://doi.org/10.1890/0012-9615(2003)073[0301:ECSAEI]2.0.CO;2">https://doi.org/10.1890/0012-9615(2003)073[0301:ECSAEI]2.0.CO;2</a>.
 </div>
@@ -5693,15 +5881,14 @@ Ives, A. R., B. Dennis, K. L. Cottingham, and S. R. Carpenter. 2003. <span>“ES
   <category>stan</category>
   <category>reproduction</category>
   <category>MAR</category>
-  <guid>https://aammd.github.io/posts/2023-11-15-ives03-ts/</guid>
+  <guid>https://aammd.github.io/posts/2023-11-15-ives03-ts/index.html</guid>
   <pubDate>Fri, 17 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Multilevel Arima model</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-14-multilevel-arima/</link>
+  <link>https://aammd.github.io/posts/2023-11-14-multilevel-arima/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -6545,15 +6732,14 @@ font-style: inherit;">50</span>))</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-11-14-multilevel-arima/</guid>
+  <guid>https://aammd.github.io/posts/2023-11-14-multilevel-arima/index.html</guid>
   <pubDate>Tue, 14 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>causal DAGS and full-luxury shade trees</title>
   <dc:creator>Andrew MacDonald, Bella Richmond</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-08-tree-cooling/</link>
+  <link>https://aammd.github.io/posts/2023-11-08-tree-cooling/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -6916,15 +7102,14 @@ font-style: inherit;">'none'</span>)</span></code></pre></div>
  ]]></description>
   <category>QCBS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-11-08-tree-cooling/</guid>
+  <guid>https://aammd.github.io/posts/2023-11-08-tree-cooling/index.html</guid>
   <pubDate>Wed, 08 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Modelling discrete growth</title>
   <dc:creator>Andrew MacDonald, Kelly Forester</dc:creator>
-  <link>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/</link>
+  <link>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -8151,15 +8336,14 @@ font-style: inherit;">4</span>)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/</guid>
+  <guid>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/index.html</guid>
   <pubDate>Tue, 07 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Power laws on log-linear plots</title>
   <dc:creator>Andrew MacDonald, Amélie Morin</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-03-power-law/</link>
+  <link>https://aammd.github.io/posts/2023-11-03-power-law/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -8477,15 +8661,14 @@ font-style: inherit;">"red"</span>)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-11-03-power-law/</guid>
+  <guid>https://aammd.github.io/posts/2023-11-03-power-law/index.html</guid>
   <pubDate>Fri, 03 Nov 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Stan-dalone generated quantites</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-01-standalone-gq/</link>
+  <link>https://aammd.github.io/posts/2023-11-01-standalone-gq/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -8941,7 +9124,7 @@ font-style: inherit;">"predicted herbivory"</span>)</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-11-01-standalone-gq/index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Visualizing an interaction. The effect of soil quality on herbivory varies with herbivore biomass (in a very pretend, make-believe example).</figcaption>
+<figcaption class="figure-caption">Visualizing an interaction. The effect of soil quality on herbivory varies with herbivore biomass (in a very pretend, make-believe example).</figcaption>
 </figure>
 </div>
 </div>
@@ -8954,15 +9137,14 @@ font-style: inherit;">"predicted herbivory"</span>)</span></code></pre></div>
   <category>UdeS</category>
   <category>stan</category>
   <category>generated quantities</category>
-  <guid>https://aammd.github.io/posts/2023-11-01-standalone-gq/</guid>
+  <guid>https://aammd.github.io/posts/2023-11-01-standalone-gq/index.html</guid>
   <pubDate>Wed, 01 Nov 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Transformed regression in Stan</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-08-22-transformed-regression/</link>
+  <link>https://aammd.github.io/posts/2023-08-22-transformed-regression/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -9024,7 +9206,7 @@ font-style: inherit;">4</span>))</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-22-transformed-regression/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Log-transformed responses are like fitting an exponential curve</figcaption>
+<figcaption class="figure-caption">Log-transformed responses are like fitting an exponential curve</figcaption>
 </figure>
 </div>
 </div>
@@ -9053,7 +9235,7 @@ font-style: inherit;">8</span>))</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-22-transformed-regression/index_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Square root transformed models are like fitting a quadratic curve</figcaption>
+<figcaption class="figure-caption">Square root transformed models are like fitting a quadratic curve</figcaption>
 </figure>
 </div>
 </div>
@@ -9302,7 +9484,7 @@ font-style: inherit;">~</span>.draw)</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-22-transformed-regression/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>some prior predictive simulations from a square-root transformed model.</figcaption>
+<figcaption class="figure-caption">some prior predictive simulations from a square-root transformed model.</figcaption>
 </figure>
 </div>
 </div>
@@ -9698,7 +9880,7 @@ font-style: inherit;">stat_lineribbon</span>()</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-22-transformed-regression/index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>square-root transformed model fit to data from a log-transformed model. Just to prove you can</figcaption>
+<figcaption class="figure-caption">square-root transformed model fit to data from a log-transformed model. Just to prove you can</figcaption>
 </figure>
 </div>
 </div>
@@ -9738,15 +9920,14 @@ font-style: inherit;">4</span>)</span></code></pre></div>
   <category>UdeS</category>
   <category>stan</category>
   <category>QCBS</category>
-  <guid>https://aammd.github.io/posts/2023-08-22-transformed-regression/</guid>
+  <guid>https://aammd.github.io/posts/2023-08-22-transformed-regression/index.html</guid>
   <pubDate>Tue, 22 Aug 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Missing data in non-normal distributions</title>
   <dc:creator>Andrew MacDonald, Flavio Affinito</dc:creator>
-  <link>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/</link>
+  <link>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -10443,6 +10624,7 @@ Mean chain execution time: 0.7 seconds.
 Total execution time: 0.9 seconds.</code></pre>
 </div>
 </div>
+<div>
 <div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1">posterior_and_original <span class="ot" style="color: #003B4F;
 background-color: null;
 font-style: inherit;">&lt;-</span> regression_missing<span class="sc" style="color: #5E5E5E;
@@ -10568,19 +10750,24 @@ font-style: inherit;">!</span><span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">is.na</span>(xx2))]</span>
 <span id="cb14-21">               ))</span></code></pre></div>
-<div class="cell quarto-layout-panel" data-layout-ncol="2">
+<div class="cell quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>imputed values (y axis) vs the real values (x axis), and the 1:1 line for comparison. The posterior distributions are close to the truth, because the regression equation lets information flow in both directions.</figcaption>
+<figcaption class="figure-caption">imputed values (y axis) vs the real values (x axis), and the 1:1 line for comparison. The posterior distributions are close to the truth, because the regression equation lets information flow in both directions.</figcaption>
 </figure>
 </div>
-<div class="quarto-figure quarto-figure-center quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+</div>
+<div class="cell-output-display quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>The original relationship, with posterior distributions for missing x variables.</figcaption>
+<figcaption class="figure-caption">The original relationship, with posterior distributions for missing x variables.</figcaption>
 </figure>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -10599,15 +10786,14 @@ font-style: inherit;">is.na</span>(xx2))]</span>
   <category>UdeS</category>
   <category>stan</category>
   <category>QCBS</category>
-  <guid>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/</guid>
+  <guid>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index.html</guid>
   <pubDate>Tue, 22 Aug 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Breakpoint regression in Stan</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-07-05-breakpoint/</link>
+  <link>https://aammd.github.io/posts/2023-07-05-breakpoint/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -10817,7 +11003,7 @@ font-style: inherit;">"Car speed"</span>)</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-07-05-breakpoint/bk_intro-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Car speed equals the speed limit, right up to the car’s maximum velocity. Then, it doesn’t matter how high the limit is, the car has to stay at maximum speed.</figcaption>
+<figcaption class="figure-caption">Car speed equals the speed limit, right up to the car’s maximum velocity. Then, it doesn’t matter how high the limit is, the car has to stay at maximum speed.</figcaption>
 </figure>
 </div>
 </div>
@@ -10994,7 +11180,7 @@ font-style: inherit;">"Car speed"</span>)</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-07-05-breakpoint/breakpoint-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Car speed equals the speed limit, right up to the car’s maximum velocity – decreased a little bit by particularities of this specific car.</figcaption>
+<figcaption class="figure-caption">Car speed equals the speed limit, right up to the car’s maximum velocity – decreased a little bit by particularities of this specific car.</figcaption>
 </figure>
 </div>
 </div>
@@ -11391,9 +11577,7 @@ font-style: inherit;">B =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">33</span>), <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>L)</span></code></pre></div>
+font-style: inherit;">refresh =</span> 0L)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 1 chain...
 
@@ -11589,9 +11773,7 @@ font-style: inherit;">max_sd =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>), <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>L)</span></code></pre></div>
+font-style: inherit;">refresh =</span> 0L)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 sequential chains...
 
@@ -11764,9 +11946,7 @@ font-style: inherit;">max_sd =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">5</span>), <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>L)</span></code></pre></div>
+font-style: inherit;">refresh =</span> 0L)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 sequential chains...
 
@@ -11945,9 +12125,7 @@ font-style: inherit;">B =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">33</span>), <span class="at" style="color: #657422;
 background-color: null;
-font-style: inherit;">refresh =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>L)</span></code></pre></div>
+font-style: inherit;">refresh =</span> 1000L)</span></code></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 1 chain...
 
@@ -12168,25 +12346,24 @@ font-style: inherit;">~</span>.draw)</span></code></pre></div>
 </section>
 
 
-<div id="quarto-appendix" class="default"><aside id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>see Leibig’s Law of the Minimum, and also Dune↩︎</p></li>
 </ol>
-</aside></div> ]]></description>
+</section></div> ]]></description>
   <category>UdeS</category>
   <category>stan</category>
   <category>QCBS</category>
-  <guid>https://aammd.github.io/posts/2023-07-05-breakpoint/</guid>
+  <guid>https://aammd.github.io/posts/2023-07-05-breakpoint/index.html</guid>
   <pubDate>Sat, 05 Aug 2023 04:00:00 GMT</pubDate>
   <media:content url="https://aammd.github.io/posts/2023-07-05-breakpoint/breakpoint-1.png" medium="image" type="image/png" height="103" width="144"/>
 </item>
 <item>
   <title>Latent continuous variables</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-03-20-latent-continuous/</link>
+  <link>https://aammd.github.io/posts/2023-03-20-latent-continuous/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -12212,7 +12389,7 @@ font-style: inherit;">library</span>(cmdstanr)</span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2023-03-20-latent-continuous/dag.png" class="img-fluid figure-img"></p>
-<figcaption>Five different observable variables (in squares), all caused by one latent variable (round).</figcaption>
+<figcaption class="figure-caption">Five different observable variables (in squares), all caused by one latent variable (round).</figcaption>
 </figure>
 </div>
 <p>In mathematics, this model is the following:</p>
@@ -12300,9 +12477,7 @@ font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">matrix</span>(<span class="fu" style="color: #4758AB;
 background-color: null;
-font-style: inherit;">rep</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>L, <span class="at" style="color: #657422;
+font-style: inherit;">rep</span>(0L, <span class="at" style="color: #657422;
 background-color: null;
 font-style: inherit;">times =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
@@ -13216,15 +13391,14 @@ font-style: inherit;">"red"</span>)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-03-20-latent-continuous/</guid>
+  <guid>https://aammd.github.io/posts/2023-03-20-latent-continuous/index.html</guid>
   <pubDate>Mon, 20 Mar 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Validating a model of selection on plasticity</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/</link>
+  <link>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -15074,15 +15248,14 @@ Total execution time: 5.6 seconds.</code></pre>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/</guid>
+  <guid>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/index.html</guid>
   <pubDate>Thu, 02 Feb 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>The evolution of plasticity</title>
   <dc:creator>Andrew MacDonald and Audrey Tremblay</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/</link>
+  <link>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -15790,6 +15963,7 @@ font-style: inherit;">round</span>()</span>
 <span id="cb9-18">)</span></code></pre></div>
 </div>
 <p>Some of these values are unreasonable! we can adjust later</p>
+<div>
 <div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1">quality_effects <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|&gt;</span> </span>
@@ -15824,8 +15998,9 @@ background-color: null;
 font-style: inherit;">+</span> <span class="fu" style="color: #4758AB;
 background-color: null;
 font-style: inherit;">geom_point</span>()</span></code></pre></div>
-<div class="cell quarto-layout-panel" data-layout-ncol="2">
+<div class="cell quarto-layout-panel">
 
+</div>
 </div>
 </section>
 <section id="multiple-females" class="level2">
@@ -15840,6 +16015,7 @@ background-color: null;
 font-style: inherit;">simulate_many_moms</span>()</span></code></pre></div>
 </div>
 <p>let’s plot it!</p>
+<div>
 <div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1">many_moms_temperature <span class="sc" style="color: #5E5E5E;
 background-color: null;
 font-style: inherit;">|&gt;</span> </span>
@@ -15885,8 +16061,9 @@ background-color: null;
 font-style: inherit;">se =</span> <span class="cn" style="color: #8f5902;
 background-color: null;
 font-style: inherit;">FALSE</span>)</span></code></pre></div>
-<div class="cell quarto-layout-panel" data-layout-ncol="2">
+<div class="cell quarto-layout-panel">
 
+</div>
 </div>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">many_moms_temperature <span class="sc" style="color: #5E5E5E;
@@ -15957,15 +16134,14 @@ font-style: inherit;">FALSE</span>)</span></code></pre></div>
   <category>stan</category>
   <category>brms</category>
   <category>simulation</category>
-  <guid>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/index.html</guid>
   <pubDate>Wed, 23 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Simple nonlinear growth</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/</link>
+  <link>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -16135,7 +16311,7 @@ font-style: inherit;">"Size"</span>) </span></code></pre></div>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/index_files/figure-html/one_animal_plot-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption>Growth curve for a single individual. The curved line is the true size, and the dots are observations around it. The observations are taken in the field while the semi-tranquilized animal is struggling, so they show some slight variation.</figcaption>
+<figcaption class="figure-caption">Growth curve for a single individual. The curved line is the true size, and the dots are observations around it. The observations are taken in the field while the semi-tranquilized animal is struggling, so they show some slight variation.</figcaption>
 </figure>
 </div>
 </div>
@@ -16428,15 +16604,14 @@ scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/index.html</guid>
   <pubDate>Mon, 21 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Fitting a multispecies functional response in Stan</title>
   <dc:creator>Andrew MacDonald &amp; Ben Mercier</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/</link>
+  <link>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -16968,7 +17143,7 @@ font-style: inherit;">tar_make</span>()</span></code></pre></div>
 </section>
 
 
-<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0">
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-holling1966" class="csl-entry">
 Holling, C. S. 1966. <span>“The Functional Response of Invertebrate Predators to Prey Density.”</span> <em>Memoirs of the Entomological Society of Canada</em> 98 (S48): 5–86. <a href="https://doi.org/10.4039/entm9848fv">https://doi.org/10.4039/entm9848fv</a>.
 </div>
@@ -16978,23 +17153,22 @@ Smith, Brian E., and Laurel A. Smith. 2020. <span>“Multispecies Functional Res
 <div id="ref-smout2010a" class="csl-entry">
 Smout, Sophie, Christian Asseburg, Jason Matthiopoulos, Carmen Fernández, Stephen Redpath, Simon Thirgood, and John Harwood. 2010. <span>“The Functional Response of a Generalist Predator.”</span> <em>PLOS ONE</em> 5 (5): e10761. <a href="https://doi.org/10.1371/journal.pone.0010761">https://doi.org/10.1371/journal.pone.0010761</a>.
 </div>
-</div></section><aside id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+</div></section><section id="footnotes" class="footnotes footnotes-end-of-document"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
 
 <ol>
 <li id="fn1"><p>Things that eat plants have to do the same; replace “kill” with “peel” etc.↩︎</p></li>
 </ol>
-</aside></div> ]]></description>
+</section></div> ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/index.html</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Updating R and your R packages</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/</link>
+  <link>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -17010,15 +17184,14 @@ Smout, Sophie, Christian Asseburg, Jason Matthiopoulos, Carmen Fernández, Steph
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/index.html</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Andrew tries Quarto</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-29-group-centering/</link>
+  <link>https://aammd.github.io/posts/2022-11-29-group-centering/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -17084,15 +17257,14 @@ font-style: inherit;">library</span>(tidybayes)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-29-group-centering/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-29-group-centering/index.html</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Selection on plasticity</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/</link>
+  <link>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/index.html</link>
   <description><![CDATA[ 
-
 
 
 
@@ -17510,489 +17682,7 @@ font-style: inherit;">mean</span>()</span></code></pre></div>
   <category>UdeS</category>
   <category>stan</category>
   <category>plasticity</category>
-  <guid>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/</guid>
-  <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
-</item>
-<item>
-  <title>The Cholesky decomposition</title>
-  <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-12-01-cholesky-correlation/</link>
-  <description><![CDATA[ 
-
-
-
-
-
-<div class="cell">
-<div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(targets)</span>
-<span id="cb1-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(ggplot2)</span>
-<span id="cb1-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(tidyverse)</span>
-<span id="cb1-4"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">library</span>(tidybayes)</span></code></pre></div>
-</div>
-<section id="code" class="level2">
-<h2 class="anchored" data-anchor-id="code">code</h2>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">plot</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">density</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">tan</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">runif</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5000</span>,<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">min =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">max =</span> pi<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">/</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>))<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">*</span>.<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">from =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>), </span>
-<span id="cb2-2">     <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xlim =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>))</span>
-<span id="cb2-3"></span>
-<span id="cb2-4"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">curve</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dexp</span>(x, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">rate =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">3</span>), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">add =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">col =</span> <span class="st" style="color: #20794D;
-background-color: null;
-font-style: inherit;">"red"</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xlim =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">100</span>))</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2022-12-01-cholesky-correlation/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
-</div>
-<div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">curve</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">tan</span>(x), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">xlim =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>))</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2022-12-01-cholesky-correlation/index_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid" width="672"></p>
-</div>
-<div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">hist</span>(<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">log</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">runif</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">200</span>)), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">probability =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>)</span>
-<span id="cb4-2"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">curve</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">dexp</span>(x), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">add =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>)</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2022-12-01-cholesky-correlation/index_files/figure-html/unnamed-chunk-1-3.png" class="img-fluid" width="672"></p>
-</div>
-<div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1">eg <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> rethinking<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rlkjcorr</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>)</span>
-<span id="cb5-2">cc <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">chol</span>(eg)</span>
-<span id="cb5-3"></span>
-<span id="cb5-4">purrr<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rerun</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">30</span>,{</span>
-<span id="cb5-5">  zz <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">matrix</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">500</span>), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">ncol =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb5-6">  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># plot(zz)</span></span>
-<span id="cb5-7">  rr <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(cc) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%*%</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(zz)</span>
-<span id="cb5-8">  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># plot(t(rr))</span></span>
-<span id="cb5-9">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">cor</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(rr))[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>]</span>
-<span id="cb5-10">}) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> </span>
-<span id="cb5-11">  purrr<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">flatten_dbl</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">density</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">plot</span>()</span>
-<span id="cb5-12"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">abline</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">v=</span>eg[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>])</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2022-12-01-cholesky-correlation/index_files/figure-html/unnamed-chunk-1-4.png" class="img-fluid" width="672"></p>
-</div>
-<div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#' modelling the plasticity slopes (xik - xbar) for each evironmental variable?</span></span>
-<span id="cb6-2"><span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">#' what's correlated here? slopes and intercepts</span></span>
-<span id="cb6-3"></span>
-<span id="cb6-4">eg <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> rethinking<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rlkjcorr</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">5</span>)</span>
-<span id="cb6-5">cc <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">chol</span>(eg)</span>
-<span id="cb6-6"></span>
-<span id="cb6-7"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(cc) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%*%</span> cc</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>          [,1]      [,2]
-[1,] 1.0000000 0.6450641
-[2,] 0.6450641 1.0000000</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1">mm <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">matrix</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">4000</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">mean =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">sd =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">ncol =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb8-2"></span>
-<span id="cb8-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">plot</span>(mm)</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2022-12-01-cholesky-correlation/index_files/figure-html/unnamed-chunk-1-5.png" class="img-fluid" width="672"></p>
-</div>
-<div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1">yy <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(cc) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%*%</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(mm))</span>
-<span id="cb9-2"></span>
-<span id="cb9-3"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">plot</span>(yy)</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2022-12-01-cholesky-correlation/index_files/figure-html/unnamed-chunk-1-6.png" class="img-fluid" width="672"></p>
-</div>
-<div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">cor</span>(yy)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>          [,1]      [,2]
-[1,] 1.0000000 0.6548221
-[2,] 0.6548221 1.0000000</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1">purrr<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rerun</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">50</span>,{</span>
-<span id="cb12-2">  zz <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">matrix</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">500</span>), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">ncol =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb12-3">  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># plot(zz)</span></span>
-<span id="cb12-4">  rr <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(cc) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%*%</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(zz)</span>
-<span id="cb12-5">  <span class="co" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;"># plot(t(rr))</span></span>
-<span id="cb12-6">  <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">cor</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(rr))[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>]</span>
-<span id="cb12-7">}) <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> </span>
-<span id="cb12-8">  purrr<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">::</span><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">flatten_dbl</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">density</span>() <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">|&gt;</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">plot</span>()</span>
-<span id="cb12-9"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">abline</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">v=</span>eg[<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>])</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2022-12-01-cholesky-correlation/index_files/figure-html/unnamed-chunk-1-7.png" class="img-fluid" width="672"></p>
-</div>
-<div class="sourceCode cell-code" id="cb13" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1">p <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span>.<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">8</span></span>
-<span id="cb13-2">L <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">matrix</span>(<span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">c</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span>,<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">0</span>, p, <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">sqrt</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1</span> <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">-</span> p<span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">^</span><span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">ncol =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>, <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">byrow =</span> <span class="cn" style="color: #8f5902;
-background-color: null;
-font-style: inherit;">TRUE</span>)</span>
-<span id="cb13-3">zz <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">matrix</span>(<span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">data =</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">rnorm</span>(<span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">1000</span>), <span class="at" style="color: #657422;
-background-color: null;
-font-style: inherit;">ncol =</span> <span class="dv" style="color: #AD0000;
-background-color: null;
-font-style: inherit;">2</span>)</span>
-<span id="cb13-4">yy <span class="ot" style="color: #003B4F;
-background-color: null;
-font-style: inherit;">&lt;-</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(L <span class="sc" style="color: #5E5E5E;
-background-color: null;
-font-style: inherit;">%*%</span> <span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">t</span>(zz))</span>
-<span id="cb13-5"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">plot</span>(yy)</span></code></pre></div>
-<div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2022-12-01-cholesky-correlation/index_files/figure-html/unnamed-chunk-1-8.png" class="img-fluid" width="672"></p>
-</div>
-<div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><span class="fu" style="color: #4758AB;
-background-color: null;
-font-style: inherit;">cor</span>(yy)</span></code></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>           [,1]       [,2]
-[1,]  1.0000000 -0.7913319
-[2,] -0.7913319  1.0000000</code></pre>
-</div>
-</div>
-<p>Another way to make correlation matrices is here: https://www.rdatagen.net/post/2023-02-14-flexible-correlation-generation-an-update-to-gencorgen-in-simstudy/</p>
-
-
-</section>
-
- ]]></description>
-  <category>UdeS</category>
-  <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-12-01-cholesky-correlation/</guid>
+  <guid>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/index.html</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 </channel>

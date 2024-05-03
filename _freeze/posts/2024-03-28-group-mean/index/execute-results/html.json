@@ -1,0 +1,16 @@
+{
+  "hash": "50f3cbe07bdb25b1cd7925d4dedafbf1",
+  "result": {
+    "markdown": "---\ntitle: \"Andrew tries Quarto\"\nauthor: \"Andrew MacDonald\"\ndescription: |\n  Quick notes on how to make a blog with Quarto and also targets.\ndate: 11 Nov 2022\neditor: source\ncategories: [UdeS, stan]\ndraft: true\n---\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(targets)\nlibrary(ggplot2)\nlibrary(tidyverse)\nlibrary(tidybayes)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(palmerpenguins)\n```\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\nglimpse(penguins)\n```\n\n::: {.cell-output .cell-output-stdout}\n```\nRows: 344\nColumns: 8\n$ species           <fct> Adelie, Adelie, Adelie, Adelie, Adelie, Adelie, Adel…\n$ island            <fct> Torgersen, Torgersen, Torgersen, Torgersen, Torgerse…\n$ bill_length_mm    <dbl> 39.1, 39.5, 40.3, NA, 36.7, 39.3, 38.9, 39.2, 34.1, …\n$ bill_depth_mm     <dbl> 18.7, 17.4, 18.0, NA, 19.3, 20.6, 17.8, 19.6, 18.1, …\n$ flipper_length_mm <int> 181, 186, 195, NA, 193, 190, 181, 195, 193, 190, 186…\n$ body_mass_g       <int> 3750, 3800, 3250, NA, 3450, 3650, 3625, 4675, 3475, …\n$ sex               <fct> male, female, female, NA, female, male, female, male…\n$ year              <int> 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007, 2007…\n```\n:::\n:::\n\n::: {.cell}\n\n```{.r .cell-code}\npenguins |> \n  ggplot(aes(x = body_mass_g, y = flipper_length_mm, colour = species)) + geom_point()\n```\n\n::: {.cell-output .cell-output-stderr}\n```\nWarning: Removed 2 rows containing missing values (`geom_point()`).\n```\n:::\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-3-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

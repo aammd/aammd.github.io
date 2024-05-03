@@ -2,7 +2,7 @@
 title: "Growth curves"
 author: "Andrew"
 date: "2022-10-14"
-categories: [stan, simulation]
+categories: [stan, simulation, growth]
 image: gq_fig-1.png
 execute: 
   warning: false
@@ -32,7 +32,7 @@ This curve has a long tradition in ecology. It can be derived from simple assump
 
 I like this second way of writing the equation because it highlights that the VB equation is a linear transformation of an exponential function. We start out at $L_0$ and exponentially decay towards $L_\infty$.
 
-## a single tree
+## A single tree
 
 I'm going to do a simple simulation of one tree growing. here is code that does that
 
@@ -138,6 +138,8 @@ The above model reproduces predictions of the original line, but ignores measure
 One way to do this is after the fact, using the handy tidyverse `dplyr::rowwise()` syntax, combined with `posterior::rfun()`. The latter function transforms `rnorm` into a function that both takes and produces an `rvar`, the specialized format for working with posterior draws. The latter function makes sure we redo this for every row of our dataframe.
 
 ```{r}
+#| class-output: preview-image
+
 expected_df <- one_tree_post |> 
   spread_rvars(Lmax, r, sigma_obs) |> 
   expand_grid(time = seq(0, 200, length.out = 14)) |> 
@@ -154,8 +156,8 @@ expected_df |>
   theme_bw()
 ```
 
-This has the advantage of happening all in R, keeping our posterior distribution slim.\
-However sometimes it can be both convenient and more readable to keep the whole process inside Stan, and here's how:
+This has the advantage of happening all in R, keeping our posterior distribution slim.
+However, sometimes it can be both convenient and more readable to keep the whole process inside Stan, and here's how:
 
 ### Posterior predictive simulations in Stan
 

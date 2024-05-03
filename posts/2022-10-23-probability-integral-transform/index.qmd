@@ -6,7 +6,7 @@ author: "Andrew"
 date: 23 Oct 2022
 image: PIT_when_wrong-1.png
 bibliography: references.bib
-draft: true
+draft: false
 ---
 
 ::: callout-tip
@@ -17,7 +17,8 @@ Among the many wonderful plots that you can make with `bayesplot`, you will find
 
 So what is it, and how does it work?
 
-## 
+## Exploring with simulation
+
 
 Take random numbers from a distribution
 
@@ -141,3 +142,9 @@ expand_grid(meanval = seq(from = 1,
   geom_histogram() + 
   facet_grid(sdval~meanval)
 ```
+
+## What did we learn here
+
+The PIT is one of an arsenal of diagnostic tools. The idea here is to run data "backwards" through the distribution we've chosen. If the distribution we chose is something like realize, the result should look kind of flat. If we are very far wrong, it won't be flat. This can serve as a goodness-of-fit test for your response distribution. 
+
+This post also illustrates how useful it is to simulate data in order to understand how something (a model, a figure, a calculation) actually works.

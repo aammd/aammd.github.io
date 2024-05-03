@@ -5,7 +5,10 @@ description: |
   How to model the growth of things in a sensible fashion
 date: 7 Nov 2023
 editor: source
+draft: false
 categories: [UdeS, stan]
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
@@ -16,10 +19,9 @@ library(tidybayes)
 library(cmdstanr)
 ```
 
-##  growing things get bigger
+##  Growing things get bigger
 
-Animals get bigger over time, and young change in size faster than more mature individuals. 
-The classic Von Bertanaffy growth equation has animals growing from a starting size to a final asymptotic size:
+The classic Von Bertalanffy growth equation has animals growing from a starting size to a final asymptotic size:
 
 $$
 L_t = L_0e^{-rt} + L_{max}(1 - e^{-rt})
@@ -29,18 +31,31 @@ $$
 * $L_{max}$ is the final size
 * $r$ is a growth rate
 
-This equation yields a simple result:
+This equation yields a decelerating curve between the starting size and the final size, like this::
 
 ```{r}
+#| fig-cap: "VB Growth equation, with $L_0$ = 13, $L_{\text{max}} = 120$, and $r = .3$. 
+#| These are approximate values for a curve that describes growth in kangaroos."
 L0 <- 13
 Lmax <- 120
 r <- .3
 curve(L0 * exp(-r*x) + Lmax*(1 - exp(-r * x)), xlim = c(0, 20))
 ```
 
-This is the equation in continuous time
+### Discrete Time.
 
-However we often measure animals at discreet moments in time, having as a reference their last measurement. We can use a discrete version of this equation in these cases:
+The equation above is written in continuous time. 
+There are a few reasons to treat growth as discrete and not continuous.
+However, sometimes we measure organisms at discrete moments in time. 
+Animals might also only change in size during the growing season, and it can be useful to think of their growth occurring in discrete intervals. 
+Finally, we might want to consider that the growth rate (for example) is constant within a year, but variable in between years. 
+This becomes easier to think about if we let growth be discrete.
+
+The discrete-time version fo this approach just replaces $L_0$ with the previous time's size:
+
+$$
+L_t = L_{t-1} e^{-rt} + L_{max}(1 - e^{-rt})
+$$
 
 ```{r}
 vb_disc <- function(L_tm1, r, time, Lmax) {
@@ -84,7 +99,20 @@ curve(L0 * exp(-r*x) + Lmax*(1 - exp(-r * x)),
 points(cumsum(c(0,timevec)), size)
 ```
 
-So we can see that this is the same equation. Let's simulate observations of a growing animal with measurement error
+So we can see that this is the same equation. 
+
+
+### Measurement error: doing it wrong
+
+:::{.callout-warning}
+## error
+The stuff below is close but not quite. I made it based ont eh AR-1 model. however, in this model the uncertainty captured by the parameter $/sigma$ is actually process uncertainty, not measurement error! That is, it is fluctuations in intrisic growth rate that are not captured in the model. 
+:::
+
+<!-- maybe I'm too set on optimization. would it be possible to calculate all the function in a for loop in the transformed parameters block, and just to measurement error and the shifting of the whole thing left and right in the model block -->
+
+
+Let's simulate observations of a growing animal with measurement error
 
 ```{r}
 L0 <- 13
@@ -157,7 +185,7 @@ vb_discrete_post$summary()
 
 ## can it be written in BRMS?
 
-I want to ask, what happens if we fit a similar model in brms? I'm using a lagged column of size.
+What are the results from a similar model in brms? Using a lagged column of size.
 
 This feels like a different model, but at least in this simple example, the posterior is close to the real value. 
 
@@ -214,4 +242,111 @@ vb_post |>
              ), col = "red", size = 4)
 ```
 
-Hm! interestingly, it seems to work just fine.
+### Measurment error -- doing it correctly
+
+
+```{r}
+
+L0 <- 11
+Lmax <- 420
+r <- .4
+
+timevec <- rep(1, times = 13)
+size <- numeric(length(timevec)+1)
+size[1] <- 13
+
+rvec_log <- rnorm(n = length(timevec), 
+              mean = log(r),
+              sd = .5)
+
+  
+  
+for (t in 1:length(timevec)){
+  size[t+1] = vb_disc(size[t],
+                      r = exp(rvec_log[t]),
+                      time = timevec[t],
+                      Lmax = Lmax)
+}
+
+curve(L0 * exp(-r*x) + Lmax*(1 - exp(-r * x)),
+      xlim = c(0, 14), xlab = "Age (years)", ylab = "Size")
+points(cumsum(c(0,timevec)), size, pch = 21, bg = "red")
+
+## adding measurement error to that!
+meas_error <- rnorm(length(size), mean = 0, sd = 2)
+points(cumsum(c(0,timevec)), size+meas_error, pch = 21, bg = "orange")
+
+size_me <- size + meas_error
+```
+
+
+```{r}
+#| class-output: stan
+vb_discrete_loop_me <- cmdstan_model(
+  here::here(
+    "posts/2023-10-23-discrete-vb-brms-stan/vb_discrete_loop_me.stan"),
+  pedantic = TRUE)
+
+vb_discrete_loop_me 
+
+```
+
+```{r}
+vb_discrete_loop <- vb_discrete_loop_me$sample(
+  data = list(
+    n = length(size_me),
+    age_first_meas = 1,
+    obs_size = size_me,
+    time_diff = timevec
+  ),
+  refresh = 500,
+  parallel_chains = 4
+)
+
+vb_discrete_loop
+```
+
+
+
+```{r}
+#| class-output: stan
+vb_discrete_loop_me <- cmdstan_model(
+  here::here(
+    "posts/2023-10-23-discrete-vb-brms-stan/vb_discrete_loop_rvar_me.stan"),
+  pedantic = TRUE)
+
+vb_discrete_loop_me 
+
+```
+
+```{r}
+vb_discrete_loop <- vb_discrete_loop_me$sample(
+  data = list(
+    n = length(size_me),
+    age_first_meas = 1,
+    obs_size = size_me,
+    time_diff = timevec
+  ),
+  refresh = 500,
+  parallel_chains = 4
+)
+
+vb_discrete_loop$summary(variables = c("Lstart", "Lmax", "sigma"))
+```
+
+
+
+a flexible sigmoidal model
+
+https://www.mdpi.com/2073-8994/11/2/204
+
+accounting for temporal and individual 
+https://edepot.wur.nl/585090
+
+shelton and mangel -- indiv var and environ
+https://www.tandfonline.com/doi/pdf/10.1080/17513758.2012.697195
+
+Statistical Properties of Alternative Parameterizations of the von Bertalanffy Growth Curve
+https://cdnsciencepub.com/doi/10.1139/f86-091
+
+

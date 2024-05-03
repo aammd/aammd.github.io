@@ -1,0 +1,16 @@
+{
+  "hash": "2a8e892c8698924f47cea75fd4dd159c",
+  "result": {
+    "markdown": "---\ntitle: \"Difference of normals is normal\"\nauthor: \"Andrew MacDonald\"\ndescription: |\n  Calculating something like growth with measurement error.\ndate: 24 Nov 2023\neditor: source\ncategories: [UdeS, stan, reproduction, MAR]\nknitr:\n  opts_chunk: \n    warning: false\n    message: false\n---\n\n\n\n### Motivating example\n\nSuppose you were calculating the growth rate of a fish! The true size of the fish increases from one year to the next. Each year is measured by a different person, such that measurement error is not the same number in each year.\n\nWe might calculate growth rate using the traditional calculation for relative growth rate, as the log ratio of size at time $t$ and size at time $t-1$. that is:\n\n$$\n\\begin{align}\n&\\log \\left(\\frac{\\text{this year size}}{\\text{last year size}}\\right) \\\\\n&\\log (\\text{this year size})- \\log(\\text{last year size})\n\\end{align}\n$$\n\n\nThe difference between two normal distributions is another normal distribution! \n\n\n$$\n\\begin{align}\n[X_1] &\\sim \\text{N}(\\mu_1, \\sigma_1) \\\\\n[X_2] &\\sim \\text{N}(\\mu_2, \\sigma_2) \\\\ \nZ &= X_1 - X_2 \\\\\n\\\\\n[Z] &\\sim \\text{N}\\left(\\mu_1 - \\mu_2, \\sqrt{\\sigma_1^2 - \\sigma_2^2}\\right)\n\\end{align}\n$$\n\nThe mean of the new distribution is the differences of the two means: not surprising! \n\nThe standard deviation might look like a fancy formula, but it follows directly from what a variance is. \nA variance is a sum of squares, so when you add or subtract two normal distributions you add or subtract their sums of squares. \n\nHere's a quick demonstration via simulation.\n\n\n::: {.cell}\n\n```{.r .cell-code}\nsuppressPackageStartupMessages(library(tidyverse))\n\n# 3.8 is about log(45), seems like a good fish size.\ntrue_size_last_year <- 3.8\ntrue_size_this_year <- 3.92\n\n## observation error\nsigma_last_year <- 0.05\nsigma_this_year <- 0.01\n\ngrowth <- purrr:::map_dbl(1:5e3,   \n            \\(x) {\n              last_year_obs <- rnorm(1, true_size_last_year, sigma_last_year)\n              this_year_obs <- rnorm(1, true_size_this_year, sigma_this_year)\n              \n              this_year_obs - last_year_obs}\n) \n\n\n\ngrowth |> \n  enframe(value = \"growth\") |> \n  ggplot(aes(x = growth)) + \n  geom_histogram(aes(y = ..density..), binwidth = .005) +\n  # stat_density() +\n  stat_function(fun = dnorm, \n                args = list(mean = true_size_this_year - true_size_last_year,\n                            sd = sqrt(abs(sigma_this_year^2 - sigma_last_year^2)))) + \nNULL\n```\n\n::: {.cell-output-display}\n![](index_files/figure-html/unnamed-chunk-1-1.png){width=672}\n:::\n:::\n",
+    "supporting": [
+      "index_files"
+    ],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

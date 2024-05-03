@@ -1,0 +1,26 @@
+---
+title: "Andrew tries Quarto"
+author: "Andrew MacDonald"
+description: |
+  Quick notes on how to make a blog with Quarto and also targets.
+date: 11 Nov 2022
+editor: source
+categories: [UdeS, stan]
+draft: true
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+```
+Syntax error: word unexpected (expecting ")") S
+```
+
+This was a surprising error that happened while I was working in Stan tonight! It looks like it has something to do with [line endings](https://stackoverflow.com/questions/36725864/syntax-error-word-unexpected-expecting). I had been playing with two settings in Rstudio.
+
+and I think they changed the line endings in a way that Stan doesn't like! 
+

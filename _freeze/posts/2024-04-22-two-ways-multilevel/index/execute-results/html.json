@@ -1,0 +1,14 @@
+{
+  "hash": "490da217ab8806114762455fd1398991",
+  "result": {
+    "markdown": "---\ntitle: \"Andrew tries Quarto\"\nauthor: \"Andrew MacDonald\"\ndescription: |\n  Quick notes on how to make a blog with Quarto and also targets.\ndate: 11 Nov 2022\neditor: source\ncategories: [UdeS, stan]\ndraft: true\n---\n\n::: {.cell}\n\n```{.r .cell-code}\nlibrary(targets)\nlibrary(ggplot2)\nlibrary(tidyverse)\nlibrary(tidybayes)\n```\n:::\n\n\n```\nSyntax error: word unexpected (expecting \")\") S\n```\n\nThis was a surprising error that happened while I was working in Stan tonight! It looks like it has something to do with [line endings](https://stackoverflow.com/questions/36725864/syntax-error-word-unexpected-expecting). I had been playing with two settings in Rstudio.\n\nand I think they changed the line endings in a way that Stan doesn't like! \n\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

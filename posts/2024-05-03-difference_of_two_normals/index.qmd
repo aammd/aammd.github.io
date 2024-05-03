@@ -1,0 +1,85 @@
+---
+title: "Difference of normals is normal"
+author: "Andrew MacDonald"
+description: |
+  Calculating something like growth with measurement error.
+date: 24 Nov 2023
+editor: source
+categories: [UdeS, stan, reproduction, MAR]
+knitr:
+  opts_chunk: 
+    warning: false
+    message: false
+---
+
+
+### Motivating example
+
+Suppose you were calculating the growth rate of a fish! The true size of the fish increases from one year to the next. Each year is measured by a different person, such that measurement error is not the same number in each year.
+
+We might calculate growth rate using the traditional calculation for relative growth rate, as the log ratio of size at time $t$ and size at time $t-1$. that is:
+
+$$
+\begin{align}
+&\log \left(\frac{\text{this year size}}{\text{last year size}}\right) \\
+&\log (\text{this year size})- \log(\text{last year size})
+\end{align}
+$$
+
+
+The difference between two normal distributions is another normal distribution! 
+
+
+$$
+\begin{align}
+[X_1] &\sim \text{N}(\mu_1, \sigma_1) \\
+[X_2] &\sim \text{N}(\mu_2, \sigma_2) \\ 
+Z &= X_1 - X_2 \\
+\\
+[Z] &\sim \text{N}\left(\mu_1 - \mu_2, \sqrt{\sigma_1^2 - \sigma_2^2}\right)
+\end{align}
+$$
+
+The mean of the new distribution is the differences of the two means: not surprising! 
+
+The standard deviation might look like a fancy formula, but it follows directly from what a variance is. 
+A variance is a sum of squares, so when you add or subtract two normal distributions you add or subtract their sums of squares. 
+
+Here's a quick demonstration via simulation.
+
+```{r}
+
+suppressPackageStartupMessages(library(tidyverse))
+
+# 3.8 is about log(45), seems like a good fish size.
+true_size_last_year <- 3.8
+true_size_this_year <- 3.92
+
+## observation error
+sigma_last_year <- 0.05
+sigma_this_year <- 0.01
+
+growth <- purrr:::map_dbl(1:5e3,   
+            \(x) {
+              last_year_obs <- rnorm(1, true_size_last_year, sigma_last_year)
+              this_year_obs <- rnorm(1, true_size_this_year, sigma_this_year)
+              
+              this_year_obs - last_year_obs}
+) 
+
+
+
+growth |> 
+  enframe(value = "growth") |> 
+  ggplot(aes(x = growth)) + 
+  geom_histogram(aes(y = ..density..), binwidth = .005) +
+  # stat_density() +
+  stat_function(fun = dnorm, 
+                args = list(mean = true_size_this_year - true_size_last_year,
+                            sd = sqrt(abs(sigma_this_year^2 - sigma_last_year^2)))) + 
+NULL
+
+```
+
+
+
