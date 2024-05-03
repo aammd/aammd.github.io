@@ -3,9 +3,9 @@ title: "Difference of normals is normal"
 author: "Andrew MacDonald"
 description: |
   Calculating something like growth with measurement error.
-date: 24 Nov 2023
+date: 3 May 2024
 editor: source
-categories: [UdeS, stan, reproduction, MAR]
+categories: [probability, likelihood]
 knitr:
   opts_chunk: 
     warning: false
