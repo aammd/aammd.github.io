@@ -1,0 +1,288 @@
+---
+title: "Measuring a relationship between X and Y when they are averages of different samples"
+author: "Andrew MacDonald"
+description: |
+  Pr(knowledge|power) ~ Pr(power|knowledge) * Pr(knowledge).
+date: 11 Nov 2022
+editor: source
+categories: [UdeS, stan]
+draft: true
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+## Two samples, different animals
+
+You are working with a population of small mammals, _Pika supermontanus_. 
+They have a disjunct distribution on the tops of mountaintops. 
+They are found in 45 discrete populations, throughout a mountain range. 
+In every case, they are limited to the peaks; however the peaks are not all of the same altitude or area, resulting in variation in populations in the average body size. 
+
+You're conducting a study across these different mountain ranges to see if these animals exhibit variations in behavior. Let's say you observe each prey item in a set period and record how many prey they catch. This number might be zero, but it could be some other value. You release the animals in an arena, observe them, and then present your results at a conference. Someone comments, "We all know the number of prey an animal can catch is related to their size. Larger ones are better at catching prey because they have bigger paws or something."
+
+You panic.
+
+You realize that you never measured body size for these different populations. Frantically, you go through all your notes and confirm that you indeed did **not** measure body size. However, you recall that in a totally different study, someone else measured body size on different individuals. You quickly search through their published raw data and find that you now have a dataset on body size.  
+
+The good news is, you now have data on the body sizes, and you're hoping that this will let you estimate the parameters of this mass-bouncyball relationship you've heard of. The bad news is, this are on a completely different group of individuals from the same mountaintops. 
+
+You quickly download the spreadsheet of raw data, and scroll quickly down to see how many rows you have. Okay, sure looks like there's data here...
+
+...but will it be enough?
+
+## Modelling when the individuals are not the same 
+
+
+
+```{r}
+# First, install and load the necessary packages
+library(ggdag)
+library(dagitty)
+
+# Define your DAG
+dag <- dagify(
+  b_true ~ a_true,
+  a_observed ~ a_true,
+  labels = c("a_true" = "a true",
+             "b_true" = "b true"),
+  exposure = "a_true",
+  outcome = "b_true"
+)
+
+# Plot the DAG using ggdag
+ggdag(dag) + 
+  theme_dag()
+```
+
+<!-- might be better just to draw something!  -->
+
+Here we have one variable that causes another : the average body size of a population causes the average ability to catch bouncy balls. population average Body size also causes the observations made by the other scientist. And population average behaviour determines the observations you actually have from your own sample. 
+
+Your ability to measure the relationship between a population's average mass and average behaviour are limited by your power. But here you have two kinds of power to think about. The first is the power from your own study: how many population syou measured, and how consistent the results of your bouncy-ball assay are. The second kind of power is less in your control: how many individuals per population were weighed for their mass, and how consistent are these observations?
+
+$$
+\begin{align}
+\text{behaviour}_{ij} &\sim \text{Poisson}\left(e^{\beta_0 + \beta_1*\text{mass}_j}\right) \\
+\text{mass}_{kj} &\sim \text{Normal}(\mu_j, \sigma) \\
+\mu_j &\sim \text{Normal}(0, 1) \\
+\beta_0 &\sim \text{Normal}(1.3, 0.2) \\
+\beta_1 &\sim \text{Normal}(0.5, 0.2) \\
+\sigma &\sim \text{Exponential}(2) \\
+\end{align}
+$$
+
+Here I'm using $j$ for the label on each population. 
+Notice that I'm labelling individuals in the behaviour sample with $i$ and individuals in the mass sample with $k$. This is to make it clearer that they are not the same animals. 
+
+
+## n = common sense; or, how constraints can help a model work.
+
+
+* body size differences
+
+* your own study: 12 individuals in a behavioural assay
+
+previous study: body sizes from each population.
+
+study of different sample sizes for body size, but same for all studies
+
+* different sample sizes
+
+* heteroscedasticity in the body sizes
+
+* compare to  using means and standard deviations
+
+## simple case
+
+suppose you took one sample of 15 individuals from each population
+
+```{r}
+simulate_behaviour_sample <- function(mass_vec = runif(45, min = -2, max = 2),
+                                      true_intercept = 1.3, true_slope = .5, n_each = 15) {
+  equal_samp <- rep(mass_vec, each = n_each)
+  yy <- rpois(n = 45*n_each, exp(true_intercept + true_slope * equal_samp))
+  list(
+    nobs = 45*n_each,
+    npop = 45,
+    behaviour = yy,
+    pop_id = rep(1:45, each = n_each),
+    mass = mass_vec
+  )
+}
+
+simulate_behaviour_sample()
+
+
+```
+
+simulates one dataset
+
+```{r}
+known_averages <- cmdstanr::cmdstan_model(here::here("posts/2024-06-09-measurement-different-samples/known_averages.stan"))
+
+known_averages
+```
+
+
+```{r}
+datalist <- simulate_behaviour_sample()
+
+known_averages$sample(data = datalist)
+
+```
+
+
+## mass known from a sample
+
+
+```{r}
+
+simulate_behaviour_mass_sample <- function(
+    mass_vec = runif(45, min = -2, max = 2),
+    true_intercept = 1.3, true_slope = .5,
+    n_each_behav = 15, n_each_mass = 20, true_sigma_mass = .5) {
+  
+  equal_samp <- rep(mass_vec, each = n_each_behav)
+  ## behaviour simulation
+  
+  yy <- rpois(n = 45*n_each_behav,
+              exp(true_intercept + true_slope * equal_samp))
+  
+  xx <- rnorm(n = 45*n_each_mass,
+              mean = rep(mass_vec, each = n_each_mass),
+              sd = true_sigma_mass              
+              )
+  
+  list(
+    nobs_behav = 45*n_each_behav,
+    nobs_mass = 45*n_each_mass,
+    npop = 45,
+    behaviour = yy,
+    behav_pop_id = rep(1:45, each = n_each_behav),
+    obs_mass = xx,
+    mass_pop_id = rep(1:45, each = n_each_mass),
+    .mass = mass_vec
+  )
+}
+
+simulate_behaviour_mass_sample()
+```
+
+
+```{r}
+different_samples <- cmdstanr::cmdstan_model(here::here("posts/2024-06-09-measurement-different-samples/different_samples.stan"))
+```
+
+```{r}
+datalist <- simulate_behaviour_mass_sample(n_each_mass = 10)
+diff_samples_post <- different_samples$sample(data = datalist, parallel_chains =4, refresh = 0)
+```
+
+```{r}
+diff_samples_post |> 
+  gather_rvars(mass[id]) |> 
+  mutate(true_mass = datalist$.mass[id], 
+         id = forcats::fct_reorder(as.factor(id), true_mass)) |> 
+  ggplot(aes(x = id)) + 
+  stat_halfeye(aes(dist = .value)) + 
+  geom_point(aes(y = true_mass), col = "red")
+```
+
+
+```{r}
+diff_samples_post$draws("slope") |> 
+  mcmc_areas()
+```
+
+
+Visualize this somehow -- two different axes of points, one for each axis
+ 
+Simulate changing sample size for each species mass:
+
+
+```{r}
+library(tidyverse)
+library(tidybayes)
+data_simulations <- expand_grid(massrep = 1:3, n_each_mass = c(2, 5, 10, 20, 40)) |> 
+  rowwise() |> 
+  mutate(datalist = list(simulate_behaviour_mass_sample(n_each_mass = n_each_mass)))
+
+simulation_post <- data_simulations |> 
+  mutate(post = list(different_samples$sample(data = datalist, chains = 2, refresh = 0)))
+
+simulation_post$post[[1]]$draws(variables = "slope") |> posterior::as_draws_df()
+
+
+simulation_post |> 
+  mutate(draws = list(post$draws(variables = "slope") |> posterior::as_draws_df())) |> 
+  # mutate(tidybayes::spread_rvars(post, slope)) |> 
+  select(-post) |> 
+  arrange(n_each_mass) |> 
+  unnest(cols = "draws") |> 
+  ggplot(aes(x = massrep, y = slope)) + stat_halfeye() + 
+  facet_wrap(~n_each_mass) + 
+  geom_hline(yintercept = .5, col = "darkgreen")
+
+```
+
+
+Why is it bimodal??
+
+```{r}
+library(bayesplot)
+one_post <- simulation_post |> 
+  filter(massrep == 3, n_each_mass == 5)
+  
+
+tidybayes::spread_rvars(one_post[["post"]][[1]], slope) |> 
+  ggplot(aes(dist = slope)) + 
+  stat_histinterval(breaks = 70)
+```
+
+What on earth do the data look like??
+
+```{r}
+one_post$datalist[[1]] |> 
+  with(tibble(mass_pop_id, obs_mass)) |> 
+  ggplot(aes(x = mass_pop_id, y = obs_mass)) + geom_point()
+
+mass_df <- one_post$datalist[[1]] |> 
+  with(tibble(mass_pop_id, obs_mass)) |> 
+  group_by(mass_pop_id) |> 
+  summarize(mean_mass = mean(obs_mass),
+            sd_mass  = sd(obs_mass)) |> 
+  ungroup() |> 
+  rename(id = mass_pop_id)
+
+behav_df <- one_post$datalist[[1]] |> 
+  with(tibble(behav_pop_id, behaviour)) |> 
+  group_by(behav_pop_id) |> 
+  summarize(mean_behav = mean(behaviour)) |>   
+  ungroup() |> 
+  rename(id = behav_pop_id)
+
+left_join(behav_df, mass_df) |> 
+  ggplot(aes(xmin = mean_mass - sd_mass, 
+             xmax = mean_mass + sd_mass, 
+             x = mean_mass, y = mean_behav)) + 
+  geom_pointrange()
+
+
+
+
+```
+
+## Constraints can help
+
+There are two things that seem to help this model: large sample sizes, and a constraint on the slope. What I suspect is happening is that, when sample sizes for mass are small, the model is presented with two ways to "bend" the line: changing the value of the slope, or changing the relative mass of the populations. 
+
+
+
+
