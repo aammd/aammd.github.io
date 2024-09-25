@@ -2,6 +2,7 @@
   {
     "listing": "/blog.html",
     "items": [
+      "/posts/2024-09-23-discrete-growth-latent/index.html",
       "/posts/2024-05-03-difference_of_two_normals/index.html",
       "/posts/2023-12-14-contrasts/index.html",
       "/posts/2023-11-24-how-to-model-growth/index.html",
@@ -25,7 +26,6 @@
       "/posts/2022-12-01-cholesky-correlation/index.html",
       "/posts/2022-12-05-growth-increment/index.html",
       "/posts/2022-12-15-setting-priors/index.html",
-      "/posts/2024-09-23-discrete-growth-latent/index.html",
       "/posts/30-03-2023-growth-continuous-discrete/index.html",
       "/posts/2022-10-23-probability-integral-transform/index.html",
       "/posts/2022-10-14-growth_curve_measurement_error/index.html",

@@ -3,7 +3,7 @@ title: "Ricker Model with Allee effects"
 author: "Andrew MacDonald"
 description: |
   How to model discrete growth with low-density effects.
-date: 11 Nov 2022
+date: 25 Sept 2024
 editor: source
 categories: [UdeS, stan]
 draft: false
