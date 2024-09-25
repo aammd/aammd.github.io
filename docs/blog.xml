@@ -9,13 +9,14 @@
 <link>https://aammd.github.io/blog.html</link>
 <atom:link href="https://aammd.github.io/blog.xml" rel="self" type="application/rss+xml"/>
 <description>Demonstrating ecological concepts and statistical models using simulation</description>
-<generator>quarto-1.3.450</generator>
+<generator>quarto-1.4.553</generator>
 <lastBuildDate>Fri, 03 May 2024 04:00:00 GMT</lastBuildDate>
 <item>
   <title>Difference of normals is normal</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2024-05-03-difference_of_two_normals/index.html</link>
+  <link>https://aammd.github.io/posts/2024-05-03-difference_of_two_normals/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -175,7 +176,11 @@ font-style: inherit;">+</span> </span>
 background-color: null;
 font-style: inherit;">NULL</span></span></code></pre></div>
 <div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2024-05-03-difference_of_two_normals/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2024-05-03-difference_of_two_normals/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 
@@ -185,13 +190,13 @@ font-style: inherit;">NULL</span></span></code></pre></div>
  ]]></description>
   <category>probability</category>
   <category>likelihood</category>
-  <guid>https://aammd.github.io/posts/2024-05-03-difference_of_two_normals/index.html</guid>
+  <guid>https://aammd.github.io/posts/2024-05-03-difference_of_two_normals/</guid>
   <pubDate>Fri, 03 May 2024 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Contrasts</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-12-14-contrasts/index.html</link>
+  <link>https://aammd.github.io/posts/2023-12-14-contrasts/</link>
   <description><![CDATA[ 
 
 
@@ -1640,14 +1645,15 @@ Caused by error in `fun.data()`:
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-12-14-contrasts/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-12-14-contrasts/</guid>
   <pubDate>Thu, 14 Dec 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>How to model discrete growth</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index.html</link>
+  <link>https://aammd.github.io/posts/2023-11-24-how-to-model-growth/</link>
   <description><![CDATA[ 
+
 
 
 
@@ -1681,7 +1687,11 @@ font-style: inherit;">type =</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"l"</span>)</span></code></pre></div>
 <div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <section id="controversy" class="level2">
@@ -2094,7 +2104,11 @@ font-style: inherit;">+</span> </span>
 background-color: null;
 font-style: inherit;">geom_line</span>()</span></code></pre></div>
 <div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <div class="cell">
@@ -2291,7 +2305,11 @@ font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"log population size"</span>)</span></code></pre></div>
 <div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <div class="cell">
@@ -2362,7 +2380,11 @@ font-style: inherit;">size =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>) </span></code></pre></div>
 <div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -2536,7 +2558,11 @@ font-style: inherit;">y =</span> <span class="st" style="color: #20794D;
 background-color: null;
 font-style: inherit;">"log population size"</span>)</span></code></pre></div>
 <div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-11-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
@@ -2610,7 +2636,11 @@ font-style: inherit;">size =</span> <span class="dv" style="color: #AD0000;
 background-color: null;
 font-style: inherit;">2</span>) </span></code></pre></div>
 <div class="cell-output-display">
-<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index_files/figure-html/unnamed-chunk-12-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 
@@ -2623,13 +2653,13 @@ font-style: inherit;">2</span>) </span></code></pre></div>
   <category>stan</category>
   <category>reproduction</category>
   <category>MAR</category>
-  <guid>https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-11-24-how-to-model-growth/</guid>
   <pubDate>Fri, 24 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Discrete-time population growth in Stan</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-15-ives03-ts/index.html</link>
+  <link>https://aammd.github.io/posts/2023-11-15-ives03-ts/</link>
   <description><![CDATA[ 
 
 
@@ -5879,13 +5909,13 @@ Ives, A. R., B. Dennis, K. L. Cottingham, and S. R. Carpenter. 2003. <span>“ES
   <category>stan</category>
   <category>reproduction</category>
   <category>MAR</category>
-  <guid>https://aammd.github.io/posts/2023-11-15-ives03-ts/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-11-15-ives03-ts/</guid>
   <pubDate>Fri, 17 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Multilevel Arima model</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-14-multilevel-arima/index.html</link>
+  <link>https://aammd.github.io/posts/2023-11-14-multilevel-arima/</link>
   <description><![CDATA[ 
 
 
@@ -6730,13 +6760,13 @@ font-style: inherit;">50</span>))</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-11-14-multilevel-arima/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-11-14-multilevel-arima/</guid>
   <pubDate>Tue, 14 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>causal DAGS and full-luxury shade trees</title>
   <dc:creator>Andrew MacDonald, Bella Richmond</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-08-tree-cooling/index.html</link>
+  <link>https://aammd.github.io/posts/2023-11-08-tree-cooling/</link>
   <description><![CDATA[ 
 
 
@@ -7100,13 +7130,13 @@ font-style: inherit;">'none'</span>)</span></code></pre></div>
  ]]></description>
   <category>QCBS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-11-08-tree-cooling/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-11-08-tree-cooling/</guid>
   <pubDate>Wed, 08 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Modelling discrete growth</title>
   <dc:creator>Andrew MacDonald, Kelly Forester</dc:creator>
-  <link>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/index.html</link>
+  <link>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/</link>
   <description><![CDATA[ 
 
 
@@ -8334,13 +8364,13 @@ font-style: inherit;">4</span>)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/</guid>
   <pubDate>Tue, 07 Nov 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Power laws on log-linear plots</title>
   <dc:creator>Andrew MacDonald, Amélie Morin</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-03-power-law/index.html</link>
+  <link>https://aammd.github.io/posts/2023-11-03-power-law/</link>
   <description><![CDATA[ 
 
 
@@ -8659,13 +8689,13 @@ font-style: inherit;">"red"</span>)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-11-03-power-law/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-11-03-power-law/</guid>
   <pubDate>Fri, 03 Nov 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Stan-dalone generated quantites</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-11-01-standalone-gq/index.html</link>
+  <link>https://aammd.github.io/posts/2023-11-01-standalone-gq/</link>
   <description><![CDATA[ 
 
 
@@ -9135,13 +9165,13 @@ font-style: inherit;">"predicted herbivory"</span>)</span></code></pre></div>
   <category>UdeS</category>
   <category>stan</category>
   <category>generated quantities</category>
-  <guid>https://aammd.github.io/posts/2023-11-01-standalone-gq/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-11-01-standalone-gq/</guid>
   <pubDate>Wed, 01 Nov 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Transformed regression in Stan</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-08-22-transformed-regression/index.html</link>
+  <link>https://aammd.github.io/posts/2023-08-22-transformed-regression/</link>
   <description><![CDATA[ 
 
 
@@ -9918,13 +9948,13 @@ font-style: inherit;">4</span>)</span></code></pre></div>
   <category>UdeS</category>
   <category>stan</category>
   <category>QCBS</category>
-  <guid>https://aammd.github.io/posts/2023-08-22-transformed-regression/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-08-22-transformed-regression/</guid>
   <pubDate>Tue, 22 Aug 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Missing data in non-normal distributions</title>
   <dc:creator>Andrew MacDonald, Flavio Affinito</dc:creator>
-  <link>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index.html</link>
+  <link>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/</link>
   <description><![CDATA[ 
 
 
@@ -10784,13 +10814,13 @@ font-style: inherit;">is.na</span>(xx2))]</span>
   <category>UdeS</category>
   <category>stan</category>
   <category>QCBS</category>
-  <guid>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/</guid>
   <pubDate>Tue, 22 Aug 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Breakpoint regression in Stan</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-07-05-breakpoint/index.html</link>
+  <link>https://aammd.github.io/posts/2023-07-05-breakpoint/</link>
   <description><![CDATA[ 
 
 
@@ -12353,14 +12383,14 @@ font-style: inherit;">~</span>.draw)</span></code></pre></div>
   <category>UdeS</category>
   <category>stan</category>
   <category>QCBS</category>
-  <guid>https://aammd.github.io/posts/2023-07-05-breakpoint/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-07-05-breakpoint/</guid>
   <pubDate>Sat, 05 Aug 2023 04:00:00 GMT</pubDate>
   <media:content url="https://aammd.github.io/posts/2023-07-05-breakpoint/breakpoint-1.png" medium="image" type="image/png" height="103" width="144"/>
 </item>
 <item>
   <title>Latent continuous variables</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-03-20-latent-continuous/index.html</link>
+  <link>https://aammd.github.io/posts/2023-03-20-latent-continuous/</link>
   <description><![CDATA[ 
 
 
@@ -13389,13 +13419,13 @@ font-style: inherit;">"red"</span>)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-03-20-latent-continuous/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-03-20-latent-continuous/</guid>
   <pubDate>Mon, 20 Mar 2023 04:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Validating a model of selection on plasticity</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/index.html</link>
+  <link>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/</link>
   <description><![CDATA[ 
 
 
@@ -15246,13 +15276,13 @@ Total execution time: 5.6 seconds.</code></pre>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/index.html</guid>
+  <guid>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/</guid>
   <pubDate>Thu, 02 Feb 2023 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>The evolution of plasticity</title>
   <dc:creator>Andrew MacDonald and Audrey Tremblay</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/index.html</link>
+  <link>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/</link>
   <description><![CDATA[ 
 
 
@@ -16132,13 +16162,13 @@ font-style: inherit;">FALSE</span>)</span></code></pre></div>
   <category>stan</category>
   <category>brms</category>
   <category>simulation</category>
-  <guid>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/index.html</guid>
+  <guid>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/</guid>
   <pubDate>Wed, 23 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Simple nonlinear growth</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/index.html</link>
+  <link>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/</link>
   <description><![CDATA[ 
 
 
@@ -16602,13 +16632,13 @@ scale reduction factor on split chains (at convergence, Rhat = 1).</code></pre>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/index.html</guid>
+  <guid>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/</guid>
   <pubDate>Mon, 21 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Fitting a multispecies functional response in Stan</title>
   <dc:creator>Andrew MacDonald &amp; Ben Mercier</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/index.html</link>
+  <link>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/</link>
   <description><![CDATA[ 
 
 
@@ -17159,13 +17189,13 @@ Smout, Sophie, Christian Asseburg, Jason Matthiopoulos, Carmen Fernández, Steph
 </section></div> ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/index.html</guid>
+  <guid>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Updating R and your R packages</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/index.html</link>
+  <link>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/</link>
   <description><![CDATA[ 
 
 
@@ -17182,13 +17212,13 @@ Smout, Sophie, Christian Asseburg, Jason Matthiopoulos, Carmen Fernández, Steph
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/index.html</guid>
+  <guid>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Andrew tries Quarto</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-29-group-centering/index.html</link>
+  <link>https://aammd.github.io/posts/2022-11-29-group-centering/</link>
   <description><![CDATA[ 
 
 
@@ -17255,13 +17285,13 @@ font-style: inherit;">library</span>(tidybayes)</span></code></pre></div>
  ]]></description>
   <category>UdeS</category>
   <category>stan</category>
-  <guid>https://aammd.github.io/posts/2022-11-29-group-centering/index.html</guid>
+  <guid>https://aammd.github.io/posts/2022-11-29-group-centering/</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Selection on plasticity</title>
   <dc:creator>Andrew MacDonald</dc:creator>
-  <link>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/index.html</link>
+  <link>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/</link>
   <description><![CDATA[ 
 
 
@@ -17680,7 +17710,7 @@ font-style: inherit;">mean</span>()</span></code></pre></div>
   <category>UdeS</category>
   <category>stan</category>
   <category>plasticity</category>
-  <guid>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/index.html</guid>
+  <guid>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/</guid>
   <pubDate>Fri, 11 Nov 2022 05:00:00 GMT</pubDate>
 </item>
 </channel>

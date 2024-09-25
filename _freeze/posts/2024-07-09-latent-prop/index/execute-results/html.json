@@ -1,0 +1,15 @@
+{
+  "hash": "f72043e7e46647747cbc5bf02f1aa5a6",
+  "result": {
+    "engine": "knitr",
+    "markdown": "---\ntitle: \"Binary but who knows\"\nauthor: \"Should latent variables be on the probability or logit scale\"\ndescription: |\n  Quick notes on how to make a blog with Quarto and also targets.\ndate: 11 Nov 2022\neditor: source\ncategories: [UdeS, stan]\ndraft: true\nexecute: \n  error: true\n---\n\n\nAs part of a larger project, I'm building a model that has two parts: one estimates the value of a latent variable from one dataset, the other part estimates the effect of this latent variable on the response of interest using another dataset. The twist is that the latent variable is a probability, and I want to know if it makes a difference to model it on the logit or the probability scale. \n\nHere \"makes a difference\" means either that the answer is different, or that the algorithm works differently.\n\n### Sex ratio an dimorphism\n\nsuppose we are asking across many species, does a more biased sex ratio mean a greater difference in size between sexes?\n\n\n::: {.cell}\n\n```{.r .cell-code}\nnspp <- 25\n\nn_indiv <- rpois(25, 20)\n\nsex_ratios <- rbeta(nspp, 10,5)\n\nse\n```\n\n::: {.cell-output .cell-output-error}\n\n```\nError: object 'se' not found\n```\n\n\n:::\n:::\n",
+    "supporting": [],
+    "filters": [
+      "rmarkdown/pagebreak.lua"
+    ],
+    "includes": {},
+    "engineDependencies": {},
+    "preserve": {},
+    "postProcess": true
+  }
+}

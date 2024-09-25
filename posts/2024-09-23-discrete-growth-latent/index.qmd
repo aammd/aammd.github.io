@@ -1,0 +1,272 @@
+---
+title: "Ricker Model with Allee effects"
+author: "Andrew MacDonald"
+description: |
+  How to model discrete growth with low-density effects.
+date: 11 Nov 2022
+editor: source
+categories: [UdeS, stan]
+draft: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+
+```{r}
+r <- 0.05
+c <- 4
+N0 <- 5
+
+time <- 300
+
+N <- numeric(time)
+
+N[1] <- N0
+
+for (t in 2:time){
+  N[t] <- N[t-1]*exp(r * (N[t-1] - c)/N[t-1])
+}
+
+plot(N)
+
+```
+
+let's add density dependence 
+
+```{r}
+r <- 0.05
+c <- 4
+N0 <- 5
+K <- 500
+
+time <- 300
+
+N <- numeric(time)
+
+N[1] <- N0
+
+for (t in 2:time){
+  ri <- rnorm(1, mean = 0, sd = 1)
+  # print(ri)
+  N[t] <- N[t-1]*exp(r * (1 - N[t-1]/K))
+}
+
+plot(N, type = "l")
+```
+
+
+Now let's add some uncertainty every time step
+
+
+```{r}
+sim_ricker_allee <- function(
+    r = 0.05,
+    C = 9,#44
+    N0 = 7,
+    K = 500,
+    time = 300,
+    sd_process = 1.5){
+  
+  N <- numeric(time)
+  
+  N[1] <- N0
+  
+  for (t in 2:time){
+    ri <- rnorm(1, mean = 0, sd = sd_process)
+    # print(ri)
+    N[t] <- N[t-1]*exp(exp(log(r) + ri) * (1 - N[t-1]/K) * (1 - C/N[t-1]))
+  }
+  
+  return(N)
+}
+```
+
+```{r}
+
+allee_sim <- map_df(1:50, ~ tibble(
+  N = sim_ricker_allee(
+    time = 300,C = 6, N0 = 7),
+  time = 1:300,
+  7),
+  .id = "sim") |> 
+  bind_cols(type = "allee")
+
+
+no_allee_sim <- map_df(1:50, ~ tibble(
+  N = sim_ricker_allee(
+    time = 300,
+    C = 0,
+    N0 = 7),
+  time = 1:300,
+  7),
+  .id = "sim") |> 
+  bind_cols(type = "no allee")
+
+
+
+two_sims <- bind_rows(allee_sim, no_allee_sim)
+
+two_sims |> 
+  ggplot(aes(x = time, y = N, group = sim)) + 
+  geom_line() + 
+  coord_cartesian(ylim = c(0, 1000)) + 
+  facet_wrap(~type)
+```
+
+```{r}
+two_sims |> 
+  ggplot(aes(x = time, y = N, group = sim)) + 
+  geom_line() + 
+  facet_wrap(~type) +
+  coord_cartesian(xlim = c(0, 50), ylim = c(0, 100))
+```
+and if we look at these another way we can see the difference:
+
+```{r}
+deltaN_data <- two_sims |> 
+  filter(type == "no allee") |> 
+  group_by(sim) |> 
+  mutate(deltaN = log(N/lag(N))) |> 
+  drop_na(deltaN)
+
+deltaN_data |> 
+  ggplot(aes(x = N, y = deltaN)) + 
+  geom_point() + 
+  coord_cartesian(ylim = c(-10, 5), xlim = c(0, 600))
+
+deltaN_data |> 
+  ggplot(aes(x = N, y = deltaN)) + 
+  geom_point() + 
+  coord_cartesian(ylim = c(-.0,1), xlim = c(0, 600))
+  
+
+
+```
+
+This really doesn't seem right! 
+The y intercept is supposed to be $r$, and the X intercept is supposed to be $K$! 
+Is the cause the variation in growth rate? that is, the parameter `sd_process` above?
+
+
+Let's make a new simulation where this is set to a very low value:
+:swea
+```{r}
+map_df(1:50, ~ tibble(
+  N = sim_ricker_allee(
+    time = 300,
+    C = 0,
+    N0 = 7,
+    sd_process = 0.01),
+  time = 1:300,
+  7),
+  .id = "sim") |> 
+  group_by(sim) |> 
+  mutate(deltaN = log(N/lag(N))) |> 
+  drop_na(deltaN) |> 
+  ggplot(aes(x = N, y = deltaN)) + 
+  geom_point() + 
+  coord_cartesian(ylim = c(0, .1), xlim = c(0, 600)) + 
+  geom_hline(yintercept = .05) + 
+  geom_vline(xintercept = 500)
+```
+
+
+Much better! so the process error makes this pretty traditional plot go kind of haywire.
+
+Interestingly, looking back at the previous figures, you can see that the error is not _around_ the "correct" line at all but mostly below it. 
+That suggests that trying to model error based on lagged growth is probably not going to give a useful answer for the parameters
+
+## Observation error
+
+So far all of this has been in a perfect, imaginary world where we have perfect information on the population density. 
+In reality, we'll always have a **sample** of the population density. 
+A simple model for this variation is that it follows a Poisson distribution:
+
+
+$$ 
+\begin{align}
+Y_t &\sim \text{Poisson}(N_t)\\
+N_{t+1} &= N_t e^{r\left(1 - \frac{N_t}{K}\right)} \\
+\end{align}
+$$
+
+Lets do a simulation of several observations of *one single* time series:
+
+```{r}
+set.seed(1618)
+avg_dens <- sim_ricker_allee(C = 5, N0 = 7, time = 120)
+
+obs_dens <- avg_dens |> 
+  imap(
+    ~tibble(
+      time_id = as.numeric(.y),
+      obs = rpois(5, lambda = .x),
+      obs_id = seq_along(obs)
+    )
+    
+  ) |> 
+  bind_rows()
+
+
+obs_dens |> 
+  ggplot(aes(x = time_id, y = obs,group = obs_id)) + 
+  geom_line() + 
+  geom_line(aes(x = time_id, y = avg), inherit.aes = FALSE, 
+            col = "red",
+            data = tibble(
+              time_id = seq_along(avg_dens),
+              avg = avg_dens))
+
+```
+
+This shows a few things of interest: the wiggling red line, which shows variation in growth rate at each timestep. This is process error. 
+We can also see variation around this; these is variation coming from a Poisson distribution centered on the true mean population size.
+
+
+## Coding and validating a model
+
+
+We're going to torture the math a little bit, to make it more convenient to write it Stan:
+
+Take the expression for the average and log both sides:
+
+$$
+\begin{align}
+N_{t+1} &= N_te^{r\left(1 - \frac{N_t}{K}\right)} \\
+\ln(N_{t+1}) &= \ln{N_t} + r(1 - \frac{N_t}{K})  \\
+L_{t+1} &= L_t + e^{\ln{r} + \ln(1 - e^{L_t - \ln{K}})} \\
+L_{t+1} &= L_t + e^{s + \ln(1 - e^{L_t - J})} \\
+\end{align}
+$$
+Here to keep notation simple I'm just writing 
+
+* $s = \ln{r}$
+* $J = \ln{K}$
+* $Lt = \ln{N_t}$
+
+I know what you're thinking: get help, Andrew! 
+
+There's a couple reasons for this violence: 
+
+* Working on the log scale is easier for parameter estimation. it keeps values on similar scales, even though, for example $r$ and $K$ have very different magnitudes. 
+* We can take advantage of Stan's built-in [composed functions](https://mc-stan.org/docs/functions-reference/real-valued_basic_functions.html#composed-functions)
+* it will be easier to add hierarchical effects if (when :P ) we want to do that!
+
+Here's a more complete rendering of the model, which will set us up for writing Stan code in the next section:
+
+$$
+\begin{align}
+Y_i &\sim \text{Poisson\_log}(L_{t[i]}) \\
+L_{t+1} &= L_t + e^{\left(s + \ln\left(1 - e^{L_t - J}\right)\right)} \\
+L_0 &\sim \text{Normal}(2,1) \\
+s &\sim \text{Normal}(-3, 0.5) \\
+J &\sim \text{Normal}(6, 1)
+\end{align}
+$$

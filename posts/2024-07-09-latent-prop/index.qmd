@@ -1,0 +1,31 @@
+---
+title: "Binary but who knows"
+author: "Should latent variables be on the probability or logit scale"
+description: |
+  Quick notes on how to make a blog with Quarto and also targets.
+date: 11 Nov 2022
+editor: source
+categories: [UdeS, stan]
+draft: true
+execute: 
+  error: true
+---
+
+As part of a larger project, I'm building a model that has two parts: one estimates the value of a latent variable from one dataset, the other part estimates the effect of this latent variable on the response of interest using another dataset. The twist is that the latent variable is a probability, and I want to know if it makes a difference to model it on the logit or the probability scale. 
+
+Here "makes a difference" means either that the answer is different, or that the algorithm works differently.
+
+### Sex ratio an dimorphism
+
+suppose we are asking across many species, does a more biased sex ratio mean a greater difference in size between sexes?
+
+```{r}
+nspp <- 25
+
+n_indiv <- rpois(25, 20)
+
+sex_ratios <- rbeta(nspp, 10,5)
+
+se
+```
+

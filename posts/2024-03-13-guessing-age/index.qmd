@@ -333,8 +333,9 @@ one_roo_age_unk
 one_roo_age_unk_post <- one_roo_age_unk$sample(data = list(
   n = length(time_since_obs),
   leg = one_roo_obs_late,
-  time_since_capture = time_since_obs,
-  age_at_capture = age_when_obs),
+  time_since_capture = time_since_obs
+  # age_at_capture = age_when_obs
+  ),
   refresh = 0)
 
 one_roo_age_unk_post |> 
@@ -364,3 +365,32 @@ to estimate age in the case where starting with start size, I would work on the 
 
 
 ## Age predicts reproductive success
+
+
+## ordinal regression
+
+```{r}
+#| class-output: stan
+ordered_logistic <- cmdstan_model(stan_file = , here::here("posts/2024-03-13-guessing-age/ordered_logistic.stan"))
+
+ordered_logistic
+```
+
+```{r}
+dl <- list(n_cat = 6,
+           N = 30,
+           n_x = 1,
+           x = matrix(runif(30), nrow = 30, ncol = 1))
+
+ordered_logistic_samp <- ordered_logistic$sample(data = dl, chains = 1)
+
+```
+
+```{r}
+prior_pred_df <- spread_draws(ordered_logistic_samp, y[i], beta[j], ndraws = 5) |> 
+  mutate(x = dl$x[i, ])
+
+ggplot(prior_pred_df, aes(x = x, y = y)) + geom_point() + facet_wrap(~.draw) + 
+  stat_function(aes(v = beta), fun = \(x, v) v*x)
+
+```
