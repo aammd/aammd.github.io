@@ -1,0 +1,74 @@
+---
+title: "Phylogeny"
+author: "Andrew MacDonald"
+description: |
+  it is that (evolutionary) time.
+date: 27 Sept 2024
+editor: source
+categories: [UdeS, stan]
+draft: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
+library(targets)
+library(ggplot2)
+library(tidyverse)
+library(tidybayes)
+```
+
+simulating data on a phylogeny and fitting it in Stan! 
+
+```{r}
+## simulate data
+set.seed(1618)
+n <- 20
+b0 <- 0
+b1 <- .5
+lam.x <- .98
+lam.e <- .5
+phy <- ape::compute.brlen(
+  ape::rtree(n=n),
+  method = "Grafen",
+  power = 1)
+
+plot(phy)
+
+phy.x <- phylolm::transf.branch.lengths(
+  phy=phy, model="lambda",
+  parameters=list(lambda = lam.x))$tree
+
+phy.e <- phylolm::transf.branch.lengths(
+  phy=phy, model="lambda",
+  parameters=list(lambda = lam.e))$tree
+
+x <- ape::rTraitCont(phy.x, model = "BM", sigma = 1)
+e <- ape::rTraitCont(phy.e, model = "BM", sigma = .3)
+x <- x[match(names(e), names(x))]
+Y <- b0 + b1 * x + e
+Y <- array(Y)
+rownames(Y) <- phy$tip.label
+
+plot(x, Y)
+
+```
+
+
+```{r}
+phylo <- cmdstanr::cmdstan_model(here::here("posts/2024-09-27-phylo/phylo.stan"))
+```
+
+
+```{r, warning=FALSE, message=FALSE}
+phylo_sample <- phylo$sample(data = list(
+  n = n,
+  s = n,
+  x = x,
+  y = Y,
+  phyvcv = ape::vcv(phy)
+),parallel_chains = 4, refresh = 1000)
+
+phylo_sample
+```
+

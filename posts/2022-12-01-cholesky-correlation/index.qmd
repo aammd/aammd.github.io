@@ -5,6 +5,8 @@ description: |
   It's giving correlations.
 date: 11 Nov 2022
 categories: [UdeS, stan]
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, eval=TRUE, message=FALSE, warning=FALSE}
@@ -14,21 +16,13 @@ library(tidyverse)
 library(tidybayes)
 ```
 
-## code
+You can give uncorrelated random numbers a specific correlation by using the Cholesky decomposition. 
+This comes in handy when you're modelling correlated random variables using MCMC.
 
 ```{r}
-plot(density(tan(runif(5000,min = 0, max = pi/2))*.3, from = 0), 
-     xlim = c(0, 100))
-
-curve(dexp(x, rate = 3), add = TRUE, col = "red", xlim = c(0, 100))
-
-curve(tan(x), xlim = c(-5,5))
-
-hist(-log(runif(200)), probability = TRUE)
-curve(dexp(x), add = TRUE)
-
-
 eg <- rethinking::rlkjcorr(1, 2, 1)
+eg
+
 cc <- chol(eg)
 
 purrr::rerun(30,{
@@ -38,13 +32,20 @@ purrr::rerun(30,{
   # plot(t(rr))
   cor(t(rr))[1,2]
 }) |> 
-  purrr::flatten_dbl() |> density() |> plot()
+  purrr::flatten_dbl() |> density() |> plot(main = "Simulated correlations")
 abline(v=eg[1,2])
+```
 
-#' modelling the plasticity slopes (xik - xbar) for each evironmental variable?
-#' what's correlated here? slopes and intercepts
+Here we can see that the correlation we want is `r eg[1,2]`, and indeed we're able to give exactly that correlation to uncorrelated random numbers. 
+```{r}
+#| layout-ncol: 2
+#| fig-cap: 
+#|    - uncorrelated numbers
+#|    - after being given a correlation
 
 eg <- rethinking::rlkjcorr(1, 2, 5)
+print(eg)
+
 cc <- chol(eg)
 
 t(cc) %*% cc
@@ -57,19 +58,14 @@ yy <- t(t(cc) %*% t(mm))
 
 plot(yy)
 
-cor(yy)
+```
 
-purrr::rerun(50,{
-  zz <- matrix(data = rnorm(500), ncol = 2)
-  # plot(zz)
-  rr <- t(cc) %*% t(zz)
-  # plot(t(rr))
-  cor(t(rr))[1,2]
-}) |> 
-  purrr::flatten_dbl() |> density() |> plot()
-abline(v=eg[1,2])
+## Doing it by hand
 
+Because the case for only two random variables is pretty simple, we can actually write out the Cholesky decomposition by hand. 
+Here I want to give some independent random numbers a correlation of -0.8:
 
+```{r}
 p <- -.8
 L <- matrix(c(1,0, p, sqrt(1 - p^2)), ncol = 2, byrow = TRUE)
 zz <- matrix(data = rnorm(1000), ncol = 2)
@@ -77,5 +73,54 @@ yy <- t(L %*% t(zz))
 plot(yy)
 cor(yy)
 ```
+
+This can be written without matrix multiplication like this:
+
+
+```{r}
+z1 <- rnorm(1000)
+z2 <- rnorm(1000)
+
+y1 <- z1
+y2 <- p*z1 + sqrt(1 - p^2)*z2
+
+plot(y1, y2)
+cor(y2, y1)
+```
+
+In a Stan model, I might want to use a scaled beta distribution to model the correlation between, say, slopes and intercepts in a model:
+
+```{r}
+mu <- .84
+phi <- 80
+g <- rbeta(1, mu*phi, (1 - mu)*phi)
+p_trans <- g*2 - 1
+
+sim_y_corr <- function(n, p) {
+  z1 <- rnorm(n)
+  z2 <- rnorm(n)
+  
+  y1 <- z1
+  y2 <- p*z1 + sqrt(1 - p^2)*z2
+  
+  return(data.frame(y1, y2))
+}
+
+sim_y_corr(n = 1000, p = p_trans) |> plot()
+```
+
+or even work on the logit scale:
+
+```{r}
+q <- rnorm(1, mean = -1, sd = .1)
+p_trans_n <- plogis(q)*2 - 1
+sim_y_corr(n = 1000, p = p_trans_n) |> plot()
+```
+
+This is even a little easier to think about: because of all the transformations, 0 on the logit scale still means a 0 correlation; negative and positive numbers mean negative and positive correlations as well. 
+
+
+
+
 
 Another way to make correlation matrices is here: https://www.rdatagen.net/post/2023-02-14-flexible-correlation-generation-an-update-to-gencorgen-in-simstudy/
