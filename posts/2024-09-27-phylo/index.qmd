@@ -56,7 +56,10 @@ plot(x, Y)
 
 
 ```{r}
+#| class-output: stan
 phylo <- cmdstanr::cmdstan_model(here::here("posts/2024-09-27-phylo/phylo.stan"))
+
+phylo
 ```
 
 
