@@ -25,3 +25,5 @@ x <- x[match(names(e), names(x))]
 Y <- b0 + b1 * x + e
 Y <- array(Y)
 rownames(Y) <- phy$tip.label
+
+plot(x, Y)

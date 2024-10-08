@@ -92,11 +92,13 @@ sim_ricker_allee <- function(
   
   N <- numeric(time)
   
+  browser()
   N[1] <- N0
   
   for (t in 2:time){
     ri <- rnorm(1, mean = 0, sd = sd_process)
     # print(ri)
+    
     N[t] <- N[t-1]*exp(exp(log(r) + ri) * (1 - N[t-1]/K) * (1 - C/N[t-1]))
   }
   
@@ -119,7 +121,7 @@ allee_sim <- map_df(1:50, ~ tibble(
   bind_cols(type = "allee")
 
 
-no_allee_sim <- map_df(1:50, ~ tibble(
+lsno_allee_sim <- map_df(1:50, ~ tibble(
   N = sim_ricker_allee(
     time = 300,
     C = 0,

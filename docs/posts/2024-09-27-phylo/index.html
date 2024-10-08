@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.553">
+<meta name="generator" content="quarto-1.5.57">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -10,7 +10,7 @@
 <meta name="dcterms.date" content="2024-09-27">
 <meta name="description" content="it is that (evolutionary) time.">
 
-<title>Andrew MacDonald - Phylogeny</title>
+<title>Phylogeny – Andrew MacDonald</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -36,7 +36,7 @@ div.sourceCode { overflow: auto; }
 }
 @media print {
 pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
 }
 pre.numberSource code
   { counter-reset: source-line 0; }
@@ -57,7 +57,27 @@ div.sourceCode
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+  margin-bottom: 0em;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
@@ -104,6 +124,35 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="../../styles.css">
 </head>
@@ -120,7 +169,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     </a>
   </div>
             <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -141,7 +190,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </li>  
 </ul>
           </div> <!-- /navcollapse -->
-          <div class="quarto-navbar-tools">
+            <div class="quarto-navbar-tools">
 </div>
       </div> <!-- /container-fluid -->
     </nav>
@@ -188,7 +237,17 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <!-- sidebar -->
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#why-a-phylogenetic-regression" id="toc-why-a-phylogenetic-regression" class="nav-link active" data-scroll-target="#why-a-phylogenetic-regression">Why a phylogenetic regression?</a></li>
+  <li><a href="#recipe-for-phylogeny" id="toc-recipe-for-phylogeny" class="nav-link" data-scroll-target="#recipe-for-phylogeny">Recipe for phylogeny</a></li>
+  <li><a href="#data-simulation" id="toc-data-simulation" class="nav-link" data-scroll-target="#data-simulation">Data simulation</a></li>
+  <li><a href="#tips-from-the-forum" id="toc-tips-from-the-forum" class="nav-link" data-scroll-target="#tips-from-the-forum">Tips from the forum</a></li>
+  <li><a href="#repeated-sampling-of-these-traits" id="toc-repeated-sampling-of-these-traits" class="nav-link" data-scroll-target="#repeated-sampling-of-these-traits">Repeated sampling of these traits</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content quarto-banner-title-block" id="quarto-document-content">
@@ -203,21 +262,92 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>simulating data on a phylogeny and fitting it in Stan!</p>
+<p>I’ve always wanted to understand how to do phylogenetic regressions, and thanks to my colleauge Alex Fuster I finally had the opportunity to sit down and work on them. The literature on the topic is <em>confusing</em>, large, and not always clear about what model is being fit. I relied heavily on two resources:</p>
+<ul>
+<li>one book, a free online resource from Tony Ives <span class="citation" data-cites="ives">(<a href="#ref-ives" role="doc-biblioref">Ives, n.d.</a>)</span></li>
+<li>a preprint, an excellent review of the use and misuse of Pagel’s Lambda by <span class="citation" data-cites="pearse">Pearse, Davies, and Wolkovich (<a href="#ref-pearse" role="doc-biblioref">n.d.</a>)</span></li>
+</ul>
+<section id="why-a-phylogenetic-regression" class="level2">
+<h2 class="anchored" data-anchor-id="why-a-phylogenetic-regression">Why a phylogenetic regression?</h2>
+<p>Suppose you have two traits, measured across many different species – say, social group size (Trait X) and brain size (Trait Y). You want to test the hypothesis that bigger social groups mean a bigger brain. However there’s a catch: some of the species are closely related, and others are not. Its entirely possible that any apparent correlation between Trait X and Trait Y comes from random chance: both traits change randomly along evolutionary time. That means that distantly related species have more time to become different to each other, and close relatives have less “time apart” and are therefore less likely to be different in their two traits.</p>
+<p>Because every kind of cross-species comparison involves a group of species with a phylogenetic structure, “controlling for phylogeny” has become very common in these kinds of studies. Also, because we are usually missing traits for at least some species in our studies, people often use phylogeny as a guide for guessing what trait values are present in the animals that we haven’t measured.</p>
+</section>
+<section id="recipe-for-phylogeny" class="level2">
+<h2 class="anchored" data-anchor-id="recipe-for-phylogeny">Recipe for phylogeny</h2>
+<p>I love the large and flexible toolbox of Bayesian methods because it can be adapted to fit such a huge array of models – virtually all the models that ecologists want to fit! However, there’s a catch: to fit a model using Stan (or something similar) you have to know <em>exactly</em> what model you’re fitting. However, because these regressions are usually fit using custom software, it can be a challenge to dig to find the exact equations being fit!</p>
+<p>Using the two resources mentioned above, I was able to write down (I hope!) the equation for the model like this:</p>
+<p>$$ <span class="math display">\[\begin{align}
+y_i &amp;\sim \text{Normal}(\bar{y} + \beta_1 x_i + a_{s[i]}, \sigma_y) \\
+a_{s} &amp;\sim \text{MVNormal}(0, \Sigma_a)\\
+\Sigma_a &amp;= \begin{bmatrix}
+\sigma_a^2 &amp; \lambda_a \cdot \sigma_{12} &amp; \cdots &amp; \lambda_a \cdot \sigma_{1,s} \\
+\lambda_a \cdot \sigma_{21} &amp; \sigma_a^2 &amp; \cdots &amp; \lambda_a \cdot \sigma_{2,s} \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+\lambda_a \cdot \sigma_{s,1} &amp; \lambda_a \cdot \sigma_{s,2} &amp; \cdots &amp; \sigma_a^2
+\end{bmatrix} \\
+
+x_i &amp;\sim \text{Normal}(\bar{x} + b_{s[i]}, \sigma_x) \\
+b_{s} &amp;\sim \text{MVNormal}(0, \Sigma_b)\\
+\Sigma_b &amp;= \begin{bmatrix}
+\sigma_b^2 &amp; \lambda_b \cdot \sigma_{12} &amp; \cdots &amp; \lambda_b \cdot \sigma_{1,s} \\
+\lambda_b \cdot \sigma_{21} &amp; \sigma_b^2 &amp; \cdots &amp; \lambda_b \cdot \sigma_{2,s} \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+\lambda_b \cdot \sigma_{s,1} &amp; \lambda_b \cdot \sigma_{s,2} &amp; \cdots &amp; \sigma_b^2
+\end{bmatrix}
+
+
+
+\end{align}\]</span> $$ {#eq-phyloreg}</p>
+<p>You can see that there are two big variance-covariance matrices here, for the effects of phylogeny on <span class="math inline">\(y\)</span> and <span class="math inline">\(x\)</span>. These covariance matrices have three ingredients that are all put together:</p>
+<ol type="1">
+<li><em>the base</em> How far apart are species on the phylogeny? Many ecologists work with trees where all the tips end at the present day – so all species have the same amount of time going back to their last common ancestor. For trees like this, the diagonal is 1 (i.e., 100% of the evolutionary time). The off-diagonals are the proportion of this total time which is shared between species.</li>
+<li><em>the flavour</em> This is a model of species averages. If there were no effect of phylogeny at all, we would still expect species to be a little different. But how different are species from each other? That is controlled by a standard deviation, <span class="math inline">\(\sigma\)</span>, which we multiply the whole matrix by to scale it.</li>
+<li><em>the secret sauce</em> The off-diagnal elements of <span class="math inline">\(\Sigma\)</span> are multiplied by <strong>another</strong> number between 0 and 1: this is “Pagel’s Lambda”. It acts like a tuning knob, adjusting the amount of phylogenetic flavour that makes it into the model. When <span class="math inline">\(\lambda\)</span> is 1, we have the maximum amount of covariance coming from the phylogeny. When <span class="math inline">\(\lambda\)</span> is 0, we are back to an identity matrix and the species are independent.</li>
+</ol>
+<p>There’s another way to write this equation that makes these three parts more clear to see. First we have to make <span class="math inline">\(V_{phy}\)</span>, which is the <em>phylogenetic variance-covariance matrix</em>. This has variances and covariances for each species on our tree. For example, for 3 species the phylogenetic variance covariance matrix is:</p>
+<p><span class="math display">\[
+V_{phy} = \begin{bmatrix}
+\sigma_1^2 &amp; \sigma_{12} &amp; \sigma_{1,3} \\
+\sigma_{2,1} &amp; \sigma_2^2 &amp; \sigma_{2,3} \\
+\sigma_{3,1} &amp; \sigma_{3,2} &amp; \sigma_3^2
+\end{bmatrix}
+\]</span> The covariances are equal to the proportion of the tree that is shared between two species. The diagonal is the amount of time between the tree’s start and each species. This is just a fancy way to say that, for a tree where all the tips end at the present day, the diagonal is 1 and the off-diagonal is between 0 and 1.</p>
+<p>Then, we can write the expression for <span class="math inline">\(\Sigma\)</span> like this:</p>
+<p><span class="math display">\[
+\Sigma = \sigma^2 \lambda V_{phy} + \sigma^2 (1 - \lambda) \mathbf{I}
+\]</span> This is equation 4 in <span class="citation" data-cites="pearse">Pearse, Davies, and Wolkovich (<a href="#ref-pearse" role="doc-biblioref">n.d.</a>)</span>.</p>
+<p>I can rewrite <strong>?@eq-phyloreg</strong> in this style:</p>
+<p>$$ <span class="math display">\[\begin{align}
+
+y_i &amp;\sim \text{Normal}(\bar{y} + \beta_1 x_i + a_{s[i]}, \sigma_y) \\
+a_{s} &amp;\sim \text{MVNormal}(0, \Sigma_a)\\
+\Sigma_a &amp;= \sigma_a^2 \lambda_a V_{phy} + \sigma_a^2 (1 - \lambda_a) \mathbf{I} \\
+x_i &amp;\sim \text{Normal}(\bar{x} + b_{s[i]}, \sigma_x) \\
+b_{s} &amp;\sim \text{MVNormal}(0, \Sigma_b)\\
+\Sigma_b &amp;= \sigma_b^2 \lambda_b V_{phy} + \sigma_b^2 (1 - \lambda_b) \mathbf{I} \\
+\end{align}\]</span></p>
+<p>$$ You can see I’m using two different trait variances and two different <span class="math inline">\(\lambda\)</span>s, because the two traits might have a different amount of variance among species, and within that might have a different amount of phylogenetic signal.</p>
+</section>
+<section id="data-simulation" class="level2">
+<h2 class="anchored" data-anchor-id="data-simulation">Data simulation</h2>
+<p>Here is simulation code from <span class="citation" data-cites="ives">Ives (<a href="#ref-ives" role="doc-biblioref">n.d.</a>)</span> , which generates a dataset where there is a signal for phylogeny and also a relationship between two traits of interest. I’ll use this code to generate a dataset and then estimate the known parameters with a Stan model:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate data</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1618</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="sc">-</span>.<span class="dv">1</span></span>
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>lam.x <span class="ot">&lt;-</span> .<span class="dv">98</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>lam.e <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>phy <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">compute.brlen</span>(</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  ape<span class="sc">::</span><span class="fu">rtree</span>(<span class="at">n=</span>n),</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"Grafen"</span>,</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">power =</span> <span class="dv">1</span>)</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(phy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>lam.e <span class="ot">&lt;-</span> .<span class="dv">8</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>sigma_y <span class="ot">&lt;-</span> .<span class="dv">6</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>sigma_x <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>phy <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">compute.brlen</span>(</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  ape<span class="sc">::</span><span class="fu">rtree</span>(<span class="at">n=</span>n),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"Grafen"</span>,</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">power =</span> <span class="dv">1</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(phy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -233,8 +363,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">phy=</span>phy, <span class="at">model=</span><span class="st">"lambda"</span>,</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters=</span><span class="fu">list</span>(<span class="at">lambda =</span> lam.e))<span class="sc">$</span>tree</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.x, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> <span class="dv">1</span>)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.e, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> .<span class="dv">3</span>)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.x, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_x)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.e, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_y)</span>
 <span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> x[<span class="fu">match</span>(<span class="fu">names</span>(e), <span class="fu">names</span>(x))]</span>
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> b0 <span class="sc">+</span> b1 <span class="sc">*</span> x <span class="sc">+</span> e</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">array</span>(Y)</span>
@@ -331,35 +461,1165 @@ Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) </code></pre>
 Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
 Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
 Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
 Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
 Chain 1 finished in 0.3 seconds.
 Chain 2 finished in 0.3 seconds.
-Chain 3 finished in 0.3 seconds.
 Chain 4 finished in 0.3 seconds.
+Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 3 finished in 0.3 seconds.
 
 All 4 chains finished successfully.
 Mean chain execution time: 0.3 seconds.
-Total execution time: 0.4 seconds.</code></pre>
+Total execution time: 0.5 seconds.</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>phylo_sample</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>       variable  mean median   sd  mad    q5   q95 rhat ess_bulk ess_tail
- lp__           17.69  18.06 1.98 1.76 13.82 20.18 1.00     1647     1995
- b0              0.10   0.10 0.12 0.11 -0.11  0.30 1.00     4569     2966
- b1              0.47   0.47 0.09 0.09  0.31  0.62 1.00     4505     2628
- sigma_x         0.99   0.97 0.17 0.15  0.76  1.29 1.00     5194     2478
- sigma_y         0.29   0.28 0.05 0.05  0.22  0.39 1.00     3419     2141
- logit_lambda_x  3.00   3.00 0.20 0.21  2.66  3.33 1.00     5124     2945
- logit_lambda_y -0.01  -0.01 0.20 0.20 -0.35  0.32 1.00     4689     2874
- lambda_x        0.95   0.95 0.01 0.01  0.93  0.97 1.00     5124     2945
- lambda_y        0.50   0.50 0.05 0.05  0.41  0.58 1.00     4689     2874</code></pre>
+<pre><code>       variable  mean median   sd  mad    q5  q95 rhat ess_bulk ess_tail
+ lp__            7.03   7.35 1.88 1.71  3.44 9.42 1.00     1691     2050
+ b0              0.25   0.25 0.21 0.20 -0.09 0.59 1.00     3999     2561
+ b1             -0.07  -0.07 0.15 0.15 -0.30 0.18 1.00     4884     2904
+ sigma_x         0.99   0.97 0.16 0.16  0.75 1.27 1.00     4878     2405
+ sigma_y         0.47   0.46 0.09 0.08  0.35 0.63 1.00     3711     2546
+ logit_lambda_x  2.99   2.99 0.20 0.20  2.66 3.31 1.00     5765     3000
+ logit_lambda_y  0.03   0.03 0.20 0.20 -0.31 0.36 1.00     4084     3063
+ lambda_x        0.95   0.95 0.01 0.01  0.93 0.96 1.00     5765     3000
+ lambda_y        0.51   0.51 0.05 0.05  0.42 0.59 1.00     4084     3063</code></pre>
 </div>
 </div>
+</section>
+<section id="tips-from-the-forum" class="level2">
+<h2 class="anchored" data-anchor-id="tips-from-the-forum">Tips from the forum</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>phylo_forum <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-09-27-phylo/phylo_forum.stan"</span>))</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>phylo_forum</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb16"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; s;</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x;</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] y;</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] phyvcv;</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed data</span> {</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] zero_vec = rep_vector(<span class="dv">0</span>, n);</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> b0;</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=<span class="fl">0.5</span>, <span class="dt">multiplier</span>=<span class="fl">0.5</span>&gt; b1;</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> sigma_x;</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> sigma_y;</span>
+<span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=<span class="dv">3</span>, <span class="dt">multiplier</span>=<span class="fl">0.2</span>&gt; logit_lambda_x;</span>
+<span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">multiplier</span>=<span class="fl">0.2</span>&gt; logit_lambda_y;</span>
+<span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-19"><a href="#cb16-19" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb16-20"><a href="#cb16-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_x = inv_logit(logit_lambda_x);</span>
+<span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_y = inv_logit(logit_lambda_y);</span>
+<span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_x</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    = sigma_x^<span class="dv">2</span> * add_diag(lambda_x * phyvcv, <span class="dv">1</span> - lambda_x);</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_y</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    = sigma_y^<span class="dv">2</span> * add_diag(lambda_y * phyvcv, <span class="dv">1</span> - lambda_y);</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>  b0 ~ std_normal();</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>  b1 ~ std_normal();</span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>  sigma_x ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>  sigma_y ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>  logit_lambda_x ~ std_normal();</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>  logit_lambda_y ~ std_normal();</span>
+<span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>  x ~ multi_normal(zero_vec, vcv_x);</span>
+<span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>  y ~ multi_normal(b0 + b1 * x, vcv_y);</span>
+<span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>phylo_forum_sample <span class="ot">&lt;-</span> phylo_forum<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> n,</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">s =</span> n,</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> x,</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> Y,</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyvcv =</span> ape<span class="sc">::</span><span class="fu">vcv</span>(phy)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...
+
+Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -0.51895, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -0.700908, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -0.770928, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Rejecting initial value:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2   Error evaluating the log probability at the initial value.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -0.164996, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)
+Chain 2 Exception: exponential_lpdf: Random variable is -0.164996, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -239.939, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -30.0871, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -0.0239313, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Rejecting initial value:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3   Error evaluating the log probability at the initial value.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -0.582241, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)
+Chain 3 Exception: exponential_lpdf: Random variable is -0.582241, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -6.77531, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -7.75933, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -0.949866, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -1.94406, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -1.11172, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Rejecting initial value:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4   Error evaluating the log probability at the initial value.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -1.23407, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)
+Chain 4 Exception: exponential_lpdf: Random variable is -1.23407, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Rejecting initial value:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4   Error evaluating the log probability at the initial value.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -0.812231, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)
+Chain 4 Exception: exponential_lpdf: Random variable is -0.812231, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Rejecting initial value:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4   Error evaluating the log probability at the initial value.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -1.2108, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)
+Chain 4 Exception: exponential_lpdf: Random variable is -1.2108, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -2.11394, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -2.99518, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -381.664, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -9.75761, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -0.234259, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -0.0104136, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -4.03245, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -1.28496, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -0.548797, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -0.694561, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -0.757703, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -4.31528, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -4.30625, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -0.550271, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -0.209166, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -1.53058, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -1.18267, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -0.420203, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 3 finished in 0.5 seconds.
+Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 1 finished in 0.6 seconds.
+Chain 2 finished in 0.6 seconds.
+Chain 4 finished in 0.6 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.6 seconds.
+Total execution time: 0.7 seconds.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb185"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb185-1"><a href="#cb185-1" aria-hidden="true" tabindex="-1"></a>phylo_forum_sample</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       variable  mean median   sd  mad    q5  q95 rhat ess_bulk ess_tail
+ lp__            2.49   2.83 1.91 1.77 -1.12 4.92 1.01     1237     2536
+ b0              0.26   0.26 0.22 0.20 -0.11 0.61 1.00     4362     2621
+ b1             -0.13  -0.13 0.15 0.15 -0.39 0.11 1.00     4000     2755
+ sigma_x         0.81   0.79 0.14 0.13  0.60 1.06 1.00     4085     2605
+ sigma_y         0.50   0.48 0.11 0.10  0.36 0.70 1.00     2789     2314
+ logit_lambda_x  1.30   1.30 0.69 0.69  0.18 2.41 1.00     4212     2810
+ logit_lambda_y  0.27   0.29 0.79 0.77 -1.06 1.56 1.00     2771     2301
+ lambda_x        0.77   0.79 0.12 0.11  0.54 0.92 1.00     4212     2810
+ lambda_y        0.56   0.57 0.17 0.18  0.26 0.83 1.00     2771     2301</code></pre>
+</div>
+</div>
+<p>and an even simpler strategy, replacing the lambda parameter on the logit scale with a beta:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb187"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb187-1"><a href="#cb187-1" aria-hidden="true" tabindex="-1"></a>phylo_beta <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-09-27-phylo/phylo_beta.stan"</span>))</span>
+<span id="cb187-2"><a href="#cb187-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb187-3"><a href="#cb187-3" aria-hidden="true" tabindex="-1"></a>phylo_beta</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb188"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb188-1"><a href="#cb188-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb188-2"><a href="#cb188-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;</span>
+<span id="cb188-3"><a href="#cb188-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; s;</span>
+<span id="cb188-4"><a href="#cb188-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x;</span>
+<span id="cb188-5"><a href="#cb188-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] y;</span>
+<span id="cb188-6"><a href="#cb188-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] phyvcv;</span>
+<span id="cb188-7"><a href="#cb188-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb188-8"><a href="#cb188-8" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed data</span> {</span>
+<span id="cb188-9"><a href="#cb188-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] zero_vec = rep_vector(<span class="dv">0</span>, n);</span>
+<span id="cb188-10"><a href="#cb188-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb188-11"><a href="#cb188-11" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb188-12"><a href="#cb188-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> b0;</span>
+<span id="cb188-13"><a href="#cb188-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=<span class="fl">0.5</span>, <span class="dt">multiplier</span>=<span class="fl">0.5</span>&gt; b1;</span>
+<span id="cb188-14"><a href="#cb188-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_x;</span>
+<span id="cb188-15"><a href="#cb188-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_y;</span>
+<span id="cb188-16"><a href="#cb188-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_x;</span>
+<span id="cb188-17"><a href="#cb188-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_y;</span>
+<span id="cb188-18"><a href="#cb188-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb188-19"><a href="#cb188-19" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb188-20"><a href="#cb188-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_x</span>
+<span id="cb188-21"><a href="#cb188-21" aria-hidden="true" tabindex="-1"></a>    = sigma_x^<span class="dv">2</span> * add_diag(lambda_x * phyvcv, <span class="dv">1</span> - lambda_x);</span>
+<span id="cb188-22"><a href="#cb188-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_y</span>
+<span id="cb188-23"><a href="#cb188-23" aria-hidden="true" tabindex="-1"></a>    = sigma_y^<span class="dv">2</span> * add_diag(lambda_y * phyvcv, <span class="dv">1</span> - lambda_y);</span>
+<span id="cb188-24"><a href="#cb188-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb188-25"><a href="#cb188-25" aria-hidden="true" tabindex="-1"></a>  b0 ~ std_normal();</span>
+<span id="cb188-26"><a href="#cb188-26" aria-hidden="true" tabindex="-1"></a>  b1 ~ std_normal();</span>
+<span id="cb188-27"><a href="#cb188-27" aria-hidden="true" tabindex="-1"></a>  sigma_x ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb188-28"><a href="#cb188-28" aria-hidden="true" tabindex="-1"></a>  sigma_y ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb188-29"><a href="#cb188-29" aria-hidden="true" tabindex="-1"></a>  lambda_x ~ beta(<span class="dv">9</span>, <span class="dv">1</span>);</span>
+<span id="cb188-30"><a href="#cb188-30" aria-hidden="true" tabindex="-1"></a>  lambda_y ~ beta(<span class="dv">5</span>, <span class="dv">5</span>);</span>
+<span id="cb188-31"><a href="#cb188-31" aria-hidden="true" tabindex="-1"></a>  x ~ multi_normal(zero_vec, vcv_x);</span>
+<span id="cb188-32"><a href="#cb188-32" aria-hidden="true" tabindex="-1"></a>  y ~ multi_normal(b0 + b1 * x, vcv_y);</span>
+<span id="cb188-33"><a href="#cb188-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb189"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb189-1"><a href="#cb189-1" aria-hidden="true" tabindex="-1"></a>phylo_beta_sample <span class="ot">&lt;-</span> phylo_beta<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(</span>
+<span id="cb189-2"><a href="#cb189-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> n,</span>
+<span id="cb189-3"><a href="#cb189-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">s =</span> n,</span>
+<span id="cb189-4"><a href="#cb189-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> x,</span>
+<span id="cb189-5"><a href="#cb189-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> Y,</span>
+<span id="cb189-6"><a href="#cb189-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyvcv =</span> ape<span class="sc">::</span><span class="fu">vcv</span>(phy)</span>
+<span id="cb189-7"><a href="#cb189-7" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...
+
+Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 32, column 2 to column 39)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 32, column 2 to column 39)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: multi_normal_lpdf: LDLT_Factor of covariance parameter is not positive definite.  last conditional variance is 0. (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 31, column 2 to column 36)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 32, column 2 to column 39)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 31, column 2 to column 36)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 31, column 2 to column 36)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 3 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 32, column 2 to column 39)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 1 finished in 0.4 seconds.
+Chain 2 finished in 0.4 seconds.
+Chain 3 finished in 0.4 seconds.
+Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 4 finished in 0.5 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.4 seconds.
+Total execution time: 0.6 seconds.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb230"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb230-1"><a href="#cb230-1" aria-hidden="true" tabindex="-1"></a>phylo_beta_sample</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> variable  mean median   sd  mad    q5   q95 rhat ess_bulk ess_tail
+ lp__     -3.91  -3.58 1.84 1.71 -7.43 -1.58 1.00     1606     2401
+ b0        0.26   0.26 0.21 0.19 -0.09  0.60 1.00     4301     2944
+ b1       -0.12  -0.12 0.15 0.14 -0.37  0.12 1.00     4157     2916
+ sigma_x   0.95   0.92 0.19 0.18  0.69  1.29 1.00     3548     3016
+ sigma_y   0.49   0.47 0.10 0.09  0.36  0.67 1.00     3653     2876
+ lambda_x  0.92   0.93 0.06 0.06  0.80  0.99 1.00     2672     1411
+ lambda_y  0.54   0.54 0.13 0.14  0.31  0.75 1.00     4050     2728</code></pre>
+</div>
+</div>
+</section>
+<section id="repeated-sampling-of-these-traits" class="level2">
+<h2 class="anchored" data-anchor-id="repeated-sampling-of-these-traits">Repeated sampling of these traits</h2>
+<p>The simulation above is giving species <em>means</em>. However in our study we have more than one measurement per species. Measurements of “Trait X” and “Trait Y” are measured on different individuals.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb232"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb232-1"><a href="#cb232-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb232-2"><a href="#cb232-2" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(ape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: ape</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'ape'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following object is masked from 'package:dplyr':
+
+    where</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb236"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb236-1"><a href="#cb236-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1618</span>)</span>
+<span id="cb236-2"><a href="#cb236-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb236-3"><a href="#cb236-3" aria-hidden="true" tabindex="-1"></a><span class="co"># set true parameter values</span></span>
+<span id="cb236-4"><a href="#cb236-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
+<span id="cb236-5"><a href="#cb236-5" aria-hidden="true" tabindex="-1"></a>b0_y <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
+<span id="cb236-6"><a href="#cb236-6" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
+<span id="cb236-7"><a href="#cb236-7" aria-hidden="true" tabindex="-1"></a>lam.x <span class="ot">&lt;-</span> .<span class="dv">98</span></span>
+<span id="cb236-8"><a href="#cb236-8" aria-hidden="true" tabindex="-1"></a>lam.e <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
+<span id="cb236-9"><a href="#cb236-9" aria-hidden="true" tabindex="-1"></a>sigma_x <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb236-10"><a href="#cb236-10" aria-hidden="true" tabindex="-1"></a>sigma_y <span class="ot">&lt;-</span> .<span class="dv">3</span></span>
+<span id="cb236-11"><a href="#cb236-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb236-12"><a href="#cb236-12" aria-hidden="true" tabindex="-1"></a><span class="co"># simulate phylogeny</span></span>
+<span id="cb236-13"><a href="#cb236-13" aria-hidden="true" tabindex="-1"></a>phy <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">compute.brlen</span>(</span>
+<span id="cb236-14"><a href="#cb236-14" aria-hidden="true" tabindex="-1"></a>  ape<span class="sc">::</span><span class="fu">rtree</span>(<span class="at">n=</span>n),</span>
+<span id="cb236-15"><a href="#cb236-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"Grafen"</span>,</span>
+<span id="cb236-16"><a href="#cb236-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">power =</span> <span class="dv">1</span>)</span>
+<span id="cb236-17"><a href="#cb236-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb236-18"><a href="#cb236-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(phy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb237"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb237-1"><a href="#cb237-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get names from this matrix! needs to line up perfectly</span></span>
+<span id="cb237-2"><a href="#cb237-2" aria-hidden="true" tabindex="-1"></a>phyvcv <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">vcv</span>(phy)</span>
+<span id="cb237-3"><a href="#cb237-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb237-4"><a href="#cb237-4" aria-hidden="true" tabindex="-1"></a>distmat_names <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(phyvcv)[[<span class="dv">1</span>]]</span>
+<span id="cb237-5"><a href="#cb237-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb237-6"><a href="#cb237-6" aria-hidden="true" tabindex="-1"></a><span class="co"># observations per species</span></span>
+<span id="cb237-7"><a href="#cb237-7" aria-hidden="true" tabindex="-1"></a>n_obs <span class="ot">&lt;-</span> <span class="dv">15</span></span>
+<span id="cb237-8"><a href="#cb237-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb237-9"><a href="#cb237-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb237-10"><a href="#cb237-10" aria-hidden="true" tabindex="-1"></a>phy.x <span class="ot">&lt;-</span> phylolm<span class="sc">::</span><span class="fu">transf.branch.lengths</span>(</span>
+<span id="cb237-11"><a href="#cb237-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">phy=</span>phy, <span class="at">model=</span><span class="st">"lambda"</span>,</span>
+<span id="cb237-12"><a href="#cb237-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters=</span><span class="fu">list</span>(<span class="at">lambda =</span> lam.x))<span class="sc">$</span>tree</span>
+<span id="cb237-13"><a href="#cb237-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb237-14"><a href="#cb237-14" aria-hidden="true" tabindex="-1"></a>phy.e <span class="ot">&lt;-</span> phylolm<span class="sc">::</span><span class="fu">transf.branch.lengths</span>(</span>
+<span id="cb237-15"><a href="#cb237-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">phy=</span>phy, <span class="at">model=</span><span class="st">"lambda"</span>,</span>
+<span id="cb237-16"><a href="#cb237-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters=</span><span class="fu">list</span>(<span class="at">lambda =</span> lam.e))<span class="sc">$</span>tree</span>
+<span id="cb237-17"><a href="#cb237-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb237-18"><a href="#cb237-18" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.x, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_x)</span>
+<span id="cb237-19"><a href="#cb237-19" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.e, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_y)</span>
+<span id="cb237-20"><a href="#cb237-20" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> x[<span class="fu">match</span>(<span class="fu">names</span>(e), <span class="fu">names</span>(x))]</span>
+<span id="cb237-21"><a href="#cb237-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb237-22"><a href="#cb237-22" aria-hidden="true" tabindex="-1"></a><span class="do">## calculate Y</span></span>
+<span id="cb237-23"><a href="#cb237-23" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> b0_y <span class="sc">+</span> b1 <span class="sc">*</span> x <span class="sc">+</span> e</span>
+<span id="cb237-24"><a href="#cb237-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb237-25"><a href="#cb237-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Y &lt;- array(Y)</span></span>
+<span id="cb237-26"><a href="#cb237-26" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(Y) <span class="ot">&lt;-</span> phy<span class="sc">$</span>tip.label</span>
+<span id="cb237-27"><a href="#cb237-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb237-28"><a href="#cb237-28" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<div class="sourceCode cell-code" id="cb238"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb238-1"><a href="#cb238-1" aria-hidden="true" tabindex="-1"></a>obs_xy_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(x, Y, <span class="at">sp_name =</span> <span class="fu">names</span>(x)) <span class="sc">|&gt;</span> </span>
+<span id="cb238-2"><a href="#cb238-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb238-3"><a href="#cb238-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">sp_id =</span> <span class="fu">as.numeric</span>(</span>
+<span id="cb238-4"><a href="#cb238-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">factor</span>(sp_name, </span>
+<span id="cb238-5"><a href="#cb238-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">levels =</span> distmat_names))) <span class="sc">|&gt;</span> </span>
+<span id="cb238-6"><a href="#cb238-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb238-7"><a href="#cb238-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obs_x =</span> <span class="fu">list</span>(</span>
+<span id="cb238-8"><a href="#cb238-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rnorm</span>(n_obs, <span class="at">mean =</span> x, <span class="at">sd =</span> .<span class="dv">3</span>)),</span>
+<span id="cb238-9"><a href="#cb238-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">obs_y =</span> <span class="fu">list</span>(<span class="fu">rnorm</span>(n_obs, <span class="at">mean =</span> Y, <span class="at">sd =</span> .<span class="dv">3</span>)))</span>
+<span id="cb238-10"><a href="#cb238-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb238-11"><a href="#cb238-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb238-12"><a href="#cb238-12" aria-hidden="true" tabindex="-1"></a>x_obs_df <span class="ot">&lt;-</span> obs_xy_df <span class="sc">|&gt;</span> </span>
+<span id="cb238-13"><a href="#cb238-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(sp_id, obs_x) <span class="sc">|&gt;</span> <span class="fu">unnest</span>(obs_x)</span>
+<span id="cb238-14"><a href="#cb238-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb238-15"><a href="#cb238-15" aria-hidden="true" tabindex="-1"></a>y_obs_df <span class="ot">&lt;-</span> obs_xy_df <span class="sc">|&gt;</span> </span>
+<span id="cb238-16"><a href="#cb238-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(sp_id, obs_y) <span class="sc">|&gt;</span> <span class="fu">unnest</span>(obs_y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>fit a model that is ready for replication per species:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb239"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb239-1"><a href="#cb239-1" aria-hidden="true" tabindex="-1"></a>phylo_obs <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-09-27-phylo/phylo_obs.stan"</span>))</span>
+<span id="cb239-2"><a href="#cb239-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb239-3"><a href="#cb239-3" aria-hidden="true" tabindex="-1"></a>phylo_obs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb240"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb240-1"><a href="#cb240-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb240-2"><a href="#cb240-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; s;</span>
+<span id="cb240-3"><a href="#cb240-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// x trait</span></span>
+<span id="cb240-4"><a href="#cb240-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n_x;</span>
+<span id="cb240-5"><a href="#cb240-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n_x] x_obs;</span>
+<span id="cb240-6"><a href="#cb240-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_x] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>,<span class="kw">upper</span>=s&gt; sp_id_x;</span>
+<span id="cb240-7"><a href="#cb240-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// y trait</span></span>
+<span id="cb240-8"><a href="#cb240-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n_y;</span>
+<span id="cb240-9"><a href="#cb240-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n_y] y_obs;</span>
+<span id="cb240-10"><a href="#cb240-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_y] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>,<span class="kw">upper</span>=s&gt; sp_id_y;</span>
+<span id="cb240-11"><a href="#cb240-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">cov_matrix</span>[s] phyvcv;</span>
+<span id="cb240-12"><a href="#cb240-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb240-13"><a href="#cb240-13" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed data</span> {</span>
+<span id="cb240-14"><a href="#cb240-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[s] zero_vec = rep_vector(<span class="dv">0</span>, s);</span>
+<span id="cb240-15"><a href="#cb240-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb240-16"><a href="#cb240-16" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb240-17"><a href="#cb240-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=.<span class="dv">5</span>,<span class="dt">multiplier</span>=.<span class="dv">8</span>&gt; b0_y;</span>
+<span id="cb240-18"><a href="#cb240-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=<span class="fl">0.5</span>, <span class="dt">multiplier</span>=<span class="fl">0.5</span>&gt; b1;</span>
+<span id="cb240-19"><a href="#cb240-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_x;</span>
+<span id="cb240-20"><a href="#cb240-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_y;</span>
+<span id="cb240-21"><a href="#cb240-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_x;</span>
+<span id="cb240-22"><a href="#cb240-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_y;</span>
+<span id="cb240-23"><a href="#cb240-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[s] x_avg;</span>
+<span id="cb240-24"><a href="#cb240-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[s] y_avg;</span>
+<span id="cb240-25"><a href="#cb240-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_x_obs;</span>
+<span id="cb240-26"><a href="#cb240-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_y_obs;</span>
+<span id="cb240-27"><a href="#cb240-27" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb240-28"><a href="#cb240-28" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb240-29"><a href="#cb240-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_x</span>
+<span id="cb240-30"><a href="#cb240-30" aria-hidden="true" tabindex="-1"></a>    = sigma_x^<span class="dv">2</span> * add_diag(lambda_x * phyvcv, <span class="dv">1</span> - lambda_x);</span>
+<span id="cb240-31"><a href="#cb240-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_y</span>
+<span id="cb240-32"><a href="#cb240-32" aria-hidden="true" tabindex="-1"></a>    = sigma_y^<span class="dv">2</span> * add_diag(lambda_y * phyvcv, <span class="dv">1</span> - lambda_y);</span>
+<span id="cb240-33"><a href="#cb240-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb240-34"><a href="#cb240-34" aria-hidden="true" tabindex="-1"></a>  b0_y ~ std_normal();</span>
+<span id="cb240-35"><a href="#cb240-35" aria-hidden="true" tabindex="-1"></a>  b1 ~ std_normal();</span>
+<span id="cb240-36"><a href="#cb240-36" aria-hidden="true" tabindex="-1"></a>  sigma_x ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb240-37"><a href="#cb240-37" aria-hidden="true" tabindex="-1"></a>  sigma_y ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb240-38"><a href="#cb240-38" aria-hidden="true" tabindex="-1"></a>  lambda_x ~ beta(<span class="dv">9</span>, <span class="dv">1</span>);</span>
+<span id="cb240-39"><a href="#cb240-39" aria-hidden="true" tabindex="-1"></a>  lambda_y ~ beta(<span class="dv">5</span>, <span class="dv">5</span>);</span>
+<span id="cb240-40"><a href="#cb240-40" aria-hidden="true" tabindex="-1"></a>  sigma_x_obs ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb240-41"><a href="#cb240-41" aria-hidden="true" tabindex="-1"></a>  sigma_y_obs ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb240-42"><a href="#cb240-42" aria-hidden="true" tabindex="-1"></a>  <span class="co">// species averages</span></span>
+<span id="cb240-43"><a href="#cb240-43" aria-hidden="true" tabindex="-1"></a>  x_avg ~ multi_normal(zero_vec, vcv_x);</span>
+<span id="cb240-44"><a href="#cb240-44" aria-hidden="true" tabindex="-1"></a>  y_avg ~ multi_normal(b0_y + b1 * x_avg, vcv_y);</span>
+<span id="cb240-45"><a href="#cb240-45" aria-hidden="true" tabindex="-1"></a>  <span class="co">// observations of these</span></span>
+<span id="cb240-46"><a href="#cb240-46" aria-hidden="true" tabindex="-1"></a>  x_obs ~ normal(x_avg[sp_id_x], sigma_x_obs);</span>
+<span id="cb240-47"><a href="#cb240-47" aria-hidden="true" tabindex="-1"></a>  y_obs ~ normal(y_avg[sp_id_y], sigma_y_obs);</span>
+<span id="cb240-48"><a href="#cb240-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb240-49"><a href="#cb240-49" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb241"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb241-1"><a href="#cb241-1" aria-hidden="true" tabindex="-1"></a>phylo_obs_sample <span class="ot">&lt;-</span> phylo_obs<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(</span>
+<span id="cb241-2"><a href="#cb241-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">s =</span> n,</span>
+<span id="cb241-3"><a href="#cb241-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># trait x</span></span>
+<span id="cb241-4"><a href="#cb241-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_x =</span> <span class="fu">nrow</span>(x_obs_df),</span>
+<span id="cb241-5"><a href="#cb241-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_obs =</span> x_obs_df<span class="sc">$</span>obs_x,</span>
+<span id="cb241-6"><a href="#cb241-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">sp_id_x =</span> x_obs_df<span class="sc">$</span>sp_id,</span>
+<span id="cb241-7"><a href="#cb241-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># trait y</span></span>
+<span id="cb241-8"><a href="#cb241-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_y =</span> <span class="fu">nrow</span>(y_obs_df),</span>
+<span id="cb241-9"><a href="#cb241-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">y_obs =</span> y_obs_df<span class="sc">$</span>obs_y,</span>
+<span id="cb241-10"><a href="#cb241-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">sp_id_y =</span> y_obs_df<span class="sc">$</span>sp_id,</span>
+<span id="cb241-11"><a href="#cb241-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># phylogeny</span></span>
+<span id="cb241-12"><a href="#cb241-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyvcv =</span> phyvcv</span>
+<span id="cb241-13"><a href="#cb241-13" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...
+
+Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 Exception: multi_normal_lpdf: LDLT_Factor of covariance parameter is not positive definite.  last conditional variance is 0. (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 44, column 2 to column 49)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 1 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: multi_normal_lpdf: LDLT_Factor of covariance parameter is not positive definite.  last conditional variance is 0. (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 43, column 2 to column 40)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 Exception: normal_lpdf: Scale parameter is 0, but must be positive! (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 46, column 2 to column 46)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 2 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
+Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 43, column 2 to column 40)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 43, column 2 to column 40)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = -nan, but Covariance matrix[2,1] = -nan (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 43, column 2 to column 40)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 43, column 2 to column 40)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Chain 4 </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 2 finished in 0.6 seconds.
+Chain 3 finished in 0.6 seconds.
+Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 1 finished in 0.7 seconds.
+Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 4 finished in 0.8 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.7 seconds.
+Total execution time: 0.9 seconds.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb281"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb281-1"><a href="#cb281-1" aria-hidden="true" tabindex="-1"></a>phylo_obs_sample<span class="sc">$</span><span class="fu">summary</span>(<span class="at">variables =</span> <span class="fu">c</span>(</span>
+<span id="cb281-2"><a href="#cb281-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"b0_y"</span>, <span class="st">"b1"</span>, <span class="st">"sigma_x"</span>, <span class="st">"sigma_y"</span>, <span class="st">"lambda_x"</span>, <span class="st">"lambda_y"</span>, <span class="st">"sigma_x_obs"</span>, <span class="st">"sigma_y_obs"</span></span>
+<span id="cb281-3"><a href="#cb281-3" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 8 × 10
+  variable     mean median     sd    mad    q5   q95  rhat ess_bulk ess_tail
+  &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 b0_y        0.610  0.616 0.131  0.118  0.394 0.813  1.00    3950.    2381.
+2 b1          0.476  0.478 0.102  0.0968 0.309 0.643  1.00    4823.    2686.
+3 sigma_x     0.898  0.876 0.173  0.162  0.656 1.22   1.00    3848.    2722.
+4 sigma_y     0.300  0.289 0.0688 0.0617 0.208 0.426  1.00    2806.    2659.
+5 lambda_x    0.935  0.947 0.0531 0.0474 0.832 0.995  1.00    3298.    1629.
+6 lambda_y    0.476  0.477 0.141  0.146  0.243 0.706  1.00    3867.    2999.
+7 sigma_x_obs 0.290  0.290 0.0126 0.0124 0.270 0.312  1.00    4977.    3515.
+8 sigma_y_obs 0.313  0.312 0.0132 0.0134 0.292 0.335  1.00    5201.    2987.</code></pre>
+</div>
+</div>
+<p>I guess I thought it would be better to sample <code>lambda</code> on the normal scale as well, but is that misguided? I guess using the unconstrained scale also sets us up for hierarchical effects later.</p>
+<p>In the real-world work that this is focussed on, the traits X and Y are going to be observed on different individuals. Sample size will be different across species with some species missing entirely from one or the other (or both) X and Y.</p>
 
 
 
-</main> <!-- /main -->
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
+<div id="ref-ives" class="csl-entry" role="listitem">
+Ives, Anthony R. n.d. <span>“Mixed and Phylogenetic Models: A Conceptual Introduction to Correlated Data.”</span>
+</div>
+<div id="ref-pearse" class="csl-entry" role="listitem">
+Pearse, William D., T. Jonathan Davies, and E. M. Wolkovich. n.d. <span>“How to Define, Use, and Interpret Pagel<span>’</span>s λ (Lambda) in Ecology and Evolution.”</span> <a href="https://doi.org/10.1101/2023.10.10.561651">https://doi.org/10.1101/2023.10.10.561651</a>.
+</div>
+</div></section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
@@ -395,18 +1655,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
     return false;
   }
-  const clipboard = new window.ClipboardJS('.code-copy-button', {
-    text: function(trigger) {
-      const codeEl = trigger.previousElementSibling.cloneNode(true);
-      for (const childEl of codeEl.children) {
-        if (isCodeAnnotation(childEl)) {
-          childEl.remove();
-        }
-      }
-      return codeEl.innerText;
-    }
-  });
-  clipboard.on('success', function(e) {
+  const onCopySuccess = function(e) {
     // button target
     const button = e.trigger;
     // don't keep focus
@@ -438,7 +1687,29 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }, 1000);
     // clear code selection
     e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
   });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    // For code content inside modals, clipBoardJS needs to be initialized with a container option
+    // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
     var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
     var mailtoRegex = new RegExp(/^mailto:/);
       var filterRegex = new RegExp("https:\/\/aammd\.github\.io");
@@ -446,7 +1717,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
     }
     // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
     for (var i=0; i<links.length; i++) {
       const link = links[i];
       if (!isInternal(link.href)) {
