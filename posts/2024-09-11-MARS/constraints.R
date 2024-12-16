@@ -7,11 +7,13 @@ trans_competition <- function(vcomp){
 }
 
 trans_consumption <- function(vprey, vpred){
-  -(1 - plogis(vprey))/plogis(vpred)
+  # -(1 - plogis(vprey))/plogis(vpred)
+  -plogis(vprey) * exp(vpred)
 }
 
 trans_food_eaten <- function(vprey){
-  1 - plogis(vprey)
+  # 1 - plogis(vprey)
+  plogis(vprey)
 }
 
 trans_dens_depend <- function(vdens){
@@ -61,8 +63,9 @@ con <- (n_r+1):(n_r + n_c)
 B_mat <- matrix(0, n_r + n_c, n_r + n_c)
 
 comp_r <- rnorm(n_r^2 - n_r, mean = -2, sd = .3)
-pred_r <- rnorm(n_r * n_c, mean = 0, sd = 1)
-food_r <- rnorm(n_r * n_c, mean = 2, sd = 1)
+pred_r <- rnorm(n_r * n_c, mean = -2, sd = .1)
+# food_r <- rnorm(n_r * n_c, mean = 2, sd = 1)
+food_r <- rnorm(n_r * n_c, mean = -2, sd = 1)
 dens_r <- rnorm(n_r + n_c, mean = -2, sd = .5)
 
 B_mat_fill <- B_mat |>
@@ -117,6 +120,7 @@ pop_sizes_long <- pop_sizes |>
 logplot <- pop_sizes_long |>
   ggplot(aes(x = time, y = abd,
              group = sp, col = is_pred)) + geom_line() +
+  guides(col = "none") +
   # facet_wrap(~sp, ncol = 1) +
   NULL
 
@@ -124,6 +128,8 @@ logplot <- pop_sizes_long |>
 abdplot <- pop_sizes_long |>
   ggplot(aes(x = time, y = exp(abd), group = sp,
              col = is_pred)) + geom_line() +
+  guides(col = "none")  +
+  # facet_wrap(~sp, ncol = 1) +
   # facet_wrap(~sp, ncol = 1) +
   NULL
 #

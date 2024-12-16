@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://aammd.github.io/index.html</loc>
-    <lastmod>2024-02-23T15:54:34.822Z</lastmod>
+    <lastmod>2024-01-30T14:10:32.106Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/blog.html</loc>
@@ -10,63 +10,71 @@
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2014-11-27-continuous-fraction-functional-programming/index.html</loc>
-    <lastmod>2024-02-23T15:54:32.170Z</lastmod>
+    <lastmod>2024-01-30T14:10:32.122Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2023-11-08-tree-cooling/index.html</loc>
-    <lastmod>2024-02-23T15:54:29.930Z</lastmod>
+    <loc>https://aammd.github.io/posts/2024-05-03-difference_of_two_normals/index.html</loc>
+    <lastmod>2024-05-04T12:34:27.332Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/index.html</loc>
-    <lastmod>2024-02-23T15:54:28.502Z</lastmod>
+    <loc>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/index.html</loc>
+    <lastmod>2024-02-15T19:58:39.021Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2023-11-01-standalone-gq/index.html</loc>
-    <lastmod>2024-02-23T15:54:27.866Z</lastmod>
+    <loc>https://aammd.github.io/posts/2023-03-20-latent-continuous/index.html</loc>
+    <lastmod>2024-02-04T12:29:13.091Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/index.html</loc>
-    <lastmod>2024-02-23T15:54:25.842Z</lastmod>
+    <loc>https://aammd.github.io/posts/2024-09-27-phylo/index.html</loc>
+    <lastmod>2024-12-04T19:18:07.869Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2023-11-03-power-law/index.html</loc>
-    <lastmod>2024-02-23T15:54:25.106Z</lastmod>
+    <loc>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.266Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2016-12-02-twitter-recommends-stats-books/index.html</loc>
-    <lastmod>2024-02-23T15:54:24.318Z</lastmod>
+    <loc>https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index.html</loc>
+    <lastmod>2024-05-04T12:34:29.632Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2023-12-14-contrasts/index.html</loc>
-    <lastmod>2024-02-23T15:54:23.650Z</lastmod>
+    <loc>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.534Z</lastmod>
+  </url>
+  <url>
+    <loc>https://aammd.github.io/posts/2016-12-07-population-growth-functional-programming/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.154Z</lastmod>
+  </url>
+  <url>
+    <loc>https://aammd.github.io/posts/2024-09-23-discrete-growth-latent/index.html</loc>
+    <lastmod>2024-10-08T17:28:57.145Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2022-11-23-evolution-of-plasticity/index.html</loc>
-    <lastmod>2024-02-23T15:54:22.518Z</lastmod>
+    <lastmod>2024-01-30T14:10:32.170Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2022-11-11-multispecies-functional-response/index.html</loc>
-    <lastmod>2024-02-23T15:54:21.834Z</lastmod>
+    <lastmod>2024-01-30T14:10:32.162Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2022-11-24-updating-R-and-packages/index.html</loc>
-    <lastmod>2024-02-23T15:54:20.938Z</lastmod>
+    <lastmod>2024-01-30T14:10:32.170Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2022-11-29-group-centering/index.html</loc>
-    <lastmod>2024-02-23T15:54:20.410Z</lastmod>
-  </url>
-  <url>
-    <loc>https://aammd.github.io/posts/2022-12-15-setting-priors/index.html</loc>
-    <lastmod>2024-02-23T15:54:19.010Z</lastmod>
-  </url>
-  <url>
-    <loc>https://aammd.github.io/posts/30-03-2023-growth-continuous-discrete/index.html</loc>
-    <lastmod>2024-02-23T15:54:18.666Z</lastmod>
+    <lastmod>2024-01-30T14:10:32.170Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2023-08-22-transformed-regression/index.html</loc>
-    <lastmod>2024-02-23T15:54:19.454Z</lastmod>
+    <lastmod>2024-01-30T14:10:32.434Z</lastmod>
+  </url>
+  <url>
+    <loc>https://aammd.github.io/posts/30-03-2023-growth-continuous-discrete/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.782Z</lastmod>
+  </url>
+  <url>
+    <loc>https://aammd.github.io/posts/2022-12-15-setting-priors/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.170Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2022-12-01-cholesky-correlation/index.html</loc>
@@ -74,66 +82,58 @@
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2023-11-14-multilevel-arima/index.html</loc>
-    <lastmod>2024-02-23T15:54:20.762Z</lastmod>
+    <lastmod>2024-02-05T15:42:08.607Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2023-07-05-breakpoint/index.html</loc>
-    <lastmod>2024-02-23T15:54:21.430Z</lastmod>
+    <lastmod>2024-01-30T14:10:32.418Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2022-12-05-growth-increment/index.html</loc>
-    <lastmod>2024-02-23T15:54:22.154Z</lastmod>
+    <lastmod>2024-01-30T14:10:32.226Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2023-11-15-ives03-ts/index.html</loc>
-    <lastmod>2024-02-23T15:54:23.278Z</lastmod>
+    <lastmod>2024-01-30T14:10:32.754Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2016-12-07-population-growth-functional-programming/index.html</loc>
-    <lastmod>2024-02-23T15:54:24.098Z</lastmod>
+    <loc>https://aammd.github.io/posts/2023-12-14-contrasts/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.782Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2023-08-24-imputation-nonnormal/index.html</loc>
-    <lastmod>2024-02-23T15:54:24.746Z</lastmod>
+    <loc>https://aammd.github.io/posts/2016-12-02-twitter-recommends-stats-books/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.138Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2023-11-24-how-to-model-growth/index.html</loc>
-    <lastmod>2024-05-04T12:34:29.632Z</lastmod>
+    <loc>https://aammd.github.io/posts/2023-11-03-power-law/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.678Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2023-02-02-selection-on-plasticity/index.html</loc>
-    <lastmod>2024-02-23T15:54:26.546Z</lastmod>
+    <loc>https://aammd.github.io/posts/2022-11-21-growth-curve-known-age/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.170Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2023-03-20-latent-continuous/index.html</loc>
-    <lastmod>2024-02-23T15:54:29.626Z</lastmod>
+    <loc>https://aammd.github.io/posts/2023-11-01-standalone-gq/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.678Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2023-10-23-discrete-vb-brms-stan/index.html</loc>
-    <lastmod>2024-02-23T15:54:30.314Z</lastmod>
+    <loc>https://aammd.github.io/posts/2022-11-29-selection-on-plasticity/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.170Z</lastmod>
+  </url>
+  <url>
+    <loc>https://aammd.github.io/posts/2023-11-08-tree-cooling/index.html</loc>
+    <lastmod>2024-01-30T14:10:32.678Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2022-10-14-growth_curve_measurement_error/index.html</loc>
-    <lastmod>2024-02-23T16:14:15.583Z</lastmod>
-  </url>
-  <url>
-    <loc>https://aammd.github.io/draft/pres.html</loc>
-    <lastmod>2024-02-23T15:54:34.442Z</lastmod>
+    <lastmod>2024-02-23T16:08:23.821Z</lastmod>
   </url>
   <url>
     <loc>https://aammd.github.io/posts/2022-10-23-probability-integral-transform/index.html</loc>
-    <lastmod>2024-05-03T12:40:22.934Z</lastmod>
+    <lastmod>2024-02-23T16:41:23.852Z</lastmod>
   </url>
   <url>
-    <loc>https://aammd.github.io/posts/2024-05-03-difference_of_two_normals/index.html</loc>
-    <lastmod>2024-05-04T12:34:27.332Z</lastmod>
-  </url>
-  <url>
-    <loc>https://aammd.github.io/posts/2024-09-23-discrete-growth-latent/index.html</loc>
-    <lastmod>2024-10-08T17:28:57.145Z</lastmod>
-  </url>
-  <url>
-    <loc>https://aammd.github.io/posts/2024-09-27-phylo/index.html</loc>
-    <lastmod>2024-10-08T16:07:04.095Z</lastmod>
+    <loc>https://aammd.github.io/draft/pres.html</loc>
+    <lastmod>2024-01-30T14:10:32.110Z</lastmod>
   </url>
 </urlset>

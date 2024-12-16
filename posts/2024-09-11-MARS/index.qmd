@@ -18,6 +18,7 @@ here is it is in R:
 
 ```{r}
 library(tidyverse)
+
 ```
 
 
@@ -268,7 +269,7 @@ mars_poisson_samp |>
 
 
 ```{r}
-mars_poisson_assemblage_datafmt <- cmdstan_model("posts/2024-09-11-MARS/mars_poisson_assemblage_datafmt.stan")
+mars_poisson_assemblage_datafmt <- cmdstan_model(here::here("posts/2024-09-11-MARS/mars_poisson_assemblage_datafmt.stan"))
 ```
 
 will it accept data without complaining?
@@ -321,4 +322,417 @@ would it make sense to model the off-diagonal elements symmetrically? like for e
 * a degree of asymmetry with its partner? or perhaps just a random effect for every off-diagonal at that point
 
 
+
+```{r}
+library(cmdstanr)
+
+mars_poisson_check_matrix <- cmdstan_model(here::here("posts/2024-09-11-MARS/mars_poisson_check matrix.stan"))
+
+samp_check <- mars_poisson_check_matrix$sample(data = list(S = 3,
+                                             n_time = 5, 
+                                             n_add = 3, 
+                                             added = c(7, 9, 10),
+                                             add_idx = 
+                                               matrix(c(1,   1,
+                                                        2,   1,
+                                                        3,   3), nrow = 3, byrow = TRUE),
+                                             n_abs = 5,
+                                             abs_idx = 
+                                               matrix(c(1, 1,
+                                                        2, 1, 
+                                                        3, 1,
+                                                        3, 2, 
+                                                        3, 3), nrow = 5, byrow = TRUE)),
+                                 iter_warmup = 1, iter_sampling = 1, chains = 1)
+```
+
+
+```{r}
+samp_check |> tidybayes::gather_draws(true_abd[s,time]) |> 
+  dplyr::select(s, time, .value) |> 
+  tidyr::pivot_wider(names_from = "time", values_from = ".value")
+```
+
+
+This looks promising! there's no species present before they are added. The simple linear equation changes the starting densities each time.
+
+### get the shape right
+
+The model will get embellished later with more detail: treatments, hyperparameters, biologically meaningful constraints. But first I want a simple, random model which has what I'm calling the right "shape": an interaction / transition matrix, growth rates, an input for data and a likelihood.
+
+```{r}
+
+mars_matrix_shape  <- cmdstan_model(here::here("posts/2024-09-11-MARS/mars_matrix_shape.stan"))
+
+
+mars_matrix_shape_samp <- mars_matrix_shape$sample(data = list(S = 3,
+                                             n_time = 25, 
+                                             n_add = 3, 
+                                             added = c(7, 9, 10),
+                                             add_idx = 
+                                               matrix(c(1,   1,
+                                                        2,   1,
+                                                        3,   3), nrow = 3, byrow = TRUE),
+                                             n_abs = 5,
+                                             abs_idx = 
+                                               matrix(c(1, 1,
+                                                        2, 1, 
+                                                        3, 1,
+                                                        3, 2, 
+                                                        3, 3), nrow = 5, byrow = TRUE)),
+                                 iter_warmup = 500, iter_sampling = 400, chains = 1)
+
+library(tidyverse)
+mars_matrix_shape_samp |> 
+  tidybayes::spread_draws(true_abd[sp,time], ndraws = 16) |> 
+  ggplot(aes(x= time, group = sp, y = true_abd)) + 
+  geom_line() + 
+  facet_wrap(~.draw)
+```
+
+
+add a for-loop for the likelihood
+
+add the CONSTRAINTS actually do that next
+
+
+```{r}
+#| class-output: stan
+
+mars_matrix_constraints  <- cmdstan_model(here::here("posts/2024-09-11-MARS/mars_matrix_constraints.stan"))
+mars_matrix_constraints
+```
+
+
+```{r}
+
+data_constraint <- list(S = 3,
+     n_time = 10, 
+     n_add = 3, 
+     added = c(7, 9, 10),
+     add_idx = 
+       matrix(c(1,   1,
+                2,   1,
+                3,   3), nrow = 3, byrow = TRUE),
+     n_abs = 5,
+     abs_idx = 
+       matrix(c(1, 1,
+                2, 1, 
+                3, 1,
+                3, 2, 
+                3, 3), nrow = 5, byrow = TRUE)
+)
+     
+     
+     
+
+
+plot_print_prior <- function(stan_model, data_list){
+  stan_model_samp <- stan_model$sample(
+    data = data_list,
+    iter_warmup = 500, 
+    iter_sampling = 400, 
+    chains = 1, refresh = 0)
+  
+  stan_model_samp |> 
+    tidybayes::spread_draws(B[r,c], ndraws = 1) |> 
+    # tidybayes::summarise_draws(median) |>
+    # filter(str_detect(variable, "^B.*")) |> 
+    # separate(variable, into = c("B", "r", "c", "n")) |> 
+    select(B, r, c) |> 
+    pivot_wider(names_from = "c", values_from = "B") |> 
+    # select(-B, -n) |> 
+    print()
+      
+  
+  m <- stan_model_samp |> 
+    tidybayes::spread_draws(true_abd[sp,time], ndraws = 16) |> 
+    ggplot(aes(x= time, group = sp, y = exp(true_abd))) + 
+    geom_line() + 
+    facet_wrap(~.draw) + 
+    coord_cartesian(ylim = c(0,50))
+  
+  return(m)
+}
+
+
+plot_print_prior(mars_matrix_constraints,
+                 data_list = data_constraint) + 
+  coord_cartesian(ylim = c(0,40))
+```
+
+Results are encouraging! You can see from the figure that most species are now getting to an equilibrium; this is the effect of the density-dependence constraint. 
+You can see from the (single) B matrix printed on the screen that the diagonal is indeed between 0 and 1. 
+
+### Competition constraint
+
+Species within the same trophic level might have many interactions with each other, of course -- but a simple assumption is that they are in _competiton_. That means that each species has a negative per-capita impact on the others. An easy way to enforce that kind of constraint on our interaction matrix is by using a log link function:
+
+$$
+B_{ij} = -e^\alpha
+$$
+There's no correlation between any competitive effects -- a simple assumption. in other words, the effect of species A on species B is not related to how B effects A, or how A effects some other species.^[this is an assumption that could definitely be relaxed in a future draft of this model]
+
+How many interactions are we expecting? Every trophic level is like a small square matrix inside the larger interaction matrix, and the competition effects are on the upper and lower triangles of this matrix. That means that for an experiment where $K$ trophic levels are being introduced, there are this many competitive effects in total:
+
+$$
+n_{\text{comp}} = \sum_{k=1}^K (S_k^2 - S_k)
+$$
+
+Where $S_k$ is the richness of trophic group $k$. 
+
+Adding this into Stan calls for a bit of care in the transformed parameter block to loop over all the species ids and put their competition effects in where they belong. It also requires a change to the data block, because I want to allow for many trophic levels in possible experiments without changing the model. 
+
+:::{.callout-warning} 
+
+## Assumptions about data
+
+In my experience, when we work with models we often make assumptions about what kind of data setup is "sensible", but this usually reflects unwritten assumptions on the part of the statistican. These things might not be true in real data! Also when people use your Stan program they have no way of knowing what is "common sense" to you! So here I'm just noticing that I'm assuming that species are going to be given their ID numbers in such a way that
+* all members of the same trophic level have consecutive ID numbers
+* higher trophic levels come after lower ones in ID number.
+
+:::
+
+```{r}
+#| class-output: stan
+
+mars_matrix_constr_comp  <- cmdstan_model(here::here("posts/2024-09-11-MARS/mars_matrix_constr_comp.stan"))
+mars_matrix_constr_comp
+```
+
+```{r}
+data_comp <- list(
+  S = 7,
+  n_trophic = 2,
+  S_trophic = c(4,3),
+  sp_id = 1:7,
+  
+  n_time = 10, 
+  n_add = 7, 
+  added = log(c(8, 8, 8, 8, 3, 3, 3)),
+  add_idx = 
+    matrix(c(1,   1,
+             2,   1,
+             3,   1,
+             4,   1,
+             5,   3,
+             6,   3,
+             7,   3),nrow = 7, byrow = TRUE),
+  n_abs = 13,
+  abs_idx = 
+    matrix(c(1,   1,
+             2,   1,
+             3,   1,
+             4,   1,
+             5,   1,
+             5,   2,
+             5,   3,
+             6,   1,
+             6,   2,
+             6,   3,
+             7,   1,
+             7,   2,
+             7,   3),nrow = 13, byrow = TRUE)
+)
+
+plot_print_prior(mars_matrix_constr_comp,
+                 data_list = data_comp)
+```
+
+Whoops, we can't actually SAMPLE from this matrix until we also add in predation.
+
+```{r}
+#| class-output: stan
+
+mars_matrix_constr_comp_pred  <- cmdstan_model(here::here("posts/2024-09-11-MARS/mars_matrix_constr_comp_pred.stan"))
+mars_matrix_constr_comp_pred
+```
+
+
+```{r make_data_comp_pred}
+
+fw_links <- expand.grid(1:4, 5:7)
+
+data_comp_pred <- list(
+  S = 7,
+  n_trophic = 2,
+  S_trophic = c(4,3),
+  sp_id = 1:7,
+  
+  nlinks = nrow(fw_links),
+  resc = fw_links[,1],
+  cons = fw_links[,2],
+  
+  n_time = 10, 
+  n_add = 7, 
+  added = log(c(8, 8, 8, 8, 3, 3, 3)),
+  add_idx = 
+    matrix(c(1,   1,
+             2,   1,
+             3,   1,
+             4,   1,
+             5,   3,
+             6,   3,
+             7,   3),nrow = 7, byrow = TRUE),
+  n_abs = 13,
+  abs_idx = 
+    matrix(c(1,   1,
+             2,   1,
+             3,   1,
+             4,   1,
+             5,   1,
+             5,   2,
+             5,   3,
+             6,   1,
+             6,   2,
+             6,   3,
+             7,   1,
+             7,   2,
+             7,   3),nrow = 13, byrow = TRUE)
+)
+  
+```
+
+
+```{r}
+xim_plot <- plot_print_prior(mars_matrix_constr_comp_pred,
+                 data_list = data_comp_pred) 
+
+xim_plot
+```
+
+
+This is getting closer, but there still needs to be predation constraints
+
+
+```{r}
+#| class-output: stan
+
+mars_matrix_all_constraints  <- cmdstan_model(here::here("posts/2024-09-11-MARS/mars_matrix_all_constraints.stan"))
+mars_matrix_all_constraints
+```
+
+```{r}
+xim_plot <- plot_print_prior(mars_matrix_all_constraints,
+                 data_list = data_comp_pred) 
+
+xim_plot + 
+  coord_cartesian(ylim = c(0, 2000))
+```
+
+should go back and split this function in two
+
+```{r}
+plot_print_prior_obs <- function(stan_model, data_list){
+  stan_model_samp <- stan_model$sample(
+    data = data_list,
+    iter_warmup = 500, 
+    iter_sampling = 400, 
+    chains = 1, refresh = 0)
+  
+  stan_model_samp |> 
+    tidybayes::spread_draws(B[r,c], ndraws = 1) |> 
+    # tidybayes::summarise_draws(median) |>
+    # filter(str_detect(variable, "^B.*")) |> 
+    # separate(variable, into = c("B", "r", "c", "n")) |> 
+    select(B, r, c) |> 
+    pivot_wider(names_from = "c", values_from = "B") |> 
+    # select(-B, -n) |> 
+    print()
+      
+  
+  abd_data <- stan_model_samp |> 
+    tidybayes::spread_draws(obs_abd[sp,time], ndraws = 16)
+  
+  m <- abd_data |> 
+    ggplot(aes(x= time, group = sp, y = obs_abd)) + 
+    geom_point() + 
+    facet_wrap(~.draw) + 
+    coord_cartesian(ylim = c(0,20000))
+  
+  return(list(plot = m, abd_data = abd_data))
+}
+
+xim_plot <- plot_print_prior_obs(mars_matrix_all_constraints,
+                 data_list = data_comp_pred) 
+
+xim_plot$plot  + 
+  coord_cartesian(ylim = c(0, 4000)) + 
+  geom_line()
+
+xim_plot$abd_data$obs_abd |> range()
+
+```
+
+## adding random noise
+
+in this model I'm adding noise to the growth rates at each interval. 
+I've decided to do this via crossed random effects: every species is different, and every time point has a growth rate above or below the average.
+I'm having a hard time deciding if growth should be always positive. 
+
+```{r}
+#| class-output: stan
+
+mars_matrix_process_e  <- cmdstan_model(here::here("posts/20240-9-11-MARS/mars_matrix_procces_e.stan"))
+mars_matrix_process_e
+```
+
+```{r}
+prior_sim_plot_data <- plot_print_prior(mars_matrix_process_e,
+                 data_list = data_comp_pred) 
+
+prior_sim_plot_data + 
+  coord_cartesian(ylim = c(0, 9000))
+```
+
+```{r}
+xim_plot <- plot_print_prior_obs(mars_matrix_process_e,
+                 data_list = data_comp_pred) 
+
+xim_plot$plot  + 
+  coord_cartesian(ylim = c(0, 4000)) + 
+  geom_line()
+
+xim_plot$abd_data$obs_abd |> range()
+
+```
+
+The next step is to include some forbidden links.
+
+right now the matrix has two sets of triangles (competition) two rectangles (consumer resource) and self-limitation (diagonal).  
+
+if we add a second trophic level (something that eats consumers, not resources) then we need to add a new kind of input -- 0, for forbidden links that mean nothing.
+
+If a prey has a big effect on a predator, does it follow that the predator has a large impact on the prey? not necessarily but I think so. The current strategy does imply a certain correlation, since they are related by a positive factor. I could model it with a correlation more explicitly but we'll see if that is necessary.
+
+## visualization of an interaction matrix 
+
+```{r}
+resources <- 1:4
+consumers <- 5:7
+
+expand.grid(x = 1:7,y = 1:7) |> 
+  mutate(type = case_when(
+    x == y ~ "dd", 
+    x %in% resources & y %in% resources ~ "comp",
+    x %in% consumers & y %in% consumers ~ "comp",
+    x %in% resources & y %in% consumers ~ "eat",
+    x %in% consumers & y %in% resources ~ "eaten",
+    
+                          .default = "other")) |> 
+  ggplot(aes(x = x, y = -y, fill = type)) + 
+  geom_tile() + 
+  scale_fill_manual(values = c("dd" = "red",
+                               "comp" = "pink",
+                               "eat" = "lightblue",
+                               "eaten" = "blue")) +
+  
+  coord_fixed() + 
+  theme_void()
+
+```
+
+## Real data
+
+  
 

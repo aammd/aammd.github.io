@@ -245,7 +245,10 @@ window.Quarto = {
   <li><a href="#recipe-for-phylogeny" id="toc-recipe-for-phylogeny" class="nav-link" data-scroll-target="#recipe-for-phylogeny">Recipe for phylogeny</a></li>
   <li><a href="#data-simulation" id="toc-data-simulation" class="nav-link" data-scroll-target="#data-simulation">Data simulation</a></li>
   <li><a href="#tips-from-the-forum" id="toc-tips-from-the-forum" class="nav-link" data-scroll-target="#tips-from-the-forum">Tips from the forum</a></li>
-  <li><a href="#repeated-sampling-of-these-traits" id="toc-repeated-sampling-of-these-traits" class="nav-link" data-scroll-target="#repeated-sampling-of-these-traits">Repeated sampling of these traits</a></li>
+  <li><a href="#repeated-sampling-of-these-traits" id="toc-repeated-sampling-of-these-traits" class="nav-link" data-scroll-target="#repeated-sampling-of-these-traits">Repeated sampling of these traits</a>
+  <ul class="collapse">
+  <li><a href="#missing-data" id="toc-missing-data" class="nav-link" data-scroll-target="#missing-data">Missing data</a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -262,7 +265,7 @@ window.Quarto = {
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidybayes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>I’ve always wanted to understand how to do phylogenetic regressions, and thanks to my colleauge Alex Fuster I finally had the opportunity to sit down and work on them. The literature on the topic is <em>confusing</em>, large, and not always clear about what model is being fit. I relied heavily on two resources:</p>
+<p>I’ve always wanted to learn more about phylogenetic regressions, and thanks to my colleauge Alex Fuster I recently had the opportunity to sit down and work on them. The literature on the topic is <em>confusing</em>, large, and not always clear about what model is being fit. I relied heavily on two resources:</p>
 <ul>
 <li>one book, a free online resource from Tony Ives <span class="citation" data-cites="ives">(<a href="#ref-ives" role="doc-biblioref">Ives, n.d.</a>)</span></li>
 <li>a preprint, an excellent review of the use and misuse of Pagel’s Lambda by <span class="citation" data-cites="pearse">Pearse, Davies, and Wolkovich (<a href="#ref-pearse" role="doc-biblioref">n.d.</a>)</span></li>
@@ -276,8 +279,9 @@ window.Quarto = {
 <h2 class="anchored" data-anchor-id="recipe-for-phylogeny">Recipe for phylogeny</h2>
 <p>I love the large and flexible toolbox of Bayesian methods because it can be adapted to fit such a huge array of models – virtually all the models that ecologists want to fit! However, there’s a catch: to fit a model using Stan (or something similar) you have to know <em>exactly</em> what model you’re fitting. However, because these regressions are usually fit using custom software, it can be a challenge to dig to find the exact equations being fit!</p>
 <p>Using the two resources mentioned above, I was able to write down (I hope!) the equation for the model like this:</p>
-<p>$$ <span class="math display">\[\begin{align}
-y_i &amp;\sim \text{Normal}(\bar{y} + \beta_1 x_i + a_{s[i]}, \sigma_y) \\
+<p><span id="eq-phyloreg"><span class="math display">\[
+\begin{align}
+y_i &amp;= \bar{y} + \beta_1 x_i + a_{s[i]} \\
 a_{s} &amp;\sim \text{MVNormal}(0, \Sigma_a)\\
 \Sigma_a &amp;= \begin{bmatrix}
 \sigma_a^2 &amp; \lambda_a \cdot \sigma_{12} &amp; \cdots &amp; \lambda_a \cdot \sigma_{1,s} \\
@@ -285,8 +289,7 @@ a_{s} &amp;\sim \text{MVNormal}(0, \Sigma_a)\\
 \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
 \lambda_a \cdot \sigma_{s,1} &amp; \lambda_a \cdot \sigma_{s,2} &amp; \cdots &amp; \sigma_a^2
 \end{bmatrix} \\
-
-x_i &amp;\sim \text{Normal}(\bar{x} + b_{s[i]}, \sigma_x) \\
+x_i &amp;= \bar{x} + b_{s[i]} \\
 b_{s} &amp;\sim \text{MVNormal}(0, \Sigma_b)\\
 \Sigma_b &amp;= \begin{bmatrix}
 \sigma_b^2 &amp; \lambda_b \cdot \sigma_{12} &amp; \cdots &amp; \lambda_b \cdot \sigma_{1,s} \\
@@ -294,10 +297,21 @@ b_{s} &amp;\sim \text{MVNormal}(0, \Sigma_b)\\
 \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
 \lambda_b \cdot \sigma_{s,1} &amp; \lambda_b \cdot \sigma_{s,2} &amp; \cdots &amp; \sigma_b^2
 \end{bmatrix}
-
-
-
-\end{align}\]</span> $$ {#eq-phyloreg}</p>
+\end{align}
+\tag{1}\]</span></span></p>
+<div class="callout callout-style-default callout-note callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Note
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>You can see that there is no likelihood for the <span class="math inline">\(y_i\)</span> and <span class="math inline">\(x_i\)</span> values. That’s because I’m starting from a simple case where we know the true values for each species. The only thing to estimate is how variable these traits are among species, and how much of that variation correlates with phylogeny. Later I’ll show an example that is closer to real life.</p>
+</div>
+</div>
 <p>You can see that there are two big variance-covariance matrices here, for the effects of phylogeny on <span class="math inline">\(y\)</span> and <span class="math inline">\(x\)</span>. These covariance matrices have three ingredients that are all put together:</p>
 <ol type="1">
 <li><em>the base</em> How far apart are species on the phylogeny? Many ecologists work with trees where all the tips end at the present day – so all species have the same amount of time going back to their last common ancestor. For trees like this, the diagonal is 1 (i.e., 100% of the evolutionary time). The off-diagonals are the proportion of this total time which is shared between species.</li>
@@ -311,130 +325,147 @@ V_{phy} = \begin{bmatrix}
 \sigma_{2,1} &amp; \sigma_2^2 &amp; \sigma_{2,3} \\
 \sigma_{3,1} &amp; \sigma_{3,2} &amp; \sigma_3^2
 \end{bmatrix}
-\]</span> The covariances are equal to the proportion of the tree that is shared between two species. The diagonal is the amount of time between the tree’s start and each species. This is just a fancy way to say that, for a tree where all the tips end at the present day, the diagonal is 1 and the off-diagonal is between 0 and 1.</p>
+\]</span> The covariances are equal to the proportion of the tree that is shared between two species. The diagonal is the amount of time between the tree’s start and each species. This means that, for a tree where all the tips end at the present day, the diagonal is 1 and the off-diagonal is between 0 and 1.</p>
 <p>Then, we can write the expression for <span class="math inline">\(\Sigma\)</span> like this:</p>
 <p><span class="math display">\[
 \Sigma = \sigma^2 \lambda V_{phy} + \sigma^2 (1 - \lambda) \mathbf{I}
 \]</span> This is equation 4 in <span class="citation" data-cites="pearse">Pearse, Davies, and Wolkovich (<a href="#ref-pearse" role="doc-biblioref">n.d.</a>)</span>.</p>
-<p>I can rewrite <strong>?@eq-phyloreg</strong> in this style:</p>
-<p>$$ <span class="math display">\[\begin{align}
-
+<p>I can rewrite <a href="#eq-phyloreg" class="quarto-xref">Equation&nbsp;1</a> in this style:</p>
+<p><span id="eq-lambda-decomp"><span class="math display">\[
+\begin{align}
+y_i &amp;= \bar{y} + \beta_1 x_i + a_{s[i]} \\
+a_{s} &amp;\sim \text{MVNormal}(0, \Sigma_a)\\
+\Sigma_a &amp;= \sigma_a^2 \lambda_a V_{phy} + \sigma_a^2 (1 - \lambda_a) \mathbf{I} \\
+x_i &amp;= \bar{x} + b_{s[i]} \\
+b_{s} &amp;\sim \text{MVNormal}(0, \Sigma_b)\\
+\Sigma_b &amp;= \sigma_b^2 \lambda_b V_{phy} + \sigma_b^2 (1 - \lambda_b) \mathbf{I} \\
+\end{align}
+\tag{2}\]</span></span></p>
+<p><span id="eq-lambda-decomp"><span class="math display">\[
+\begin{align}
 y_i &amp;\sim \text{Normal}(\bar{y} + \beta_1 x_i + a_{s[i]}, \sigma_y) \\
 a_{s} &amp;\sim \text{MVNormal}(0, \Sigma_a)\\
 \Sigma_a &amp;= \sigma_a^2 \lambda_a V_{phy} + \sigma_a^2 (1 - \lambda_a) \mathbf{I} \\
 x_i &amp;\sim \text{Normal}(\bar{x} + b_{s[i]}, \sigma_x) \\
 b_{s} &amp;\sim \text{MVNormal}(0, \Sigma_b)\\
 \Sigma_b &amp;= \sigma_b^2 \lambda_b V_{phy} + \sigma_b^2 (1 - \lambda_b) \mathbf{I} \\
-\end{align}\]</span></p>
-<p>$$ You can see I’m using two different trait variances and two different <span class="math inline">\(\lambda\)</span>s, because the two traits might have a different amount of variance among species, and within that might have a different amount of phylogenetic signal.</p>
+\end{align}
+\tag{3}\]</span></span></p>
+<p>You can see I’m using two different trait variances (<span class="math inline">\(\sigma_a\)</span> and <span class="math inline">\(\sigma_b\)</span>) and two different amounts of phylogenetic signal (<span class="math inline">\(\lambda_a\)</span> and <span class="math inline">\(\lambda_b\)</span>), one for each trait.</p>
 </section>
 <section id="data-simulation" class="level2">
 <h2 class="anchored" data-anchor-id="data-simulation">Data simulation</h2>
 <p>Here is simulation code from <span class="citation" data-cites="ives">Ives (<a href="#ref-ives" role="doc-biblioref">n.d.</a>)</span> , which generates a dataset where there is a signal for phylogeny and also a relationship between two traits of interest. I’ll use this code to generate a dataset and then estimate the known parameters with a Stan model:</p>
-<div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="do">## simulate data</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1618</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>b0 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="sc">-</span>.<span class="dv">1</span></span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>lam.x <span class="ot">&lt;-</span> .<span class="dv">98</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>lam.e <span class="ot">&lt;-</span> .<span class="dv">8</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>sigma_y <span class="ot">&lt;-</span> .<span class="dv">6</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>sigma_x <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>lambda_x <span class="ot">&lt;-</span> .<span class="dv">98</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>lambda_y <span class="ot">&lt;-</span> .<span class="dv">8</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>sigma_y <span class="ot">&lt;-</span> .<span class="dv">2</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>sigma_x <span class="ot">&lt;-</span> .<span class="dv">2</span></span>
 <span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>phy <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">compute.brlen</span>(</span>
 <span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>  ape<span class="sc">::</span><span class="fu">rtree</span>(<span class="at">n=</span>n),</span>
 <span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"Grafen"</span>,</span>
 <span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">power =</span> <span class="dv">1</span>)</span>
 <span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(phy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(phy)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>phy.x <span class="ot">&lt;-</span> phylolm<span class="sc">::</span><span class="fu">transf.branch.lengths</span>(</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">phy=</span>phy, <span class="at">model=</span><span class="st">"lambda"</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters=</span><span class="fu">list</span>(<span class="at">lambda =</span> lambda_x))<span class="sc">$</span>tree</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>phy.e <span class="ot">&lt;-</span> phylolm<span class="sc">::</span><span class="fu">transf.branch.lengths</span>(</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">phy=</span>phy, <span class="at">model=</span><span class="st">"lambda"</span>,</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters=</span><span class="fu">list</span>(<span class="at">lambda =</span> lambda_y))<span class="sc">$</span>tree</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.x, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_x)</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.e, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_y)</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> x[<span class="fu">match</span>(<span class="fu">names</span>(e), <span class="fu">names</span>(x))]</span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> b0 <span class="sc">+</span> b1 <span class="sc">*</span> x <span class="sc">+</span> e</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">array</span>(Y)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(Y) <span class="ot">&lt;-</span> phy<span class="sc">$</span>tip.label</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell quarto-layout-panel" data-layout-ncol="2">
+<div class="quarto-layout-row">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="index_files/figure-html/unnamed-chunk-1-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>a simulated phylogeny</figcaption>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>phy.x <span class="ot">&lt;-</span> phylolm<span class="sc">::</span><span class="fu">transf.branch.lengths</span>(</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">phy=</span>phy, <span class="at">model=</span><span class="st">"lambda"</span>,</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters=</span><span class="fu">list</span>(<span class="at">lambda =</span> lam.x))<span class="sc">$</span>tree</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>phy.e <span class="ot">&lt;-</span> phylolm<span class="sc">::</span><span class="fu">transf.branch.lengths</span>(</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">phy=</span>phy, <span class="at">model=</span><span class="st">"lambda"</span>,</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters=</span><span class="fu">list</span>(<span class="at">lambda =</span> lam.e))<span class="sc">$</span>tree</span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.x, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_x)</span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.e, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_y)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> x[<span class="fu">match</span>(<span class="fu">names</span>(e), <span class="fu">names</span>(x))]</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> b0 <span class="sc">+</span> b1 <span class="sc">*</span> x <span class="sc">+</span> e</span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="fu">array</span>(Y)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(Y) <span class="ot">&lt;-</span> phy<span class="sc">$</span>tip.label</span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
+<div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><img src="index_files/figure-html/unnamed-chunk-1-2.png" class="img-fluid figure-img" width="672"></p>
+<figcaption>simulated data, with both a phylogenetic signal and a causal relationship between trait X and trait Y.</figcaption>
 </figure>
 </div>
 </div>
 </div>
+</div>
+<p>Here’s a simple Stan program which fits the model in <a href="#eq-lambda-decomp" class="quarto-xref">Equation&nbsp;3</a> to these simulated data.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>phylo <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-09-27-phylo/phylo.stan"</span>))</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>phylo</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>phylo <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-09-27-phylo/phylo.stan"</span>))</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>phylo</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb5"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> n;</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> s;</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x;</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] y;</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] phyvcv;</span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> b0;</span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> b1;</span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> sigma_x;</span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> sigma_y;</span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> logit_lambda_x;</span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> logit_lambda_y;</span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>,<span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_x;</span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  lambda_x = inv_logit(logit_lambda_x);</span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// y</span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>,<span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_y;</span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>  lambda_y = inv_logit(logit_lambda_y);</span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  b0 ~ std_normal();</span>
-<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  b1 ~ normal(.<span class="dv">5</span>, .<span class="dv">5</span>);</span>
-<span id="cb5-26"><a href="#cb5-26" aria-hidden="true" tabindex="-1"></a>  sigma_x ~ exponential(<span class="dv">1</span>);</span>
-<span id="cb5-27"><a href="#cb5-27" aria-hidden="true" tabindex="-1"></a>  sigma_y ~ exponential(<span class="dv">1</span>);</span>
-<span id="cb5-28"><a href="#cb5-28" aria-hidden="true" tabindex="-1"></a>  logit_lambda_x ~ normal(<span class="dv">3</span>, .<span class="dv">2</span>);</span>
-<span id="cb5-29"><a href="#cb5-29" aria-hidden="true" tabindex="-1"></a>  logit_lambda_y ~ normal(<span class="dv">0</span>, .<span class="dv">2</span>);</span>
-<span id="cb5-30"><a href="#cb5-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-31"><a href="#cb5-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_x;</span>
-<span id="cb5-32"><a href="#cb5-32" aria-hidden="true" tabindex="-1"></a>  vcv_x = add_diag(sigma_x^<span class="dv">2</span>*lambda_x*phyvcv, sigma_x^<span class="dv">2</span>*(<span class="dv">1</span> - lambda_x));</span>
-<span id="cb5-33"><a href="#cb5-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-34"><a href="#cb5-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-35"><a href="#cb5-35" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_y;</span>
-<span id="cb5-36"><a href="#cb5-36" aria-hidden="true" tabindex="-1"></a>  vcv_y = add_diag(sigma_y^<span class="dv">2</span>*lambda_y*phyvcv, sigma_y^<span class="dv">2</span>*(<span class="dv">1</span> - lambda_y));</span>
-<span id="cb5-37"><a href="#cb5-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-38"><a href="#cb5-38" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb5-39"><a href="#cb5-39" aria-hidden="true" tabindex="-1"></a>  x ~ multi_normal(rep_vector(<span class="dv">0</span>, n), vcv_x);</span>
-<span id="cb5-40"><a href="#cb5-40" aria-hidden="true" tabindex="-1"></a>  y ~ multi_normal(b0 + b1*x, vcv_y);</span>
-<span id="cb5-41"><a href="#cb5-41" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> n;</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span> s;</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x;</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] y;</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] phyvcv;</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> b0;</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> b1;</span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> sigma_x;</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> sigma_y;</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> logit_lambda_x;</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> logit_lambda_y;</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed parameters</span> {</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>,<span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_x;</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  lambda_x = inv_logit(logit_lambda_x);</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="co">// y</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>,<span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_y;</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>  lambda_y = inv_logit(logit_lambda_y);</span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>  b0 ~ std_normal();</span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>  b1 ~ normal(.<span class="dv">5</span>, .<span class="dv">5</span>);</span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>  sigma_x ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  sigma_y ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>  logit_lambda_x ~ normal(<span class="dv">3</span>, .<span class="dv">2</span>);</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  logit_lambda_y ~ normal(<span class="dv">0</span>, .<span class="dv">2</span>);</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_x;</span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a>  vcv_x = add_diag(sigma_x^<span class="dv">2</span>*lambda_x*phyvcv, sigma_x^<span class="dv">2</span>*(<span class="dv">1</span> - lambda_x));</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_y;</span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>  vcv_y = add_diag(sigma_y^<span class="dv">2</span>*lambda_y*phyvcv, sigma_y^<span class="dv">2</span>*(<span class="dv">1</span> - lambda_y));</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>  x ~ multi_normal(rep_vector(<span class="dv">0</span>, n), vcv_x);</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>  y ~ multi_normal(b0 + b1*x, vcv_y);</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </div>
+<p>Now we’ll sample the model and plot the posterior distribution of some parameters against the truth:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>phylo_sample <span class="ot">&lt;-</span> phylo<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> n,</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">s =</span> n,</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> x,</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> Y,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyvcv =</span> ape<span class="sc">::</span><span class="fu">vcv</span>(phy)</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>phylo_sample <span class="ot">&lt;-</span> phylo<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> n,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">s =</span> n,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> x,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> Y,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyvcv =</span> ape<span class="sc">::</span><span class="fu">vcv</span>(phy)</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Running MCMC with 4 parallel chains...</code></pre>
 </div>
@@ -442,53 +473,87 @@ b_{s} &amp;\sim \text{MVNormal}(0, \Sigma_b)\\
 <pre><code>Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) 
-Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) </code></pre>
+<pre><code>Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
-Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) </code></pre>
+<pre><code>Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) 
-Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) </code></pre>
+<pre><code>Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) </code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
+Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
+Chain 2 finished in 0.3 seconds.
 Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
+Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
 Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
 Chain 1 finished in 0.3 seconds.
-Chain 2 finished in 0.3 seconds.
-Chain 4 finished in 0.3 seconds.
-Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
 Chain 3 finished in 0.3 seconds.
+Chain 4 finished in 0.3 seconds.
 
 All 4 chains finished successfully.
 Mean chain execution time: 0.3 seconds.
 Total execution time: 0.5 seconds.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>phylo_sample</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>       variable  mean median   sd  mad    q5  q95 rhat ess_bulk ess_tail
- lp__            7.03   7.35 1.88 1.71  3.44 9.42 1.00     1691     2050
- b0              0.25   0.25 0.21 0.20 -0.09 0.59 1.00     3999     2561
- b1             -0.07  -0.07 0.15 0.15 -0.30 0.18 1.00     4884     2904
- sigma_x         0.99   0.97 0.16 0.16  0.75 1.27 1.00     4878     2405
- sigma_y         0.47   0.46 0.09 0.08  0.35 0.63 1.00     3711     2546
- logit_lambda_x  2.99   2.99 0.20 0.20  2.66 3.31 1.00     5765     3000
- logit_lambda_y  0.03   0.03 0.20 0.20 -0.31 0.36 1.00     4084     3063
- lambda_x        0.95   0.95 0.01 0.01  0.93 0.96 1.00     5765     3000
- lambda_y        0.51   0.51 0.05 0.05  0.42 0.59 1.00     4084     3063</code></pre>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>make_rvar_df <span class="ot">&lt;-</span> <span class="cf">function</span>(post_draws){</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  post_draws <span class="sc">|&gt;</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    posterior<span class="sc">::</span><span class="fu">as_draws_rvars</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="co"># list any parameter that isn't a scalar</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map_if</span>(\(x) <span class="fu">length</span>(x)<span class="sc">&gt;</span><span class="dv">1</span>, list) <span class="sc">|&gt;</span> </span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>    tibble<span class="sc">::</span><span class="fu">as_tibble</span>()</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>plot_true_post <span class="ot">&lt;-</span> <span class="cf">function</span>(truth_df, post_draws_df){</span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  true_post_df <span class="ot">&lt;-</span> truth_df <span class="sc">|&gt;</span> </span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">left_join</span>(post_draws_df, <span class="at">by =</span> <span class="st">"name"</span>)</span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>  true_post_df <span class="sc">|&gt;</span> </span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> name, <span class="at">dist =</span> posterior))<span class="sc">+</span> </span>
+<span id="cb14-17"><a href="#cb14-17" aria-hidden="true" tabindex="-1"></a>    tidybayes<span class="sc">::</span><span class="fu">stat_dist_slab</span>() <span class="sc">+</span> </span>
+<span id="cb14-18"><a href="#cb14-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> value)) <span class="sc">+</span> </span>
+<span id="cb14-19"><a href="#cb14-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">facet_wrap</span>(<span class="sc">~</span>name, <span class="at">scales=</span><span class="st">"free"</span>)</span>
+<span id="cb14-20"><a href="#cb14-20" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb14-21"><a href="#cb14-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-22"><a href="#cb14-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-23"><a href="#cb14-23" aria-hidden="true" tabindex="-1"></a>truth <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(sigma_x, sigma_y, b0, </span>
+<span id="cb14-24"><a href="#cb14-24" aria-hidden="true" tabindex="-1"></a>           b1, lambda_x, lambda_y) <span class="sc">|&gt;</span> </span>
+<span id="cb14-25"><a href="#cb14-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">everything</span>())</span>
+<span id="cb14-26"><a href="#cb14-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-27"><a href="#cb14-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-28"><a href="#cb14-28" aria-hidden="true" tabindex="-1"></a>posterior_dist_long <span class="ot">&lt;-</span> <span class="fu">make_rvar_df</span>(phylo_sample) <span class="sc">|&gt;</span> </span>
+<span id="cb14-29"><a href="#cb14-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(b0<span class="sc">:</span>lambda_y) <span class="sc">|&gt;</span> </span>
+<span id="cb14-30"><a href="#cb14-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">everything</span>(), <span class="at">values_to =</span> <span class="st">"posterior"</span>)</span>
+<span id="cb14-31"><a href="#cb14-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-32"><a href="#cb14-32" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_true_post</span>(truth, <span class="at">post_draws_df =</span> posterior_dist_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
+</div>
+<p>We can see that, at least for these values, parameter recovery isn’t bad, especially for the coefficients <span class="math inline">\(\beta_0\)</span> and <span class="math inline">\(\beta_1\)</span>. However, at least in this simulation, the parameters describing the phylogenetic signal are all underestimated.</p>
 </section>
 <section id="tips-from-the-forum" class="level2">
 <h2 class="anchored" data-anchor-id="tips-from-the-forum">Tips from the forum</h2>
+<p>I posted about this model in the <a href="https://discourse.mc-stan.org/t/phylogenetic-regression-in-stan-can-this-model-be-improved/36748/2">Stan Discourse</a> forum and I had the good luck to get feedback from Bob Carpenter! Here is the model after including those suggested changes:</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>phylo_forum <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-09-27-phylo/phylo_forum.stan"</span>))</span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -499,7 +564,7 @@ Total execution time: 0.5 seconds.</code></pre>
 <span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; s;</span>
 <span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x;</span>
 <span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] y;</span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] phyvcv;</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">cov_matrix</span>[s] phyvcv;</span>
 <span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed data</span> {</span>
 <span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] zero_vec = rep_vector(<span class="dv">0</span>, n);</span>
@@ -507,8 +572,8 @@ Total execution time: 0.5 seconds.</code></pre>
 <span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
 <span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> b0;</span>
 <span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=<span class="fl">0.5</span>, <span class="dt">multiplier</span>=<span class="fl">0.5</span>&gt; b1;</span>
-<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> sigma_x;</span>
-<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> sigma_y;</span>
+<span id="cb16-14"><a href="#cb16-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_x;</span>
+<span id="cb16-15"><a href="#cb16-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_y;</span>
 <span id="cb16-16"><a href="#cb16-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=<span class="dv">3</span>, <span class="dt">multiplier</span>=<span class="fl">0.2</span>&gt; logit_lambda_x;</span>
 <span id="cb16-17"><a href="#cb16-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">multiplier</span>=<span class="fl">0.2</span>&gt; logit_lambda_y;</span>
 <span id="cb16-18"><a href="#cb16-18" aria-hidden="true" tabindex="-1"></a>}</span>
@@ -517,17 +582,17 @@ Total execution time: 0.5 seconds.</code></pre>
 <span id="cb16-21"><a href="#cb16-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_y = inv_logit(logit_lambda_y);</span>
 <span id="cb16-22"><a href="#cb16-22" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb16-23"><a href="#cb16-23" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_x</span>
-<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>    = sigma_x^<span class="dv">2</span> * add_diag(lambda_x * phyvcv, <span class="dv">1</span> - lambda_x);</span>
-<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_y</span>
-<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>    = sigma_y^<span class="dv">2</span> * add_diag(lambda_y * phyvcv, <span class="dv">1</span> - lambda_y);</span>
-<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>  b0 ~ std_normal();</span>
-<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a>  b1 ~ std_normal();</span>
-<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>  sigma_x ~ exponential(<span class="dv">1</span>);</span>
-<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>  sigma_y ~ exponential(<span class="dv">1</span>);</span>
-<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>  logit_lambda_x ~ std_normal();</span>
-<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>  logit_lambda_y ~ std_normal();</span>
+<span id="cb16-24"><a href="#cb16-24" aria-hidden="true" tabindex="-1"></a>  b0 ~ std_normal();</span>
+<span id="cb16-25"><a href="#cb16-25" aria-hidden="true" tabindex="-1"></a>  b1 ~ normal(<span class="fl">0.5</span>, <span class="fl">0.5</span>);</span>
+<span id="cb16-26"><a href="#cb16-26" aria-hidden="true" tabindex="-1"></a>  sigma_x ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb16-27"><a href="#cb16-27" aria-hidden="true" tabindex="-1"></a>  sigma_y ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb16-28"><a href="#cb16-28" aria-hidden="true" tabindex="-1"></a>  logit_lambda_x ~ normal(<span class="dv">3</span>, .<span class="dv">2</span>);</span>
+<span id="cb16-29"><a href="#cb16-29" aria-hidden="true" tabindex="-1"></a>  logit_lambda_y ~ normal(<span class="dv">0</span>, .<span class="dv">2</span>);</span>
+<span id="cb16-30"><a href="#cb16-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-31"><a href="#cb16-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_x</span>
+<span id="cb16-32"><a href="#cb16-32" aria-hidden="true" tabindex="-1"></a>    = sigma_x^<span class="dv">2</span> * add_diag(lambda_x * phyvcv, <span class="dv">1</span> - lambda_x);</span>
+<span id="cb16-33"><a href="#cb16-33" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_y</span>
+<span id="cb16-34"><a href="#cb16-34" aria-hidden="true" tabindex="-1"></a>    = sigma_y^<span class="dv">2</span> * add_diag(lambda_y * phyvcv, <span class="dv">1</span> - lambda_y);</span>
 <span id="cb16-35"><a href="#cb16-35" aria-hidden="true" tabindex="-1"></a>  x ~ multi_normal(zero_vec, vcv_x);</span>
 <span id="cb16-36"><a href="#cb16-36" aria-hidden="true" tabindex="-1"></a>  y ~ multi_normal(b0 + b1 * x, vcv_y);</span>
 <span id="cb16-37"><a href="#cb16-37" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -540,1076 +605,470 @@ Total execution time: 0.5 seconds.</code></pre>
 <span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> x,</span>
 <span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> Y,</span>
 <span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyvcv =</span> ape<span class="sc">::</span><span class="fu">vcv</span>(phy)</span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Running MCMC with 4 parallel chains...
-
-Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -0.51895, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -0.700908, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -0.770928, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Rejecting initial value:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2   Error evaluating the log probability at the initial value.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -0.164996, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)
-Chain 2 Exception: exponential_lpdf: Random variable is -0.164996, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
+<pre><code>Running MCMC with 4 parallel chains...</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -239.939, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -30.0871, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -0.0239313, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Rejecting initial value:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3   Error evaluating the log probability at the initial value.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -0.582241, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)
-Chain 3 Exception: exponential_lpdf: Random variable is -0.582241, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -6.77531, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -7.75933, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -0.949866, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -1.94406, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -1.11172, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Rejecting initial value:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4   Error evaluating the log probability at the initial value.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -1.23407, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)
-Chain 4 Exception: exponential_lpdf: Random variable is -1.23407, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Rejecting initial value:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4   Error evaluating the log probability at the initial value.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -0.812231, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)
-Chain 4 Exception: exponential_lpdf: Random variable is -0.812231, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Rejecting initial value:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4   Error evaluating the log probability at the initial value.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -1.2108, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)
-Chain 4 Exception: exponential_lpdf: Random variable is -1.2108, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -2.11394, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -2.99518, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -381.664, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -9.75761, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -0.234259, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -0.0104136, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -4.03245, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -1.28496, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -0.548797, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Exception: exponential_lpdf: Random variable is -0.694561, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -0.757703, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -4.31528, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -4.30625, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -0.550271, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -0.209166, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: exponential_lpdf: Random variable is -1.53058, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: exponential_lpdf: Random variable is -1.18267, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 31, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: exponential_lpdf: Random variable is -0.420203, but must be nonnegative! (in '/tmp/Rtmpkr95XI/model-431f5eaab01d.stan', line 32, column 2 to column 27)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
-Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
-Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 3 finished in 0.5 seconds.
-Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 1 finished in 0.6 seconds.
-Chain 2 finished in 0.6 seconds.
-Chain 4 finished in 0.6 seconds.
-
-All 4 chains finished successfully.
-Mean chain execution time: 0.6 seconds.
-Total execution time: 0.7 seconds.</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb185"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb185-1"><a href="#cb185-1" aria-hidden="true" tabindex="-1"></a>phylo_forum_sample</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>       variable  mean median   sd  mad    q5  q95 rhat ess_bulk ess_tail
- lp__            2.49   2.83 1.91 1.77 -1.12 4.92 1.01     1237     2536
- b0              0.26   0.26 0.22 0.20 -0.11 0.61 1.00     4362     2621
- b1             -0.13  -0.13 0.15 0.15 -0.39 0.11 1.00     4000     2755
- sigma_x         0.81   0.79 0.14 0.13  0.60 1.06 1.00     4085     2605
- sigma_y         0.50   0.48 0.11 0.10  0.36 0.70 1.00     2789     2314
- logit_lambda_x  1.30   1.30 0.69 0.69  0.18 2.41 1.00     4212     2810
- logit_lambda_y  0.27   0.29 0.79 0.77 -1.06 1.56 1.00     2771     2301
- lambda_x        0.77   0.79 0.12 0.11  0.54 0.92 1.00     4212     2810
- lambda_y        0.56   0.57 0.17 0.18  0.26 0.83 1.00     2771     2301</code></pre>
-</div>
-</div>
-<p>and an even simpler strategy, replacing the lambda parameter on the logit scale with a beta:</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb187"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb187-1"><a href="#cb187-1" aria-hidden="true" tabindex="-1"></a>phylo_beta <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-09-27-phylo/phylo_beta.stan"</span>))</span>
-<span id="cb187-2"><a href="#cb187-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb187-3"><a href="#cb187-3" aria-hidden="true" tabindex="-1"></a>phylo_beta</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb188"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb188-1"><a href="#cb188-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb188-2"><a href="#cb188-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;</span>
-<span id="cb188-3"><a href="#cb188-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; s;</span>
-<span id="cb188-4"><a href="#cb188-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x;</span>
-<span id="cb188-5"><a href="#cb188-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] y;</span>
-<span id="cb188-6"><a href="#cb188-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] phyvcv;</span>
-<span id="cb188-7"><a href="#cb188-7" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb188-8"><a href="#cb188-8" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed data</span> {</span>
-<span id="cb188-9"><a href="#cb188-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] zero_vec = rep_vector(<span class="dv">0</span>, n);</span>
-<span id="cb188-10"><a href="#cb188-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb188-11"><a href="#cb188-11" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb188-12"><a href="#cb188-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> b0;</span>
-<span id="cb188-13"><a href="#cb188-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=<span class="fl">0.5</span>, <span class="dt">multiplier</span>=<span class="fl">0.5</span>&gt; b1;</span>
-<span id="cb188-14"><a href="#cb188-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_x;</span>
-<span id="cb188-15"><a href="#cb188-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_y;</span>
-<span id="cb188-16"><a href="#cb188-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_x;</span>
-<span id="cb188-17"><a href="#cb188-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_y;</span>
-<span id="cb188-18"><a href="#cb188-18" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb188-19"><a href="#cb188-19" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb188-20"><a href="#cb188-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_x</span>
-<span id="cb188-21"><a href="#cb188-21" aria-hidden="true" tabindex="-1"></a>    = sigma_x^<span class="dv">2</span> * add_diag(lambda_x * phyvcv, <span class="dv">1</span> - lambda_x);</span>
-<span id="cb188-22"><a href="#cb188-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_y</span>
-<span id="cb188-23"><a href="#cb188-23" aria-hidden="true" tabindex="-1"></a>    = sigma_y^<span class="dv">2</span> * add_diag(lambda_y * phyvcv, <span class="dv">1</span> - lambda_y);</span>
-<span id="cb188-24"><a href="#cb188-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb188-25"><a href="#cb188-25" aria-hidden="true" tabindex="-1"></a>  b0 ~ std_normal();</span>
-<span id="cb188-26"><a href="#cb188-26" aria-hidden="true" tabindex="-1"></a>  b1 ~ std_normal();</span>
-<span id="cb188-27"><a href="#cb188-27" aria-hidden="true" tabindex="-1"></a>  sigma_x ~ exponential(<span class="dv">1</span>);</span>
-<span id="cb188-28"><a href="#cb188-28" aria-hidden="true" tabindex="-1"></a>  sigma_y ~ exponential(<span class="dv">1</span>);</span>
-<span id="cb188-29"><a href="#cb188-29" aria-hidden="true" tabindex="-1"></a>  lambda_x ~ beta(<span class="dv">9</span>, <span class="dv">1</span>);</span>
-<span id="cb188-30"><a href="#cb188-30" aria-hidden="true" tabindex="-1"></a>  lambda_y ~ beta(<span class="dv">5</span>, <span class="dv">5</span>);</span>
-<span id="cb188-31"><a href="#cb188-31" aria-hidden="true" tabindex="-1"></a>  x ~ multi_normal(zero_vec, vcv_x);</span>
-<span id="cb188-32"><a href="#cb188-32" aria-hidden="true" tabindex="-1"></a>  y ~ multi_normal(b0 + b1 * x, vcv_y);</span>
-<span id="cb188-33"><a href="#cb188-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb189"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb189-1"><a href="#cb189-1" aria-hidden="true" tabindex="-1"></a>phylo_beta_sample <span class="ot">&lt;-</span> phylo_beta<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(</span>
-<span id="cb189-2"><a href="#cb189-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> n,</span>
-<span id="cb189-3"><a href="#cb189-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">s =</span> n,</span>
-<span id="cb189-4"><a href="#cb189-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> x,</span>
-<span id="cb189-5"><a href="#cb189-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> Y,</span>
-<span id="cb189-6"><a href="#cb189-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyvcv =</span> ape<span class="sc">::</span><span class="fu">vcv</span>(phy)</span>
-<span id="cb189-7"><a href="#cb189-7" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Running MCMC with 4 parallel chains...
-
-Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 32, column 2 to column 39)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 32, column 2 to column 39)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: multi_normal_lpdf: LDLT_Factor of covariance parameter is not positive definite.  last conditional variance is 0. (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 31, column 2 to column 36)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 32, column 2 to column 39)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 31, column 2 to column 36)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 31, column 2 to column 36)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 3 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/RtmpxIHnAa/model-170e11e0a599.stan', line 32, column 2 to column 39)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
-Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
-Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
-Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
-Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 1 finished in 0.4 seconds.
+<pre><code>Chain 1 finished in 0.4 seconds.
 Chain 2 finished in 0.4 seconds.
 Chain 3 finished in 0.4 seconds.
-Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 4 finished in 0.5 seconds.
+Chain 4 finished in 0.4 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 0.4 seconds.
+Total execution time: 0.5 seconds.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>truth <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(sigma_x, sigma_y, b0, </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>           b1, lambda_x, lambda_y) <span class="sc">|&gt;</span> </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">everything</span>())</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>phylo_forum_sample_long <span class="ot">&lt;-</span> <span class="fu">make_rvar_df</span>(phylo_forum_sample) <span class="sc">|&gt;</span> </span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(b0<span class="sc">:</span>lambda_y) <span class="sc">|&gt;</span> </span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">everything</span>(), <span class="at">values_to =</span> <span class="st">"posterior"</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_true_post</span>(truth, <span class="at">post_draws_df =</span> phylo_forum_sample_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We get get pretty similar results to the above!</p>
+<p>and an even simpler strategy, replacing the lambda parameter on the logit scale with a beta:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>phylo_beta <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-09-27-phylo/phylo_beta.stan"</span>))</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>phylo_beta</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<div class="sourceCode" id="cb22"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n;</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; s;</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] x;</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] y;</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">cov_matrix</span>[s] phyvcv;</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed data</span> {</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n] zero_vec = rep_vector(<span class="dv">0</span>, n);</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span> b0;</span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=<span class="fl">0.5</span>, <span class="dt">multiplier</span>=<span class="fl">0.5</span>&gt; b1;</span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_x;</span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_y;</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>,<span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_x;</span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>,<span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_y;</span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>  b0 ~ std_normal();</span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>  b1 ~ normal(<span class="fl">0.5</span>, <span class="fl">0.5</span>);</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>  sigma_x ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb22-23"><a href="#cb22-23" aria-hidden="true" tabindex="-1"></a>  sigma_y ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb22-24"><a href="#cb22-24" aria-hidden="true" tabindex="-1"></a>  lambda_x ~ beta(<span class="dv">9</span>, <span class="dv">1</span>);</span>
+<span id="cb22-25"><a href="#cb22-25" aria-hidden="true" tabindex="-1"></a>  lambda_y ~ beta(<span class="dv">5</span>, <span class="dv">5</span>);</span>
+<span id="cb22-26"><a href="#cb22-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-27"><a href="#cb22-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_x</span>
+<span id="cb22-28"><a href="#cb22-28" aria-hidden="true" tabindex="-1"></a>    = sigma_x^<span class="dv">2</span> * add_diag(lambda_x * phyvcv, <span class="dv">1</span> - lambda_x);</span>
+<span id="cb22-29"><a href="#cb22-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_y</span>
+<span id="cb22-30"><a href="#cb22-30" aria-hidden="true" tabindex="-1"></a>    = sigma_y^<span class="dv">2</span> * add_diag(lambda_y * phyvcv, <span class="dv">1</span> - lambda_y);</span>
+<span id="cb22-31"><a href="#cb22-31" aria-hidden="true" tabindex="-1"></a>  x ~ multi_normal(zero_vec, vcv_x);</span>
+<span id="cb22-32"><a href="#cb22-32" aria-hidden="true" tabindex="-1"></a>  y ~ multi_normal(b0 + b1 * x, vcv_y);</span>
+<span id="cb22-33"><a href="#cb22-33" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>phylo_beta_sample <span class="ot">&lt;-</span> phylo_beta<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">n =</span> n,</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">s =</span> n,</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">x =</span> x,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">y =</span> Y,</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyvcv =</span> ape<span class="sc">::</span><span class="fu">vcv</span>(phy)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 1 finished in 0.4 seconds.
+Chain 3 finished in 0.4 seconds.
+Chain 2 finished in 0.5 seconds.
+Chain 4 finished in 0.4 seconds.
 
 All 4 chains finished successfully.
 Mean chain execution time: 0.4 seconds.
 Total execution time: 0.6 seconds.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb230"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb230-1"><a href="#cb230-1" aria-hidden="true" tabindex="-1"></a>phylo_beta_sample</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>phylo_beta_sample</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> variable  mean median   sd  mad    q5   q95 rhat ess_bulk ess_tail
- lp__     -3.91  -3.58 1.84 1.71 -7.43 -1.58 1.00     1606     2401
- b0        0.26   0.26 0.21 0.19 -0.09  0.60 1.00     4301     2944
- b1       -0.12  -0.12 0.15 0.14 -0.37  0.12 1.00     4157     2916
- sigma_x   0.95   0.92 0.19 0.18  0.69  1.29 1.00     3548     3016
- sigma_y   0.49   0.47 0.10 0.09  0.36  0.67 1.00     3653     2876
- lambda_x  0.92   0.93 0.06 0.06  0.80  0.99 1.00     2672     1411
- lambda_y  0.54   0.54 0.13 0.14  0.31  0.75 1.00     4050     2728</code></pre>
+ lp__     48.08  48.42 1.84 1.68 44.56 50.43 1.00     1586     2164
+ b0        0.08   0.09 0.07 0.07 -0.04  0.20 1.00     4003     2241
+ b1        0.07   0.06 0.23 0.22 -0.30  0.45 1.00     4309     3115
+ sigma_x   0.19   0.19 0.04 0.04  0.14  0.27 1.00     3146     2817
+ sigma_y   0.16   0.16 0.03 0.03  0.12  0.22 1.00     3296     3381
+ lambda_x  0.92   0.93 0.06 0.06  0.80  0.99 1.00     3008     1832
+ lambda_y  0.54   0.55 0.13 0.14  0.32  0.75 1.00     3309     2876</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>phylo_beta_sample_long <span class="ot">&lt;-</span> <span class="fu">make_rvar_df</span>(phylo_beta_sample) <span class="sc">|&gt;</span> </span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(b0<span class="sc">:</span>lambda_y) <span class="sc">|&gt;</span> </span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">everything</span>(), <span class="at">values_to =</span> <span class="st">"posterior"</span>)</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_true_post</span>(truth, <span class="at">post_draws_df =</span> phylo_beta_sample_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-9-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 </section>
 <section id="repeated-sampling-of-these-traits" class="level2">
 <h2 class="anchored" data-anchor-id="repeated-sampling-of-these-traits">Repeated sampling of these traits</h2>
-<p>The simulation above is giving species <em>means</em>. However in our study we have more than one measurement per species. Measurements of “Trait X” and “Trait Y” are measured on different individuals.</p>
+<p>The simulation above is giving species <em>means</em>. However in our study we have more than one measurement per species. Measurements of “Trait X” and “Trait Y” are measured on different individuals. In fact, are coming from two completely different datasets! Of course, in the real-world application there will be all kinds of quirky differences between the two datasets: different amounts of effort per species and different species measured in each dataset.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb232"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb232-1"><a href="#cb232-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
-<span id="cb232-2"><a href="#cb232-2" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(ape)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Loading required package: ape</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>
-Attaching package: 'ape'</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>The following object is masked from 'package:dplyr':
-
-    where</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb236"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb236-1"><a href="#cb236-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1618</span>)</span>
-<span id="cb236-2"><a href="#cb236-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb236-3"><a href="#cb236-3" aria-hidden="true" tabindex="-1"></a><span class="co"># set true parameter values</span></span>
-<span id="cb236-4"><a href="#cb236-4" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
-<span id="cb236-5"><a href="#cb236-5" aria-hidden="true" tabindex="-1"></a>b0_y <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
-<span id="cb236-6"><a href="#cb236-6" aria-hidden="true" tabindex="-1"></a>b1 <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
-<span id="cb236-7"><a href="#cb236-7" aria-hidden="true" tabindex="-1"></a>lam.x <span class="ot">&lt;-</span> .<span class="dv">98</span></span>
-<span id="cb236-8"><a href="#cb236-8" aria-hidden="true" tabindex="-1"></a>lam.e <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
-<span id="cb236-9"><a href="#cb236-9" aria-hidden="true" tabindex="-1"></a>sigma_x <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb236-10"><a href="#cb236-10" aria-hidden="true" tabindex="-1"></a>sigma_y <span class="ot">&lt;-</span> .<span class="dv">3</span></span>
-<span id="cb236-11"><a href="#cb236-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb236-12"><a href="#cb236-12" aria-hidden="true" tabindex="-1"></a><span class="co"># simulate phylogeny</span></span>
-<span id="cb236-13"><a href="#cb236-13" aria-hidden="true" tabindex="-1"></a>phy <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">compute.brlen</span>(</span>
-<span id="cb236-14"><a href="#cb236-14" aria-hidden="true" tabindex="-1"></a>  ape<span class="sc">::</span><span class="fu">rtree</span>(<span class="at">n=</span>n),</span>
-<span id="cb236-15"><a href="#cb236-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"Grafen"</span>,</span>
-<span id="cb236-16"><a href="#cb236-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">power =</span> <span class="dv">1</span>)</span>
-<span id="cb236-17"><a href="#cb236-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb236-18"><a href="#cb236-18" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(phy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressPackageStartupMessages</span>(<span class="fu">library</span>(ape))</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1618</span>)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a><span class="co"># set true parameter values</span></span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">20</span></span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>b0_x <span class="ot">&lt;-</span> <span class="dv">4</span></span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>b0_y <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>b_xy <span class="ot">&lt;-</span> <span class="sc">-</span>.<span class="dv">1</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>lam.x <span class="ot">&lt;-</span> .<span class="dv">98</span></span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a>lam.e <span class="ot">&lt;-</span> .<span class="dv">5</span></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a>sigma_x <span class="ot">&lt;-</span> .<span class="dv">4</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>sigma_y <span class="ot">&lt;-</span> .<span class="dv">3</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-18"><a href="#cb29-18" aria-hidden="true" tabindex="-1"></a><span class="co"># simulate phylogeny</span></span>
+<span id="cb29-19"><a href="#cb29-19" aria-hidden="true" tabindex="-1"></a>phy <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">compute.brlen</span>(</span>
+<span id="cb29-20"><a href="#cb29-20" aria-hidden="true" tabindex="-1"></a>  ape<span class="sc">::</span><span class="fu">rtree</span>(<span class="at">n=</span>n),</span>
+<span id="cb29-21"><a href="#cb29-21" aria-hidden="true" tabindex="-1"></a>  <span class="at">method =</span> <span class="st">"Grafen"</span>,</span>
+<span id="cb29-22"><a href="#cb29-22" aria-hidden="true" tabindex="-1"></a>  <span class="at">power =</span> <span class="fl">1.5</span>)</span>
+<span id="cb29-23"><a href="#cb29-23" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-24"><a href="#cb29-24" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(phy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-10-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb237"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb237-1"><a href="#cb237-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get names from this matrix! needs to line up perfectly</span></span>
-<span id="cb237-2"><a href="#cb237-2" aria-hidden="true" tabindex="-1"></a>phyvcv <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">vcv</span>(phy)</span>
-<span id="cb237-3"><a href="#cb237-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-4"><a href="#cb237-4" aria-hidden="true" tabindex="-1"></a>distmat_names <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(phyvcv)[[<span class="dv">1</span>]]</span>
-<span id="cb237-5"><a href="#cb237-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-6"><a href="#cb237-6" aria-hidden="true" tabindex="-1"></a><span class="co"># observations per species</span></span>
-<span id="cb237-7"><a href="#cb237-7" aria-hidden="true" tabindex="-1"></a>n_obs <span class="ot">&lt;-</span> <span class="dv">15</span></span>
-<span id="cb237-8"><a href="#cb237-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-9"><a href="#cb237-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-10"><a href="#cb237-10" aria-hidden="true" tabindex="-1"></a>phy.x <span class="ot">&lt;-</span> phylolm<span class="sc">::</span><span class="fu">transf.branch.lengths</span>(</span>
-<span id="cb237-11"><a href="#cb237-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">phy=</span>phy, <span class="at">model=</span><span class="st">"lambda"</span>,</span>
-<span id="cb237-12"><a href="#cb237-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters=</span><span class="fu">list</span>(<span class="at">lambda =</span> lam.x))<span class="sc">$</span>tree</span>
-<span id="cb237-13"><a href="#cb237-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-14"><a href="#cb237-14" aria-hidden="true" tabindex="-1"></a>phy.e <span class="ot">&lt;-</span> phylolm<span class="sc">::</span><span class="fu">transf.branch.lengths</span>(</span>
-<span id="cb237-15"><a href="#cb237-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">phy=</span>phy, <span class="at">model=</span><span class="st">"lambda"</span>,</span>
-<span id="cb237-16"><a href="#cb237-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters=</span><span class="fu">list</span>(<span class="at">lambda =</span> lam.e))<span class="sc">$</span>tree</span>
-<span id="cb237-17"><a href="#cb237-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-18"><a href="#cb237-18" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.x, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_x)</span>
-<span id="cb237-19"><a href="#cb237-19" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.e, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_y)</span>
-<span id="cb237-20"><a href="#cb237-20" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> x[<span class="fu">match</span>(<span class="fu">names</span>(e), <span class="fu">names</span>(x))]</span>
-<span id="cb237-21"><a href="#cb237-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-22"><a href="#cb237-22" aria-hidden="true" tabindex="-1"></a><span class="do">## calculate Y</span></span>
-<span id="cb237-23"><a href="#cb237-23" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> b0_y <span class="sc">+</span> b1 <span class="sc">*</span> x <span class="sc">+</span> e</span>
-<span id="cb237-24"><a href="#cb237-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-25"><a href="#cb237-25" aria-hidden="true" tabindex="-1"></a><span class="co"># Y &lt;- array(Y)</span></span>
-<span id="cb237-26"><a href="#cb237-26" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(Y) <span class="ot">&lt;-</span> phy<span class="sc">$</span>tip.label</span>
-<span id="cb237-27"><a href="#cb237-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb237-28"><a href="#cb237-28" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(x, Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># get names from this matrix! needs to line up perfectly</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>phyvcv <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">vcv</span>(phy)</span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>distmat_names <span class="ot">&lt;-</span> <span class="fu">dimnames</span>(phyvcv)[[<span class="dv">1</span>]]</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># observations per species</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>n_obs <span class="ot">&lt;-</span> <span class="dv">15</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a>phy.x <span class="ot">&lt;-</span> phylolm<span class="sc">::</span><span class="fu">transf.branch.lengths</span>(</span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">phy=</span>phy, <span class="at">model=</span><span class="st">"lambda"</span>,</span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters=</span><span class="fu">list</span>(<span class="at">lambda =</span> lam.x))<span class="sc">$</span>tree</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-14"><a href="#cb30-14" aria-hidden="true" tabindex="-1"></a>phy.e <span class="ot">&lt;-</span> phylolm<span class="sc">::</span><span class="fu">transf.branch.lengths</span>(</span>
+<span id="cb30-15"><a href="#cb30-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">phy=</span>phy, <span class="at">model=</span><span class="st">"lambda"</span>,</span>
+<span id="cb30-16"><a href="#cb30-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">parameters=</span><span class="fu">list</span>(<span class="at">lambda =</span> lam.e))<span class="sc">$</span>tree</span>
+<span id="cb30-17"><a href="#cb30-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-18"><a href="#cb30-18" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.x, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_x)</span>
+<span id="cb30-19"><a href="#cb30-19" aria-hidden="true" tabindex="-1"></a>e <span class="ot">&lt;-</span> ape<span class="sc">::</span><span class="fu">rTraitCont</span>(phy.e, <span class="at">model =</span> <span class="st">"BM"</span>, <span class="at">sigma =</span> sigma_y)</span>
+<span id="cb30-20"><a href="#cb30-20" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> x[<span class="fu">match</span>(<span class="fu">names</span>(e), <span class="fu">names</span>(x))]</span>
+<span id="cb30-21"><a href="#cb30-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-22"><a href="#cb30-22" aria-hidden="true" tabindex="-1"></a><span class="do">## calculate Y</span></span>
+<span id="cb30-23"><a href="#cb30-23" aria-hidden="true" tabindex="-1"></a>Y <span class="ot">&lt;-</span> b0_y <span class="sc">+</span> b_xy <span class="sc">*</span> x <span class="sc">+</span> e</span>
+<span id="cb30-24"><a href="#cb30-24" aria-hidden="true" tabindex="-1"></a><span class="do">## calculate X</span></span>
+<span id="cb30-25"><a href="#cb30-25" aria-hidden="true" tabindex="-1"></a>X <span class="ot">&lt;-</span> b0_x <span class="sc">+</span> x</span>
+<span id="cb30-26"><a href="#cb30-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-27"><a href="#cb30-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Y &lt;- array(Y)</span></span>
+<span id="cb30-28"><a href="#cb30-28" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(Y) <span class="ot">&lt;-</span> phy<span class="sc">$</span>tip.label</span>
+<span id="cb30-29"><a href="#cb30-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-30"><a href="#cb30-30" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(X, Y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="index_files/figure-html/unnamed-chunk-8-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="index_files/figure-html/unnamed-chunk-10-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
-<div class="sourceCode cell-code" id="cb238"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb238-1"><a href="#cb238-1" aria-hidden="true" tabindex="-1"></a>obs_xy_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(x, Y, <span class="at">sp_name =</span> <span class="fu">names</span>(x)) <span class="sc">|&gt;</span> </span>
-<span id="cb238-2"><a href="#cb238-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb238-3"><a href="#cb238-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">sp_id =</span> <span class="fu">as.numeric</span>(</span>
-<span id="cb238-4"><a href="#cb238-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">factor</span>(sp_name, </span>
-<span id="cb238-5"><a href="#cb238-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">levels =</span> distmat_names))) <span class="sc">|&gt;</span> </span>
-<span id="cb238-6"><a href="#cb238-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb238-7"><a href="#cb238-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obs_x =</span> <span class="fu">list</span>(</span>
-<span id="cb238-8"><a href="#cb238-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rnorm</span>(n_obs, <span class="at">mean =</span> x, <span class="at">sd =</span> .<span class="dv">3</span>)),</span>
-<span id="cb238-9"><a href="#cb238-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">obs_y =</span> <span class="fu">list</span>(<span class="fu">rnorm</span>(n_obs, <span class="at">mean =</span> Y, <span class="at">sd =</span> .<span class="dv">3</span>)))</span>
-<span id="cb238-10"><a href="#cb238-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb238-11"><a href="#cb238-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb238-12"><a href="#cb238-12" aria-hidden="true" tabindex="-1"></a>x_obs_df <span class="ot">&lt;-</span> obs_xy_df <span class="sc">|&gt;</span> </span>
-<span id="cb238-13"><a href="#cb238-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(sp_id, obs_x) <span class="sc">|&gt;</span> <span class="fu">unnest</span>(obs_x)</span>
-<span id="cb238-14"><a href="#cb238-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb238-15"><a href="#cb238-15" aria-hidden="true" tabindex="-1"></a>y_obs_df <span class="ot">&lt;-</span> obs_xy_df <span class="sc">|&gt;</span> </span>
-<span id="cb238-16"><a href="#cb238-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(sp_id, obs_y) <span class="sc">|&gt;</span> <span class="fu">unnest</span>(obs_y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>obs_xy_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(X, Y, <span class="at">sp_name =</span> <span class="fu">names</span>(x)) <span class="sc">|&gt;</span> </span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">sp_id =</span> <span class="fu">as.numeric</span>(</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">factor</span>(sp_name, </span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>             <span class="at">levels =</span> distmat_names))) <span class="sc">|&gt;</span> </span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obs_x =</span> <span class="fu">list</span>(</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rnorm</span>(n_obs, <span class="at">mean =</span> X, <span class="at">sd =</span> .<span class="dv">3</span>)),</span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">obs_y =</span> <span class="fu">list</span>(<span class="fu">rnorm</span>(n_obs, <span class="at">mean =</span> Y, <span class="at">sd =</span> .<span class="dv">3</span>)))</span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>x_obs_df <span class="ot">&lt;-</span> obs_xy_df <span class="sc">|&gt;</span> </span>
+<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(sp_id, obs_x) <span class="sc">|&gt;</span> <span class="fu">unnest</span>(obs_x)</span>
+<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a>y_obs_df <span class="ot">&lt;-</span> obs_xy_df <span class="sc">|&gt;</span> </span>
+<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(sp_id, obs_y) <span class="sc">|&gt;</span> <span class="fu">unnest</span>(obs_y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>fit a model that is ready for replication per species:</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb239"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb239-1"><a href="#cb239-1" aria-hidden="true" tabindex="-1"></a>phylo_obs <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-09-27-phylo/phylo_obs.stan"</span>))</span>
-<span id="cb239-2"><a href="#cb239-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb239-3"><a href="#cb239-3" aria-hidden="true" tabindex="-1"></a>phylo_obs</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>phylo_obs_cen <span class="ot">&lt;-</span> cmdstanr<span class="sc">::</span><span class="fu">cmdstan_model</span>(here<span class="sc">::</span><span class="fu">here</span>(<span class="st">"posts/2024-09-27-phylo/phylo_obs_cen.stan"</span>))</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>phylo_obs_cen</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<div class="sourceCode" id="cb240"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb240-1"><a href="#cb240-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
-<span id="cb240-2"><a href="#cb240-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; s;</span>
-<span id="cb240-3"><a href="#cb240-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// x trait</span></span>
-<span id="cb240-4"><a href="#cb240-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n_x;</span>
-<span id="cb240-5"><a href="#cb240-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n_x] x_obs;</span>
-<span id="cb240-6"><a href="#cb240-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_x] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>,<span class="kw">upper</span>=s&gt; sp_id_x;</span>
-<span id="cb240-7"><a href="#cb240-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// y trait</span></span>
-<span id="cb240-8"><a href="#cb240-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n_y;</span>
-<span id="cb240-9"><a href="#cb240-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n_y] y_obs;</span>
-<span id="cb240-10"><a href="#cb240-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_y] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>,<span class="kw">upper</span>=s&gt; sp_id_y;</span>
-<span id="cb240-11"><a href="#cb240-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">cov_matrix</span>[s] phyvcv;</span>
-<span id="cb240-12"><a href="#cb240-12" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb240-13"><a href="#cb240-13" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed data</span> {</span>
-<span id="cb240-14"><a href="#cb240-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[s] zero_vec = rep_vector(<span class="dv">0</span>, s);</span>
-<span id="cb240-15"><a href="#cb240-15" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb240-16"><a href="#cb240-16" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
-<span id="cb240-17"><a href="#cb240-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=.<span class="dv">5</span>,<span class="dt">multiplier</span>=.<span class="dv">8</span>&gt; b0_y;</span>
-<span id="cb240-18"><a href="#cb240-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=<span class="fl">0.5</span>, <span class="dt">multiplier</span>=<span class="fl">0.5</span>&gt; b1;</span>
-<span id="cb240-19"><a href="#cb240-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_x;</span>
-<span id="cb240-20"><a href="#cb240-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_y;</span>
-<span id="cb240-21"><a href="#cb240-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_x;</span>
-<span id="cb240-22"><a href="#cb240-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_y;</span>
-<span id="cb240-23"><a href="#cb240-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[s] x_avg;</span>
-<span id="cb240-24"><a href="#cb240-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[s] y_avg;</span>
-<span id="cb240-25"><a href="#cb240-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_x_obs;</span>
-<span id="cb240-26"><a href="#cb240-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_y_obs;</span>
-<span id="cb240-27"><a href="#cb240-27" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb240-28"><a href="#cb240-28" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
-<span id="cb240-29"><a href="#cb240-29" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_x</span>
-<span id="cb240-30"><a href="#cb240-30" aria-hidden="true" tabindex="-1"></a>    = sigma_x^<span class="dv">2</span> * add_diag(lambda_x * phyvcv, <span class="dv">1</span> - lambda_x);</span>
-<span id="cb240-31"><a href="#cb240-31" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_y</span>
-<span id="cb240-32"><a href="#cb240-32" aria-hidden="true" tabindex="-1"></a>    = sigma_y^<span class="dv">2</span> * add_diag(lambda_y * phyvcv, <span class="dv">1</span> - lambda_y);</span>
-<span id="cb240-33"><a href="#cb240-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb240-34"><a href="#cb240-34" aria-hidden="true" tabindex="-1"></a>  b0_y ~ std_normal();</span>
-<span id="cb240-35"><a href="#cb240-35" aria-hidden="true" tabindex="-1"></a>  b1 ~ std_normal();</span>
-<span id="cb240-36"><a href="#cb240-36" aria-hidden="true" tabindex="-1"></a>  sigma_x ~ exponential(<span class="dv">1</span>);</span>
-<span id="cb240-37"><a href="#cb240-37" aria-hidden="true" tabindex="-1"></a>  sigma_y ~ exponential(<span class="dv">1</span>);</span>
-<span id="cb240-38"><a href="#cb240-38" aria-hidden="true" tabindex="-1"></a>  lambda_x ~ beta(<span class="dv">9</span>, <span class="dv">1</span>);</span>
-<span id="cb240-39"><a href="#cb240-39" aria-hidden="true" tabindex="-1"></a>  lambda_y ~ beta(<span class="dv">5</span>, <span class="dv">5</span>);</span>
-<span id="cb240-40"><a href="#cb240-40" aria-hidden="true" tabindex="-1"></a>  sigma_x_obs ~ exponential(<span class="dv">1</span>);</span>
-<span id="cb240-41"><a href="#cb240-41" aria-hidden="true" tabindex="-1"></a>  sigma_y_obs ~ exponential(<span class="dv">1</span>);</span>
-<span id="cb240-42"><a href="#cb240-42" aria-hidden="true" tabindex="-1"></a>  <span class="co">// species averages</span></span>
-<span id="cb240-43"><a href="#cb240-43" aria-hidden="true" tabindex="-1"></a>  x_avg ~ multi_normal(zero_vec, vcv_x);</span>
-<span id="cb240-44"><a href="#cb240-44" aria-hidden="true" tabindex="-1"></a>  y_avg ~ multi_normal(b0_y + b1 * x_avg, vcv_y);</span>
-<span id="cb240-45"><a href="#cb240-45" aria-hidden="true" tabindex="-1"></a>  <span class="co">// observations of these</span></span>
-<span id="cb240-46"><a href="#cb240-46" aria-hidden="true" tabindex="-1"></a>  x_obs ~ normal(x_avg[sp_id_x], sigma_x_obs);</span>
-<span id="cb240-47"><a href="#cb240-47" aria-hidden="true" tabindex="-1"></a>  y_obs ~ normal(y_avg[sp_id_y], sigma_y_obs);</span>
-<span id="cb240-48"><a href="#cb240-48" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb240-49"><a href="#cb240-49" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode stan code-with-copy"><code class="sourceCode stan"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="kw">data</span> {</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; s;</span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="co">// x trait</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n_x;</span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n_x] x_obs;</span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_x] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>,<span class="kw">upper</span>=s&gt; sp_id_x;</span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">// y trait</span></span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; n_y;</span>
+<span id="cb33-9"><a href="#cb33-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[n_y] y_obs;</span>
+<span id="cb33-10"><a href="#cb33-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">array</span>[n_y] <span class="dt">int</span>&lt;<span class="kw">lower</span>=<span class="dv">1</span>,<span class="kw">upper</span>=s&gt; sp_id_y;</span>
+<span id="cb33-11"><a href="#cb33-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">cov_matrix</span>[s] phyvcv;</span>
+<span id="cb33-12"><a href="#cb33-12" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb33-13"><a href="#cb33-13" aria-hidden="true" tabindex="-1"></a><span class="kw">transformed data</span> {</span>
+<span id="cb33-14"><a href="#cb33-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[s] zero_vec = rep_vector(<span class="dv">0</span>, s);</span>
+<span id="cb33-15"><a href="#cb33-15" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb33-16"><a href="#cb33-16" aria-hidden="true" tabindex="-1"></a><span class="kw">parameters</span> {</span>
+<span id="cb33-17"><a href="#cb33-17" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=<span class="dv">2</span>,<span class="dt">multiplier</span>=<span class="dv">2</span>&gt; b0_x;</span>
+<span id="cb33-18"><a href="#cb33-18" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=.<span class="dv">5</span>,<span class="dt">multiplier</span>=.<span class="dv">8</span>&gt; b0_y;</span>
+<span id="cb33-19"><a href="#cb33-19" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="dt">offset</span>=<span class="fl">0.5</span>, <span class="dt">multiplier</span>=<span class="fl">0.5</span>&gt; b_xy;</span>
+<span id="cb33-20"><a href="#cb33-20" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_x;</span>
+<span id="cb33-21"><a href="#cb33-21" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_y;</span>
+<span id="cb33-22"><a href="#cb33-22" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_x;</span>
+<span id="cb33-23"><a href="#cb33-23" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>, <span class="kw">upper</span>=<span class="dv">1</span>&gt; lambda_y;</span>
+<span id="cb33-24"><a href="#cb33-24" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[s] x_avg;</span>
+<span id="cb33-25"><a href="#cb33-25" aria-hidden="true" tabindex="-1"></a>  <span class="dt">vector</span>[s] y_avg;</span>
+<span id="cb33-26"><a href="#cb33-26" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_x_obs;</span>
+<span id="cb33-27"><a href="#cb33-27" aria-hidden="true" tabindex="-1"></a>  <span class="dt">real</span>&lt;<span class="kw">lower</span>=<span class="dv">0</span>&gt; sigma_y_obs;</span>
+<span id="cb33-28"><a href="#cb33-28" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb33-29"><a href="#cb33-29" aria-hidden="true" tabindex="-1"></a><span class="kw">model</span> {</span>
+<span id="cb33-30"><a href="#cb33-30" aria-hidden="true" tabindex="-1"></a>  b0_x ~ normal(<span class="dv">2</span>, <span class="dv">2</span>);</span>
+<span id="cb33-31"><a href="#cb33-31" aria-hidden="true" tabindex="-1"></a>  b0_y ~ normal(.<span class="dv">5</span>, .<span class="dv">8</span>);</span>
+<span id="cb33-32"><a href="#cb33-32" aria-hidden="true" tabindex="-1"></a>  b_xy ~ normal(<span class="dv">0</span>, .<span class="dv">2</span>);</span>
+<span id="cb33-33"><a href="#cb33-33" aria-hidden="true" tabindex="-1"></a>  sigma_x ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb33-34"><a href="#cb33-34" aria-hidden="true" tabindex="-1"></a>  sigma_y ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb33-35"><a href="#cb33-35" aria-hidden="true" tabindex="-1"></a>  lambda_x ~ beta(<span class="dv">9</span>, <span class="dv">1</span>);</span>
+<span id="cb33-36"><a href="#cb33-36" aria-hidden="true" tabindex="-1"></a>  lambda_y ~ beta(<span class="dv">5</span>, <span class="dv">5</span>);</span>
+<span id="cb33-37"><a href="#cb33-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-38"><a href="#cb33-38" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_x</span>
+<span id="cb33-39"><a href="#cb33-39" aria-hidden="true" tabindex="-1"></a>    = sigma_x^<span class="dv">2</span> * add_diag(lambda_x * phyvcv, <span class="dv">1</span> - lambda_x);</span>
+<span id="cb33-40"><a href="#cb33-40" aria-hidden="true" tabindex="-1"></a>  <span class="dt">matrix</span>[s, s] vcv_y</span>
+<span id="cb33-41"><a href="#cb33-41" aria-hidden="true" tabindex="-1"></a>    = sigma_y^<span class="dv">2</span> * add_diag(lambda_y * phyvcv, <span class="dv">1</span> - lambda_y);</span>
+<span id="cb33-42"><a href="#cb33-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-43"><a href="#cb33-43" aria-hidden="true" tabindex="-1"></a>  sigma_x_obs ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb33-44"><a href="#cb33-44" aria-hidden="true" tabindex="-1"></a>  sigma_y_obs ~ exponential(<span class="dv">1</span>);</span>
+<span id="cb33-45"><a href="#cb33-45" aria-hidden="true" tabindex="-1"></a>  <span class="co">// species averages</span></span>
+<span id="cb33-46"><a href="#cb33-46" aria-hidden="true" tabindex="-1"></a>  x_avg ~ multi_normal(zero_vec, vcv_x);</span>
+<span id="cb33-47"><a href="#cb33-47" aria-hidden="true" tabindex="-1"></a>  y_avg ~ multi_normal(b_xy * x_avg, vcv_y);</span>
+<span id="cb33-48"><a href="#cb33-48" aria-hidden="true" tabindex="-1"></a>  <span class="co">// observations of these</span></span>
+<span id="cb33-49"><a href="#cb33-49" aria-hidden="true" tabindex="-1"></a>  x_obs ~ normal(b0_x + x_avg[sp_id_x], sigma_x_obs);</span>
+<span id="cb33-50"><a href="#cb33-50" aria-hidden="true" tabindex="-1"></a>  y_obs ~ normal(b0_y + y_avg[sp_id_y], sigma_y_obs);</span>
+<span id="cb33-51"><a href="#cb33-51" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</div>
+<p>Sampling the model – this produces some warnings that are safe to ignore at this point.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>phylo_obs_cen_samp <span class="ot">&lt;-</span> phylo_obs_cen<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">s =</span> n,</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># trait x</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_x =</span> <span class="fu">nrow</span>(x_obs_df),</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_obs =</span> x_obs_df<span class="sc">$</span>obs_x,</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">sp_id_x =</span> x_obs_df<span class="sc">$</span>sp_id,</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># trait y</span></span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_y =</span> <span class="fu">nrow</span>(y_obs_df),</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">y_obs =</span> y_obs_df<span class="sc">$</span>obs_y,</span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">sp_id_y =</span> y_obs_df<span class="sc">$</span>sp_id,</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># phylogeny</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyvcv =</span> phyvcv</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Running MCMC with 4 parallel chains...</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Chain 1 finished in 3.1 seconds.
+Chain 3 finished in 3.1 seconds.
+Chain 2 finished in 3.4 seconds.
+Chain 4 finished in 3.5 seconds.
+
+All 4 chains finished successfully.
+Mean chain execution time: 3.3 seconds.
+Total execution time: 3.6 seconds.</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>phylo_obs_cen_samp<span class="sc">$</span><span class="fu">summary</span>(<span class="at">variables =</span> <span class="fu">c</span>(</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"b0_x"</span>, <span class="st">"b0_y"</span>, <span class="st">"b_xy"</span>, <span class="st">"sigma_x"</span>, <span class="st">"sigma_y"</span>, <span class="st">"lambda_x"</span>, <span class="st">"lambda_y"</span>, <span class="st">"sigma_x_obs"</span>, <span class="st">"sigma_y_obs"</span></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 9 × 10
+  variable       mean  median     sd    mad     q5   q95  rhat ess_bulk ess_tail
+  &lt;chr&gt;         &lt;dbl&gt;   &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
+1 b0_x         4.07    4.08   0.210  0.206   3.71  4.40   1.01     325.     412.
+2 b0_y         0.620   0.624  0.138  0.131   0.384 0.834  1.01     340.     458.
+3 b_xy        -0.0456 -0.0454 0.161  0.157  -0.312 0.216  1.00    2158.    2701.
+4 sigma_x      0.368   0.355  0.0861 0.0802  0.249 0.529  1.00    1610.    2143.
+5 sigma_y      0.293   0.285  0.0665 0.0636  0.202 0.414  1.00    1150.    2272.
+6 lambda_x     0.975   0.984  0.0275 0.0170  0.922 0.999  1.00    1866.    1631.
+7 lambda_y     0.470   0.470  0.140  0.148   0.238 0.700  1.00    1688.    2455.
+8 sigma_x_obs  0.288   0.288  0.0122 0.0122  0.269 0.309  1.00    2010.    2422.
+9 sigma_y_obs  0.313   0.313  0.0130 0.0126  0.293 0.336  1.00    2201.    2530.</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb241"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb241-1"><a href="#cb241-1" aria-hidden="true" tabindex="-1"></a>phylo_obs_sample <span class="ot">&lt;-</span> phylo_obs<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(</span>
-<span id="cb241-2"><a href="#cb241-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">s =</span> n,</span>
-<span id="cb241-3"><a href="#cb241-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># trait x</span></span>
-<span id="cb241-4"><a href="#cb241-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_x =</span> <span class="fu">nrow</span>(x_obs_df),</span>
-<span id="cb241-5"><a href="#cb241-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_obs =</span> x_obs_df<span class="sc">$</span>obs_x,</span>
-<span id="cb241-6"><a href="#cb241-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">sp_id_x =</span> x_obs_df<span class="sc">$</span>sp_id,</span>
-<span id="cb241-7"><a href="#cb241-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># trait y</span></span>
-<span id="cb241-8"><a href="#cb241-8" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_y =</span> <span class="fu">nrow</span>(y_obs_df),</span>
-<span id="cb241-9"><a href="#cb241-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">y_obs =</span> y_obs_df<span class="sc">$</span>obs_y,</span>
-<span id="cb241-10"><a href="#cb241-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">sp_id_y =</span> y_obs_df<span class="sc">$</span>sp_id,</span>
-<span id="cb241-11"><a href="#cb241-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># phylogeny</span></span>
-<span id="cb241-12"><a href="#cb241-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyvcv =</span> phyvcv</span>
-<span id="cb241-13"><a href="#cb241-13" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>truth_df <span class="ot">&lt;-</span> <span class="fu">tribble</span>(</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>name, <span class="sc">~</span>value,</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">"b0_x"</span>, b0_x,</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"b0_y"</span>, b0_y,</span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a>  <span class="st">"b_xy"</span>, b_xy,</span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a>  <span class="st">"sigma_x"</span>, sigma_x,</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"sigma_y"</span>, sigma_y,</span>
+<span id="cb39-8"><a href="#cb39-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"lambda_x"</span>, lambda_x,</span>
+<span id="cb39-9"><a href="#cb39-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"lambda_y"</span>, lambda_y</span>
+<span id="cb39-10"><a href="#cb39-10" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb39-11"><a href="#cb39-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-12"><a href="#cb39-12" aria-hidden="true" tabindex="-1"></a>phylo_obs_cen_samp_long <span class="ot">&lt;-</span> <span class="fu">make_rvar_df</span>(phylo_obs_cen_samp) <span class="sc">|&gt;</span> </span>
+<span id="cb39-13"><a href="#cb39-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>x_avg, <span class="sc">-</span>y_avg) <span class="sc">|&gt;</span> </span>
+<span id="cb39-14"><a href="#cb39-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">everything</span>(), <span class="at">values_to =</span> <span class="st">"posterior"</span>)</span>
+<span id="cb39-15"><a href="#cb39-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-16"><a href="#cb39-16" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_true_post</span>(<span class="at">truth_df =</span> truth_df, </span>
+<span id="cb39-17"><a href="#cb39-17" aria-hidden="true" tabindex="-1"></a>               <span class="at">post_draws_df =</span> phylo_obs_cen_samp_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-13-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>species averages</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>rvar_list <span class="ot">&lt;-</span> phylo_obs_cen_samp <span class="sc">|&gt;</span> posterior<span class="sc">::</span><span class="fu">as_draws_rvars</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pluck</span>(<span class="st">"b0_x"</span>)</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>x_avg_post_long <span class="ot">&lt;-</span> <span class="fu">make_rvar_df</span>(phylo_obs_cen_samp) <span class="sc">|&gt;</span> </span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calculate averages</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(x_avg) <span class="sc">|&gt;</span> </span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(x_avg) <span class="sc">|&gt;</span> </span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sp_id"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sp_id =</span> readr<span class="sc">::</span><span class="fu">parse_number</span>(sp_id),</span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">x_total_avg =</span> rvar_list <span class="sc">+</span> x_avg )</span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a>obs_xy_df <span class="sc">|&gt;</span> </span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(x_avg_post_long) <span class="sc">|&gt;</span> </span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sp_name, <span class="at">dist =</span> x_total_avg))<span class="sc">+</span> </span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>  tidybayes<span class="sc">::</span><span class="fu">stat_dist_slab</span>() <span class="sc">+</span> </span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> sp_name, <span class="at">y =</span> X))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(sp_id)`</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="missing-data" class="level3">
+<h3 class="anchored" data-anchor-id="missing-data">Missing data</h3>
+<p>Many people use phylogenetic information to help when a dataset is missing a lot of traits.</p>
+<p>Here I’m using the same model as above but imagining that a few species are never measured for trait X, but <em>are</em> measured for trait y. There’s also phylogenetic information on both traits.</p>
+<p>Notice that there’s no need to rewrite the model for this! all I need to do is take out some observations from the dataset:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="co"># remove some from the output</span></span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>absent_sp <span class="ot">&lt;-</span> <span class="fu">sample</span>(x_obs_df<span class="sc">$</span>sp_id <span class="sc">|&gt;</span> <span class="fu">unique</span>(), <span class="at">size =</span> <span class="dv">7</span>, <span class="at">replace =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>x_obs_NA_df <span class="ot">&lt;-</span> x_obs_df <span class="sc">|&gt;</span> </span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>(sp_id <span class="sc">%in%</span> absent_sp))</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-8"><a href="#cb42-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb42-9"><a href="#cb42-9" aria-hidden="true" tabindex="-1"></a>phylo_obs_NA_samp <span class="ot">&lt;-</span> phylo_obs_cen<span class="sc">$</span><span class="fu">sample</span>(<span class="at">data =</span> <span class="fu">list</span>(</span>
+<span id="cb42-10"><a href="#cb42-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">s =</span> n,</span>
+<span id="cb42-11"><a href="#cb42-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># trait x</span></span>
+<span id="cb42-12"><a href="#cb42-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_x =</span> <span class="fu">nrow</span>(x_obs_NA_df),</span>
+<span id="cb42-13"><a href="#cb42-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">x_obs =</span> x_obs_NA_df<span class="sc">$</span>obs_x,</span>
+<span id="cb42-14"><a href="#cb42-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">sp_id_x =</span> x_obs_NA_df<span class="sc">$</span>sp_id,</span>
+<span id="cb42-15"><a href="#cb42-15" aria-hidden="true" tabindex="-1"></a>  <span class="co"># trait y</span></span>
+<span id="cb42-16"><a href="#cb42-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">n_y =</span> <span class="fu">nrow</span>(y_obs_df),</span>
+<span id="cb42-17"><a href="#cb42-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">y_obs =</span> y_obs_df<span class="sc">$</span>obs_y,</span>
+<span id="cb42-18"><a href="#cb42-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">sp_id_y =</span> y_obs_df<span class="sc">$</span>sp_id,</span>
+<span id="cb42-19"><a href="#cb42-19" aria-hidden="true" tabindex="-1"></a>  <span class="co"># phylogeny</span></span>
+<span id="cb42-20"><a href="#cb42-20" aria-hidden="true" tabindex="-1"></a>  <span class="at">phyvcv =</span> phyvcv</span>
+<span id="cb42-21"><a href="#cb42-21" aria-hidden="true" tabindex="-1"></a>),<span class="at">parallel_chains =</span> <span class="dv">4</span>, <span class="at">refresh =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Running MCMC with 4 parallel chains...
-
-Chain 1 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 Exception: multi_normal_lpdf: LDLT_Factor of covariance parameter is not positive definite.  last conditional variance is 0. (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 44, column 2 to column 49)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 1 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 2 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: multi_normal_lpdf: LDLT_Factor of covariance parameter is not positive definite.  last conditional variance is 0. (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 43, column 2 to column 40)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 Exception: normal_lpdf: Scale parameter is 0, but must be positive! (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 46, column 2 to column 46)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 2 </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Chain 3 Iteration:    1 / 2000 [  0%]  (Warmup) 
-Chain 4 Iteration:    1 / 2000 [  0%]  (Warmup) </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 43, column 2 to column 40)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 43, column 2 to column 40)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = -nan, but Covariance matrix[2,1] = -nan (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 43, column 2 to column 40)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Informational Message: The current Metropolis proposal is about to be rejected because of the following issue:</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 Exception: multi_normal_lpdf: Covariance matrix is not symmetric. Covariance matrix[1,2] = inf, but Covariance matrix[2,1] = inf (in '/tmp/Rtmp0GbgnE/model-94836fb75195.stan', line 43, column 2 to column 40)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 If this warning occurs sporadically, such as for highly constrained variable types like covariance matrices, then the sampler is fine,</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 but if this warning occurs often then your model may be either severely ill-conditioned or misspecified.</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Chain 4 </code></pre>
+<pre><code>Running MCMC with 4 parallel chains...</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>Chain 1 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 1 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
-Chain 4 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 4 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
-Chain 2 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 2 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
-Chain 3 Iteration: 1000 / 2000 [ 50%]  (Warmup) 
-Chain 3 Iteration: 1001 / 2000 [ 50%]  (Sampling) 
-Chain 2 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 3 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 2 finished in 0.6 seconds.
-Chain 3 finished in 0.6 seconds.
-Chain 1 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 1 finished in 0.7 seconds.
-Chain 4 Iteration: 2000 / 2000 [100%]  (Sampling) 
-Chain 4 finished in 0.8 seconds.
+<pre><code>Chain 2 finished in 3.2 seconds.
+Chain 4 finished in 3.8 seconds.
+Chain 1 finished in 3.8 seconds.
+Chain 3 finished in 3.9 seconds.
 
 All 4 chains finished successfully.
-Mean chain execution time: 0.7 seconds.
-Total execution time: 0.9 seconds.</code></pre>
+Mean chain execution time: 3.7 seconds.
+Total execution time: 3.9 seconds.</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb281"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb281-1"><a href="#cb281-1" aria-hidden="true" tabindex="-1"></a>phylo_obs_sample<span class="sc">$</span><span class="fu">summary</span>(<span class="at">variables =</span> <span class="fu">c</span>(</span>
-<span id="cb281-2"><a href="#cb281-2" aria-hidden="true" tabindex="-1"></a>  <span class="st">"b0_y"</span>, <span class="st">"b1"</span>, <span class="st">"sigma_x"</span>, <span class="st">"sigma_y"</span>, <span class="st">"lambda_x"</span>, <span class="st">"lambda_y"</span>, <span class="st">"sigma_x_obs"</span>, <span class="st">"sigma_y_obs"</span></span>
-<span id="cb281-3"><a href="#cb281-3" aria-hidden="true" tabindex="-1"></a>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 8 × 10
-  variable     mean median     sd    mad    q5   q95  rhat ess_bulk ess_tail
-  &lt;chr&gt;       &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;    &lt;dbl&gt;    &lt;dbl&gt;
-1 b0_y        0.610  0.616 0.131  0.118  0.394 0.813  1.00    3950.    2381.
-2 b1          0.476  0.478 0.102  0.0968 0.309 0.643  1.00    4823.    2686.
-3 sigma_x     0.898  0.876 0.173  0.162  0.656 1.22   1.00    3848.    2722.
-4 sigma_y     0.300  0.289 0.0688 0.0617 0.208 0.426  1.00    2806.    2659.
-5 lambda_x    0.935  0.947 0.0531 0.0474 0.832 0.995  1.00    3298.    1629.
-6 lambda_y    0.476  0.477 0.141  0.146  0.243 0.706  1.00    3867.    2999.
-7 sigma_x_obs 0.290  0.290 0.0126 0.0124 0.270 0.312  1.00    4977.    3515.
-8 sigma_y_obs 0.313  0.312 0.0132 0.0134 0.292 0.335  1.00    5201.    2987.</code></pre>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>rvar_list <span class="ot">&lt;-</span> phylo_obs_NA_samp <span class="sc">|&gt;</span> </span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  posterior<span class="sc">::</span><span class="fu">as_draws_rvars</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pluck</span>(<span class="st">"b0_x"</span>)</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>x_avg_post_long <span class="ot">&lt;-</span> <span class="fu">make_rvar_df</span>(phylo_obs_NA_samp) <span class="sc">|&gt;</span> </span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calculate averages</span></span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(x_avg) <span class="sc">|&gt;</span> </span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(x_avg) <span class="sc">|&gt;</span> </span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rownames_to_column</span>(<span class="at">var =</span> <span class="st">"sp_id"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sp_id =</span> readr<span class="sc">::</span><span class="fu">parse_number</span>(sp_id),</span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">x_total_avg =</span> rvar_list <span class="sc">+</span> x_avg )</span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>obs_xy_df <span class="sc">|&gt;</span> </span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(x_avg_post_long) <span class="sc">|&gt;</span> </span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">absent =</span> sp_id <span class="sc">%in%</span> absent_sp) <span class="sc">|&gt;</span> </span>
+<span id="cb45-19"><a href="#cb45-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> sp_name, <span class="at">dist =</span> x_total_avg))<span class="sc">+</span> </span>
+<span id="cb45-20"><a href="#cb45-20" aria-hidden="true" tabindex="-1"></a>  tidybayes<span class="sc">::</span><span class="fu">stat_dist_slab</span>() <span class="sc">+</span> </span>
+<span id="cb45-21"><a href="#cb45-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">x =</span> sp_name, <span class="at">y =</span> X, <span class="at">col =</span> absent))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
 </div>
-<p>I guess I thought it would be better to sample <code>lambda</code> on the normal scale as well, but is that misguided? I guess using the unconstrained scale also sets us up for hierarchical effects later.</p>
-<p>In the real-world work that this is focussed on, the traits X and Y are going to be observed on different individuals. Sample size will be different across species with some species missing entirely from one or the other (or both) X and Y.</p>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="do">## scalar parameters</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>phylo_obs_NA_samp_long <span class="ot">&lt;-</span> <span class="fu">make_rvar_df</span>(phylo_obs_NA_samp) <span class="sc">|&gt;</span> </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>x_avg, <span class="sc">-</span>y_avg) <span class="sc">|&gt;</span> </span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(<span class="at">cols =</span> <span class="fu">everything</span>(), <span class="at">values_to =</span> <span class="st">"posterior"</span>)</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_true_post</span>(<span class="at">truth_df =</span> truth_df, </span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">post_draws_df =</span> phylo_obs_NA_samp_long)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="index_files/figure-html/unnamed-chunk-15-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The model estimates latent parameters for species averages, which are then measured with error. This makes it easy to model unmeasured values. In Bayesian inference, unmeasured quantities are all treated the same, and called “parameters”. So here, we’re modelling <em>all</em> species averages as latent parameters, and saying that most, but not all, actually get measured. The result is posterior samples, not only for slopes and other values of interest, but also for the unmeasured species averages.</p>
+<p>You can see that the distributions are much flatter for these unmeasured species averages, compared to those that were measured. However, you can also see that the unmeasured averages are moving around, influenced by information coming from Pagel’s Lambda and the other parameters of the model as well.</p>
 
 
 
+</section>
 </section>
 
 <div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
