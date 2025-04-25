@@ -273,7 +273,7 @@ mars_poisson_assemblage_datafmt <- cmdstan_model(here::here("posts/2024-09-11-MA
 ```
 
 will it accept data without complaining?
-```{r}
+```{r, error=TRUE}
 mars_poisson_assemblage_datafmt$sample(
   data = list(
     S = 4,
@@ -640,17 +640,17 @@ plot_print_prior_obs <- function(stan_model, data_list){
     # select(-B, -n) |> 
     print()
       
+  # browser()
   
   abd_data <- stan_model_samp |> 
-    tidybayes::spread_draws(obs_abd[sp,time], ndraws = 16)
+    tidybayes::spread_draws(true_abd[sp,time], ndraws = 16)
   
-  m <- abd_data |> 
-    ggplot(aes(x= time, group = sp, y = obs_abd)) + 
-    geom_point() + 
-    facet_wrap(~.draw) + 
-    coord_cartesian(ylim = c(0,20000))
+  A_avg <- stan_model_samp |> 
+    tidybayes::gather_rvars(sp_avgs[sp]) |> 
+    mutate(med = median(.value)) |> 
+    select(-.value)
   
-  return(list(plot = m, abd_data = abd_data))
+  return(list(abd_data = abd_data, A = A_avg))
 }
 
 xim_plot <- plot_print_prior_obs(mars_matrix_all_constraints,
@@ -673,7 +673,7 @@ I'm having a hard time deciding if growth should be always positive.
 ```{r}
 #| class-output: stan
 
-mars_matrix_process_e  <- cmdstan_model(here::here("posts/20240-9-11-MARS/mars_matrix_procces_e.stan"))
+mars_matrix_process_e  <- cmdstan_model(here::here("posts/2024-09-11-MARS/mars_matrix_procces_e.stan"))
 mars_matrix_process_e
 ```
 
@@ -732,7 +732,136 @@ expand.grid(x = 1:7,y = 1:7) |>
 
 ```
 
-## Real data
 
+
+## corrections  
+
+```{r}
+#| class-output: stan
+
+mars_matrix_e_pred_bu  <- cmdstan_model(here::here("posts/2024-09-11-MARS/mars_matrix_e_pred_bu.stan"))
+mars_matrix_e_pred_bu
+```
+
+```{r}
+
+
+fw_links <- expand.grid(1:4, 5:7)
+
+data_comp_pred <- list(
+  S = 7,
+  S_basal = 4,
+  sp_id = 1:7,
   
+  nlinks = nrow(fw_links),
+  resc = fw_links[,1],
+  cons = fw_links[,2],
+  
+  n_time = 20, 
+  n_add = 7, 
+  added = log(c(8, 8, 8, 8, 3, 3, 3)),
+  add_idx = 
+    matrix(c(1,   1,
+             2,   1,
+             3,   1,
+             4,   1,
+             5,   5,
+             6,   5,
+             7,   5),nrow = 7, byrow = TRUE),
+  n_abs = 19,
+  abs_idx = 
+    matrix(c(1,   1,
+             2,   1,
+             3,   1,
+             4,   1,
+             5,   1,
+             5,   2,
+             5,   3,
+             5,   4,
+             5,   5,
+             6,   1,
+             6,   2,
+             6,   3,
+             6,   4,
+             6,   5,
+             7,   1,
+             7,   2,
+             7,   3,
+             7,   4,
+             7,   5
+             ),nrow = 19, byrow = TRUE)
+)
 
+prior_sim_plot_data <- plot_print_prior_obs(mars_matrix_e_pred_bu,
+                 data_list = data_comp_pred) 
+
+prior_sim_plot_data$plot + 
+  geom_line() + 
+  coord_cartesian(ylim = c(0, 25))
+
+
+prior_sim_plot_data$abd_data |> glimpse() |> 
+  mutate(trophic = if_else(sp <= data_comp_pred$S_basal, "resc", "cons")) |> 
+  ungroup() |> 
+  ggplot(aes(x = time, y = true_abd, col = trophic, group = sp)) + 
+  geom_line() + 
+  facet_wrap(~.draw) + 
+  coord_cartesian(ylim = c(-5,5)) +
+  scale_x_continuous(breaks = 1:30)
+
+
+
+prior_sim_plot_data$abd_data |> glimpse() |> 
+  mutate(trophic = if_else(sp <= data_comp_pred$S_basal, "resc", "cons")) |> 
+  ungroup() |> 
+  ggplot(aes(x = time, y = exp(true_abd), col = trophic, group = sp)) + 
+  geom_line() + 
+  facet_wrap(~.draw) + 
+  coord_cartesian(ylim = c(0,50)) +
+  scale_x_continuous(breaks = 1:30)
+
+```
+
+```{r}
+#| class-output: stan
+
+mars_matrix_log1p  <- cmdstan_model(here::here("posts/2024-09-11-MARS/mars_matrix_log1p.stan"))
+mars_matrix_log1p
+```
+
+
+```{r}
+
+data_comp_pred$n_time <- 11
+prior_sim_plot_data <- plot_print_prior_obs(mars_matrix_log1p,
+                 data_list = data_comp_pred) 
+
+prior_sim_plot_data$plot + 
+  geom_line() + 
+  coord_cartesian(ylim = c(0, 25))
+
+
+prior_sim_plot_data$abd_data |> glimpse() |> 
+  mutate(trophic = if_else(sp <= data_comp_pred$S_basal, "resc", "cons")) |> 
+  ungroup() |> 
+  ggplot(aes(x = time, y = true_abd, col = trophic, group = sp)) + 
+  geom_line() + 
+  facet_wrap(~.draw) + 
+  coord_cartesian(ylim = c(-5,5)) +
+  scale_x_continuous(breaks = 1:30)
+
+prior_sim_plot_data$abd_data |> glimpse() |> 
+  mutate(trophic = if_else(sp <= data_comp_pred$S_basal, "resc", "cons")) |> 
+  ungroup() |> 
+  ggplot(aes(x = time, y = exp(true_abd), col = trophic, group = sp)) + 
+  geom_line() + 
+  facet_wrap(~.draw) + 
+  # coord_cartesian(ylim = c(0,2000)) +
+  scale_x_continuous(breaks = 1:30)
+
+```
+
+
+this version uses either ReLu (implemented via `fmax`) or softplus (`log1p_exp`) to flatten negative values to 0. 
+This meas that when the consumer drops to low population sizes, it impacts the other species less. 
+Before, log population sizes that went _negative_ caused wildly increasing oscillations.
