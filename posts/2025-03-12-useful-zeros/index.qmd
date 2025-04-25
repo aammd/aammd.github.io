@@ -21,7 +21,7 @@ suppressPackageStartupMessages(library(brms))
 
 ## The question
 
-When placed on a host place in a nice environment with no enemies, aphids produce new aphids exponentially.[to me they seem to be bacteria with legs]{/aside}
+When placed on a host place in a nice environment with no enemies, aphids produce new aphids exponentially.
 But host plants are not all good food, and on some aphids grow poorly -- but on others they grow well. 
 
 What is the growth rate of these aphids on different host plants? What proportion of total variance can be assigned to genotype? 
