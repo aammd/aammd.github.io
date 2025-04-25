@@ -15,7 +15,7 @@ website:
         href: https://twitter.com/polesasunder
 format:
   html:
-    theme: sketchy
+    theme: journal
     css: styles.css
 
 editor: source

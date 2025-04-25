@@ -43,7 +43,7 @@ roo_gr <- runif(34, 0.2, 0.4)
 
 expand_grid(
   roo_id = 1:34,
-  age = 0:12
+  age = 0:18
   ) |> 
   mutate(roo_gr = roo_gr[roo_id],
          leg =vb_growth(time = age, r = roo_gr, Lmax = 50)) |> 

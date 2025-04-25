@@ -110,7 +110,7 @@ vb_model <- brm(formula = vb_form,
                 data = one_animal, 
                 backend = "cmdstanr",
                 chains = 2)#, 
-                file = here::here("posts/2022-11-21-growth-curve-known-age/vb_model.rds"))
+                file = here::here("posts/2022-11-21-growth-curve-known-age/vb_model.rds")
 ```
 
 ```{r}

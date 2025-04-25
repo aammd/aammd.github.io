@@ -214,9 +214,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>eg <span class="ot">&lt;-</span> rethinking<span class="sc">::</span><span class="fu">rlkjcorr</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>eg</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>          [,1]      [,2]
-[1,]  1.000000 -0.351295
-[2,] -0.351295  1.000000</code></pre>
+<pre><code>           [,1]       [,2]
+[1,]  1.0000000 -0.5587252
+[2,] -0.5587252  1.0000000</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>cc <span class="ot">&lt;-</span> <span class="fu">chol</span>(eg)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -254,7 +254,7 @@ cor(t(rr))[1, 2]
 </div>
 </div>
 </div>
-<p>Here we can see that the correlation we want is -0.351295, and indeed we’re able to give exactly that correlation to uncorrelated random numbers.</p>
+<p>Here we can see that the correlation we want is -0.5587252, and indeed we’re able to give exactly that correlation to uncorrelated random numbers.</p>
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>eg <span class="ot">&lt;-</span> rethinking<span class="sc">::</span><span class="fu">rlkjcorr</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(eg)</span>
 <span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>cc <span class="ot">&lt;-</span> <span class="fu">chol</span>(eg)</span>
@@ -270,13 +270,13 @@ cor(t(rr))[1, 2]
 <div class="quarto-layout-row">
 <div class="cell-output cell-output-stdout quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
 <pre><code>           [,1]       [,2]
-[1,]  1.0000000 -0.5282398
-[2,] -0.5282398  1.0000000</code></pre>
+[1,] 1.00000000 0.08358276
+[2,] 0.08358276 1.00000000</code></pre>
 </div>
 <div class="cell-output cell-output-stdout quarto-layout-cell" style="flex-basis: 50.0%;justify-content: flex-start;">
 <pre><code>           [,1]       [,2]
-[1,]  1.0000000 -0.5282398
-[2,] -0.5282398  1.0000000</code></pre>
+[1,] 1.00000000 0.08358276
+[2,] 0.08358276 1.00000000</code></pre>
 </div>
 </div>
 <div class="quarto-layout-row">
@@ -317,8 +317,8 @@ cor(t(rr))[1, 2]
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(yy)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>           [,1]       [,2]
-[1,]  1.0000000 -0.7809624
-[2,] -0.7809624  1.0000000</code></pre>
+[1,]  1.0000000 -0.8005567
+[2,] -0.8005567  1.0000000</code></pre>
 </div>
 </div>
 <p>This can be written without matrix multiplication like this:</p>
@@ -339,7 +339,7 @@ cor(t(rr))[1, 2]
 </div>
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cor</span>(y2, y1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] -0.8054704</code></pre>
+<pre><code>[1] -0.8105853</code></pre>
 </div>
 </div>
 <p>In a Stan model, I might want to use a scaled beta distribution to model the correlation between, say, slopes and intercepts in a model:</p>
