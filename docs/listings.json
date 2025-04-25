@@ -1,0 +1,39 @@
+[
+  {
+    "listing": "/blog.html",
+    "items": [
+      "/posts/2025-03-12-useful-zeros/index.html",
+      "/posts/2024-09-27-phylo/index.html",
+      "/posts/2024-09-23-discrete-growth-latent/index.html",
+      "/posts/2024-05-03-difference_of_two_normals/index.html",
+      "/posts/2023-12-14-contrasts/index.html",
+      "/posts/2023-11-24-how-to-model-growth/index.html",
+      "/posts/2023-11-15-ives03-ts/index.html",
+      "/posts/2023-11-14-multilevel-arima/index.html",
+      "/posts/2023-11-08-tree-cooling/index.html",
+      "/posts/2023-10-23-discrete-vb-brms-stan/index.html",
+      "/posts/2023-11-03-power-law/index.html",
+      "/posts/2023-11-01-standalone-gq/index.html",
+      "/posts/2023-08-22-transformed-regression/index.html",
+      "/posts/2023-08-24-imputation-nonnormal/index.html",
+      "/posts/2023-07-05-breakpoint/index.html",
+      "/posts/2023-03-20-latent-continuous/index.html",
+      "/posts/2023-02-02-selection-on-plasticity/index.html",
+      "/posts/2022-11-23-evolution-of-plasticity/index.html",
+      "/posts/2022-11-21-growth-curve-known-age/index.html",
+      "/posts/2022-11-11-multispecies-functional-response/index.html",
+      "/posts/2022-11-24-updating-R-and-packages/index.html",
+      "/posts/2022-11-29-group-centering/index.html",
+      "/posts/2022-11-29-selection-on-plasticity/index.html",
+      "/posts/2022-12-01-cholesky-correlation/index.html",
+      "/posts/2022-12-05-growth-increment/index.html",
+      "/posts/2022-12-15-setting-priors/index.html",
+      "/posts/30-03-2023-growth-continuous-discrete/index.html",
+      "/posts/2022-10-23-probability-integral-transform/index.html",
+      "/posts/2022-10-14-growth_curve_measurement_error/index.html",
+      "/posts/2016-12-07-population-growth-functional-programming/index.html",
+      "/posts/2016-12-02-twitter-recommends-stats-books/index.html",
+      "/posts/2014-11-27-continuous-fraction-functional-programming/index.html"
+    ]
+  }
+]
